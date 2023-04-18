@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,7 @@ namespace PlanQuinquenal.Infrastructure.Data
             : base(options)
         {
         }
+
+        public virtual DbSet<Logs> Logs { get; set; }
     }
 }

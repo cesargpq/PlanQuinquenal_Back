@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanQuinquenal", "PlanQuinquenal\PlanQuinquenal.csproj", "{C3F3FA4A-8777-4BD1-961E-CD510608CDFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanQuinquenal", "PlanQuinquenal\PlanQuinquenal.csproj", "{C3F3FA4A-8777-4BD1-961E-CD510608CDFD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanQuinquenal.Core", "PlanQuinquenal.Core\PlanQuinquenal.Core.csproj", "{97ABE4D8-E9F5-4652-9A69-F39F86BA5E97}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanQuinquenal.Infrastructure", "PlanQuinquenal.Infrastructure\PlanQuinquenal.Infrastructure.csproj", "{0218A9E9-2A1A-4CAC-9FFA-B003DF35370E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{C3F3FA4A-8777-4BD1-961E-CD510608CDFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3F3FA4A-8777-4BD1-961E-CD510608CDFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3F3FA4A-8777-4BD1-961E-CD510608CDFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97ABE4D8-E9F5-4652-9A69-F39F86BA5E97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97ABE4D8-E9F5-4652-9A69-F39F86BA5E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97ABE4D8-E9F5-4652-9A69-F39F86BA5E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97ABE4D8-E9F5-4652-9A69-F39F86BA5E97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0218A9E9-2A1A-4CAC-9FFA-B003DF35370E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0218A9E9-2A1A-4CAC-9FFA-B003DF35370E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0218A9E9-2A1A-4CAC-9FFA-B003DF35370E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0218A9E9-2A1A-4CAC-9FFA-B003DF35370E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

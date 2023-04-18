@@ -25,7 +25,7 @@ namespace PlanQuinquenal
            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
             services.AddEndpointsApiExplorer();
-            services.AddDbContext<PlanQuinquenalContext>(options =>
+            services.AddDbContext<PlanQuinquenalContext>(options => 
               options.UseSqlServer(Configuration.GetConnectionString("PlanQuinquenal"))
           );
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
