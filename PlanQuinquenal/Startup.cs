@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
+using PlanQuinquenal.Infrastructure.Repositories;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -24,7 +26,15 @@ namespace PlanQuinquenal
             services.AddControllers().AddJsonOptions(x =>
            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
+
+            ///
+            services.AddTransient<IRepositoryMantenedores, MantenedoresRepository>();
+            
+
+
             services.AddEndpointsApiExplorer();
+
+            //Conexion
             services.AddDbContext<PlanQuinquenalContext>(options => 
               options.UseSqlServer(Configuration.GetConnectionString("PlanQuinquenal"))
           );

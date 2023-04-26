@@ -20,5 +20,9 @@ namespace PlanQuinquenal.Infrastructure.Data
         }
 
         public virtual DbSet<Logs> Logs { get; set; }
+        public virtual DbSet<TablaLogicaDatos> TablaLogicaDatos { get; set; }
+        public virtual DbSet<TablaLogica> TablaLogica { get; set; }
+
     }
 }
+

@@ -19,7 +19,7 @@ namespace PlanQuinquenal.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var resultado = await _context.Logs.ToListAsync();
+            var resultado = await _context.TablaLogicaDatos.ToListAsync();
             return Ok();
         }
     }
