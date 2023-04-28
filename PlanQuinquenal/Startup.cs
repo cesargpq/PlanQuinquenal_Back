@@ -29,7 +29,8 @@ namespace PlanQuinquenal
 
             ///
             services.AddTransient<IRepositoryMantenedores, MantenedoresRepository>();
-            
+            services.AddTransient<IRepositoryLogin, LoginRepository>();
+
 
 
             services.AddEndpointsApiExplorer();
