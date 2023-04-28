@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApiDavis.Core.Utilidades;
+using Microsoft.EntityFrameworkCore;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
@@ -19,16 +20,58 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<TablaLogicaDatos>> GetAll(string entidad)
+        public async Task<IEnumerable<TablaLogicaDatos>> GetAll(ListEntidadDTO entidad)
         {
 
-            var dato  = await _context.TablaLogica.Where(x => x.Descripcion== entidad).ToListAsync();
-            var resultado = await _context.TablaLogicaDatos.Where( x=> x.IdTablaLogica == dato.ElementAt(0).IdTablaLogica ).ToListAsync();
             
+            var dato  = await _context.TablaLogica.Where(x => x.Descripcion== entidad.Entidad).ToListAsync();
+          
+
+            var queryable = _context.TablaLogicaDatos
+                                     .Where(x => x.IdTablaLogica == dato.ElementAt(0).IdTablaLogica)
+                                     .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                     .Where(x => entidad.Valor != "" ? x.Descripcion == entidad.Valor : true)
+                                     .Where(x => entidad.Codigo != "" ? x.Descripcion == entidad.Codigo : true)
+                                     .AsQueryable();
+
+            double cantidad = await queryable.CountAsync();
+            var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                   .ToListAsync();
+
+            return entidades;
+
+        }
+        public async Task<TablaLogicaDatos> GetById(int id)
+        {
+
+            //var dato = await _context.TablaLogica.FromSqlInterpolated($"exec Tabla").ToListAsync();
+            var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id && x.Estado == true).FirstOrDefaultAsync();
+        
             return resultado;
 
         }
 
+        public async Task<bool> DeleteById(int id)
+        {
+
+            var existe = await _context.TablaLogicaDatos.AnyAsync(x => x.IdTablaLogicaDatos == id);
+            if (!existe)
+            {
+
+                return false;
+            }
+            else
+            {
+                var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id && x.Estado == true).FirstOrDefaultAsync();
+                resultado.Estado = false;
+                _context.Update(resultado);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+           
+
+        }
         public async Task<bool> Post(PostEntityReqDTO postEntityReqDTO)
         {
             var dato = await _context.TablaLogica.Where(x => x.Descripcion == postEntityReqDTO.Entidad).ToListAsync();
@@ -44,6 +87,40 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<bool> Update(PostUpdateEntityDTO postEntityReqDTO, int id)
+        {
+            var dato = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id).ToListAsync();
+
+            if (dato == null)
+            {
+
+                return false;
+            }
+            else
+            {
+                TablaLogicaDatos data = new TablaLogicaDatos();
+                var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id ).FirstOrDefaultAsync();
+                if(resultado != null)
+                {
+              
+                    resultado.Descripcion = postEntityReqDTO.Descripcion;
+                    resultado.Estado = postEntityReqDTO.Estado;
+                    resultado.Codigo = postEntityReqDTO.Codigo;
+                    resultado.Valor = postEntityReqDTO.Valor;
+                    _context.Update(resultado);
+
+                    await _context.SaveChangesAsync();
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+           
         }
     }
 }
