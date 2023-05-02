@@ -9,6 +9,6 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IRepositoryLogin
     {
-        Task<bool> Post(LoginRequestDTO loginRequestDTO);
+        Task<LoginResponseDTO> Post(LoginRequestDTO loginRequestDTO);
     }
 }

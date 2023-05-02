@@ -45,6 +45,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
 
             //var dato = await _context.TablaLogica.FromSqlInterpolated($"exec Tabla").ToListAsync();
+            var prueba = await _context.Perm_viz_modulo.FromSqlInterpolated($"EXEC sp_getPermissionsByUser 'eacosta@xternal.biz' , 'perm_viz_modulo'").ToListAsync();
+            var prueba2 = await _context.Permisos_viz_seccion.FromSqlInterpolated($"EXEC sp_getPermissionsByUser 'eacosta@xternal.biz' , 'Permisos_viz_seccion'").ToListAsync();
             var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id && x.Estado == true).FirstOrDefaultAsync();
         
             return resultado;

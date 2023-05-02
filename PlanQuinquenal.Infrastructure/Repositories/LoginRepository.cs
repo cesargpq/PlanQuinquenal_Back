@@ -20,28 +20,35 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<bool> Post(LoginRequestDTO loginRequestDTO)
+        public async Task<LoginResponseDTO> Post(LoginRequestDTO loginRequestDTO)
         {
-            var correoParam = new SqlParameter("@correo", loginRequestDTO.user);
+            LoginResponseDTO lstRsp = new LoginResponseDTO();
+            string correoParam = loginRequestDTO.user;
 
-            var prueba = await _context.Permisos_viz_seccion.FromSql("EXEC sp_getPermissionsByUser @correo", correoParam).ToListAsync();
-            return true;
-        }
-        public async Task<bool> Post(PostEntityReqDTO postEntityReqDTO)
-        {
-            var dato = await _context.TablaLogica.Where(x => x.Descripcion == postEntityReqDTO.Entidad).ToListAsync();
+            var queryable = _context.Usuario
+                                     .Where(x => x.correo_usu == loginRequestDTO.user)
+                                     .Where(x => x.passw_user == loginRequestDTO.password)
+                                     .AsQueryable();
 
-            TablaLogicaDatos data = new TablaLogicaDatos();
+            double cantidad = await queryable.CountAsync();
+            if (cantidad == 1)
+            {
+                lstRsp.idMensaje = "1";
+                lstRsp.mensaje = "Autencicacion correcta";
+                var lstBDPermModulo = await _context.Perm_viz_modulo.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correoParam} , 'perm_viz_modulo'").ToListAsync();
+                var lstBDPermCampos =  _context.Permisos_viz_seccion.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correoParam} , 'Permisos_viz_seccion'").ToList();
+                lstRsp.perm_modulos = lstBDPermModulo;
+                lstRsp.perm_campos = lstBDPermCampos;
+            }
+            else
+            {
+                lstRsp.idMensaje = "0";
+                lstRsp.mensaje = "Datos de logueo invalidos";
+            }
 
-            data.IdTablaLogica = dato.ElementAt(0).IdTablaLogica;
-            data.Descripcion = postEntityReqDTO.Descripcion;
-            data.Codigo = postEntityReqDTO.Codigo;
-            data.Valor = postEntityReqDTO.Valor;
-            _context.Add(data);
+            return lstRsp;
 
-            await _context.SaveChangesAsync();
 
-            return true;
         }
     }
 }
