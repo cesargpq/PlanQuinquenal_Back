@@ -23,11 +23,11 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
-        [HttpGet("id")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("ObtenerModulos")]
+        public async Task<IActionResult> GetById(string correo)
         {
 
-            var resultado = "2";// await _repositoryMantenedores.GetById(id);
+            var resultado = await _repositoryLogin.ObtenerModulos(correo);
             return Ok(resultado);
         }
     }

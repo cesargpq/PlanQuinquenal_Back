@@ -19,6 +19,5 @@ namespace PlanQuinquenal.Core.Entities
         public string nombre_perfil { get; set; }
         public string estado_perfil { get; set; }
         public TablaPerm_viz_modulo Perm_viz_modulo { get; set;}
-        public TablaPermisos_viz_seccion Permisos_viz_seccion { get; set; }
     }
 }

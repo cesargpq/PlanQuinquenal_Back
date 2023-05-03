@@ -10,5 +10,6 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IRepositoryLogin
     {
         Task<LoginResponseDTO> Post(LoginRequestDTO loginRequestDTO);
+        Task<LoginResponseDTO> ObtenerModulos(string correo);
     }
 }

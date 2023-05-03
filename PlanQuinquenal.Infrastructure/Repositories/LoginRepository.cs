@@ -35,15 +35,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 //var query = _context.Usuario.Join(_context.Perfil, usuario => usuario.cod_perfil, perfil => perfil.cod_perfil,
                 //    (usuario, perfil) => new { Usuario = usuario, Perfil = perfil }).Where(x => x.Usuario.correo_usu == loginRequestDTO.user).ToList();
-                var queryable2 = await _context.Usuario.Include(x => x.Perfil).ThenInclude(y => y.Perm_viz_modulo).Include(z => 
-                z.Perfil.Permisos_viz_seccion = _context.Permisos_viz_seccion.Where(x => x.codSec_permViz == z.Perfil.Permisos_viz_seccioncodSec_permViz))
+                var queryable2 = await _context.Usuario.Include(x => x.Perfil).ThenInclude(y => y.Perm_viz_modulo)
                     .ToListAsync();
                 //var entidades = await queryable2.ToListAsync();
                 lstRsp.idMensaje = "1";
                 lstRsp.mensaje = "Autencicacion correcta";
-                //lstRsp.nombre= entidades[0].nombre_usu;
-                //lstRsp.apellido = entidades[0].apellido_usu;
-                //lstRsp.correo = entidades[0].correo_usu;
+                lstRsp.nombre = queryable2[0].nombre_usu;
+                lstRsp.apellido = queryable2[0].apellido_usu;
+                lstRsp.correo = queryable2[0].correo_usu;
+                lstRsp.cod_perfil = queryable2[0].Perfil.cod_perfil;
+                lstRsp.cod_modulo_perf = queryable2[0].Perfil.Perm_viz_modulocodMod_permiso;
+                lstRsp.cod_secs_perf = queryable2[0].Perfil.Permisos_viz_seccioncodSec_permViz;
                 //var lstBDPermModulo = await _context.Perm_viz_modulo.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correoParam} , 'perm_viz_modulo'").ToListAsync();
                 //var lstBDPermCampos =  _context.Permisos_viz_seccion.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correoParam} , 'Permisos_viz_seccion'").ToList();
                 //lstRsp.perm_modulos = lstBDPermModulo;
