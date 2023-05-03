@@ -22,5 +22,13 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _repositoryLogin.Post(reqLogin);
             return Ok(resultado);
         }
+
+        [HttpGet("id")]
+        public async Task<IActionResult> GetById(int id)
+        {
+
+            var resultado = "2";// await _repositoryMantenedores.GetById(id);
+            return Ok(resultado);
+        }
     }
 }

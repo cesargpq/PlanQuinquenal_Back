@@ -26,6 +26,12 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<TablaPermisos_viz_seccion> Permisos_viz_seccion { get; set; }
         public virtual DbSet<Secciones> Secciones { get; set; }
         public virtual DbSet<Usuario> Usuario { get; set; }
+        public virtual DbSet<Perfil> Perfil { get; set; }
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<Usuario>().ToTable("usuario").
+        //        HasKey(x => new { x.cod_usu, x.cod_perfil }).HasRequired(x => x.PersonOne).WithMany().HasForeignKey(x => x.Person1Id);
+        //}
 
     }
 }
