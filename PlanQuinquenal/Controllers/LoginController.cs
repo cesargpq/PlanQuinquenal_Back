@@ -30,5 +30,13 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _repositoryLogin.ObtenerModulos(correo);
             return Ok(resultado);
         }
+
+        [HttpGet("ObtenerSeccionesMod")]
+        public async Task<IActionResult> ObtenerSecciones(string modulo, string seccion)
+        {
+
+            var resultado = await _repositoryLogin.ObtenerSecciones(modulo, seccion);
+            return Ok(resultado);
+        }
     }
 }

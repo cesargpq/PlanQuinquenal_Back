@@ -61,5 +61,77 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
         }
+
+        public async Task<ModulosResponse> ObtenerModulos(string correo)
+        {
+            ModulosResponse respMod = new ModulosResponse();
+            List<TablaPerm_viz_modulo> lstModulos = new List<TablaPerm_viz_modulo>();
+            TablaPerm_viz_modulo respModulos = new TablaPerm_viz_modulo();
+            var lstBDPermModulo = await _context.Perm_viz_modulo.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correo} , 'perm_viz_modulo'").ToListAsync();
+
+            var secciones = new List<int>();
+            var queryable = await _context.Secc_modulos
+                                     .Where(x => x.modulo == "Dashboard")
+                                     .ToListAsync();
+
+            if (lstBDPermModulo.Count() > 0)
+            {
+                foreach (var seccion in queryable)
+                {
+                    secciones.Add(seccion.id);
+                }
+
+                var permSec = _context.Permisos_viz_seccion
+                        .Where(p => secciones.Contains(p.cod_seccion))
+                        .ToList();
+
+                respMod.idMensaje = "1";
+                respMod.mensaje = "Permisos obtenidos correctamente";
+                respMod.perm_modulos = lstBDPermModulo[0];
+                respMod.perm_campos = permSec;
+            }
+            else
+            {
+                respMod.idMensaje = "0";
+                respMod.mensaje = "No cuenta con los permisos para ver información";
+            }
+
+            
+            return respMod;
+        }
+
+        public async Task<ModulosResponse> ObtenerSecciones(string modulo, string seccion)
+        {
+            ModulosResponse respMod = new ModulosResponse();
+
+            var secciones = new List<int>();
+            var queryable = await _context.Secc_modulos
+                                     .Where(x => x.modulo == modulo)
+                                     .ToListAsync();
+
+            if (queryable.Count() > 0)
+            {
+                foreach (var secc in queryable)
+                {
+                    secciones.Add(secc.id);
+                }
+
+                var permSec = _context.Permisos_viz_seccion
+                        .Where(p => secciones.Contains(p.cod_seccion))
+                        .ToList();
+
+                respMod.idMensaje = "1";
+                respMod.mensaje = "Permisos obtenidos correctamente";
+                respMod.perm_campos = permSec;
+            }
+            else
+            {
+                respMod.idMensaje = "0";
+                respMod.mensaje = "No cuenta con los permisos para ver información";
+            }
+
+
+            return respMod;
+        }
     }
 }
