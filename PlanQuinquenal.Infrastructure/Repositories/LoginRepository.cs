@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
@@ -20,6 +19,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             _context = context;
         }
+
+        public Task<LoginResponseDTO> ObtenerModulos(string correo)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<LoginResponseDTO> Post(LoginRequestDTO loginRequestDTO)
         {
             LoginResponseDTO lstRsp = new LoginResponseDTO();

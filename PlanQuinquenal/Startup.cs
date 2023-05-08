@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using PlanQuinquenal.Infrastructure.Repositories;
 using System.Text;
@@ -27,10 +28,11 @@ namespace PlanQuinquenal
            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 
-            ///
+            services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IRepositoryMantenedores, MantenedoresRepository>();
             services.AddTransient<IRepositoryLogin, LoginRepository>();
-
+            services.AddTransient<HashService>();
+            services.AddTransient<Constantes>();
 
 
             services.AddEndpointsApiExplorer();
