@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.Entities;
+using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
 
 namespace PlanQuinquenal.Controllers
@@ -9,18 +12,20 @@ namespace PlanQuinquenal.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly PlanQuinquenalContext _context;
+        
+        private readonly IAuthRepository _authRepository;
 
-        public AuthController(PlanQuinquenalContext context)
+        public AuthController(IAuthRepository authRepository)
         {
-            _context = context;
+         
+            this._authRepository = authRepository;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpPost]
+        public async Task<IActionResult> Autenticar(LoginRequestDTO loginRequestDTO)
         {
-            var resultado = await _context.TablaLogicaDatos.ToListAsync();
-            return Ok();
+            var jwtToken = await _authRepository.Autenticar(loginRequestDTO);
+            return Ok(jwtToken);
         }
     }
 }

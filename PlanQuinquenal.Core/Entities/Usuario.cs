@@ -21,5 +21,8 @@ namespace PlanQuinquenal.Core.Entities
         public int Perfilcod_perfil { get; set; }
         public Perfil Perfil { get; set; }
         public int cod_und { get; set; }
+        public bool Estado { get; set; }
+        public int Intentos { get; set; }
+        public bool Interno { get; set; }
     }
 }
