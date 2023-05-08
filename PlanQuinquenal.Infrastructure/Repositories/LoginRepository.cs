@@ -20,11 +20,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             _context = context;
         }
 
-        public Task<LoginResponseDTO> ObtenerModulos(string correo)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public async Task<LoginResponseDTO> Post(LoginRequestDTO loginRequestDTO)
         {
             LoginResponseDTO lstRsp = new LoginResponseDTO();
