@@ -31,6 +31,7 @@ namespace PlanQuinquenal
             services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IRepositoryMantenedores, MantenedoresRepository>();
             services.AddTransient<IRepositoryLogin, LoginRepository>();
+            services.AddTransient<IRepositoryPermisos, PermisosRepository>();
             services.AddTransient<HashService>();
             services.AddTransient<Constantes>();
 
