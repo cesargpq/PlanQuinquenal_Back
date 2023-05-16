@@ -1,0 +1,158 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Newtonsoft.Json;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.Entities;
+using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Infrastructure.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PlanQuinquenal.Infrastructure.Repositories
+{
+    public class PerfilRepository : IRepositoryPerfil
+    {
+        private readonly PlanQuinquenalContext _context;
+
+        public PerfilRepository(PlanQuinquenalContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Object> NuevoPerfil(PerfilResponse nvoPerfil)
+        {
+            try
+            {
+                // Crear una nueva instancia de la entidad
+                var nuevoPerfil = new Perfil
+                {
+                    cod_rol = nvoPerfil.cod_rol,
+                    Perm_viz_modulocodMod_permiso = nvoPerfil.Perm_viz_modulocodMod_permiso,
+                    Permisos_viz_seccioncodSec_permViz = nvoPerfil.Permisos_viz_seccioncodSec_permViz,
+                    nombre_perfil = nvoPerfil.nombre_perfil,
+                    estado_perfil = nvoPerfil.estado_perfil
+                };
+
+                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
+                _context.Perfil.Add(nuevoPerfil);
+                _context.SaveChanges();
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se creo el perfil correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch (Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo un error al crear el perfil"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+
+        }
+
+        public async Task<List<PerfilResponse>> ObtenerPerfiles()
+        {
+            List<PerfilResponse> lstPerfil = new List<PerfilResponse>();
+            var queryable = await _context.Perfil.ToListAsync();
+
+            foreach (var perfil in queryable)
+            {
+                PerfilResponse objPerfil = new PerfilResponse();
+                objPerfil.cod_perfil = perfil.cod_perfil;
+                objPerfil.cod_rol = perfil.cod_rol;
+                objPerfil.Perm_viz_modulocodMod_permiso = perfil.Perm_viz_modulocodMod_permiso;
+                objPerfil.Permisos_viz_seccioncodSec_permViz = perfil.Permisos_viz_seccioncodSec_permViz;
+                objPerfil.nombre_perfil = perfil.nombre_perfil;
+                objPerfil.estado_perfil = perfil.estado_perfil;
+
+                lstPerfil.Add(objPerfil);
+
+            }
+
+            return lstPerfil;
+
+        }
+
+        public async Task<Object> EliminarPerfil(int cod_perfil)
+        {
+            // Obtener la entidad a eliminar por su clave primaria
+            var codPerfilElim = _context.Perfil.Find(cod_perfil);
+
+            // Verificar si se encontró la entidad
+            if (codPerfilElim != null)
+            {
+                // Eliminar la entidad y guardar los cambios en la base de datos
+                _context.Perfil.Remove(codPerfilElim);
+                _context.SaveChanges();
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se eliminó el perfil correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            else
+            {
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo el problema al eliminar el perfil"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+
+        }
+
+        public async Task<Object> ActualizarPerfil(PerfilResponse nvoPerfil)
+        {
+            try
+            {
+                var modPerfil = _context.Perfil.FirstOrDefault(p => p.cod_perfil == nvoPerfil.cod_perfil);
+                modPerfil.Perm_viz_modulocodMod_permiso = nvoPerfil.Perm_viz_modulocodMod_permiso;
+                modPerfil.Permisos_viz_seccioncodSec_permViz = nvoPerfil.Permisos_viz_seccioncodSec_permViz;
+                modPerfil.nombre_perfil = nvoPerfil.nombre_perfil;
+                modPerfil.estado_perfil = nvoPerfil.estado_perfil;
+                _context.SaveChanges();
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se modifico el perfil correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch (Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo un error al actualizar el perfil"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+
+        }
+    }
+}

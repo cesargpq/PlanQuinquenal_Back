@@ -14,5 +14,6 @@ namespace PlanQuinquenal.Core.Entities
         public string modulo { get; set; }
         public string seccion { get; set; }
         public bool vis_seccion { get; set; }
+        public ICollection<TablaPermisos_viz_seccion> permisosVizSecciones { get; set; }
     }
 }

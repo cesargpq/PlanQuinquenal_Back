@@ -127,5 +127,66 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
+        public async Task<Object> ActConfRolesPerm(List<ConfRolesPerm> conRolesPerm)
+        {
+            try
+            {
+                foreach (var accRol in conRolesPerm)
+                {
+                    var modAccion_Rol = _context.Permisos_viz_seccion.FirstOrDefault(p => p.cod_perm_campo == accRol.cod_perm_campo);
+                    modAccion_Rol.visib_campo = accRol.visib_campo;
+                    modAccion_Rol.edit_campo = accRol.edit_campo;
+                    _context.SaveChanges();
+                }
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se modifico los permisos correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch (Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo un error al actualizar los permisos"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+
+        }
+
+        public async Task<List<ConfRolesPerm>> ObtenerConfRolesPerm()
+        {
+            List<ConfRolesPerm> lstresp = new List<ConfRolesPerm>();
+            var queryable = await _context.Permisos_viz_seccion.Include(p => p.seccionModulo)
+                                     .ToListAsync();
+
+            foreach (var permRol in queryable)
+            {
+                ConfRolesPerm objPerRol = new ConfRolesPerm();
+                objPerRol.cod_perm_campo = permRol.cod_perm_campo;
+                objPerRol.codSec_permViz = permRol.codSec_permViz;
+                objPerRol.cod_seccion = permRol.cod_seccion;
+                objPerRol.nom_seccion = permRol.seccionModulo.seccion;
+                objPerRol.modulo = permRol.seccionModulo.modulo;
+                objPerRol.nom_campo = permRol.nom_campo;
+                objPerRol.visib_campo = permRol.visib_campo;
+                objPerRol.edit_campo = permRol.edit_campo;
+
+                lstresp.Add(objPerRol);
+
+            }
+
+            return lstresp;
+
+        }
+
     }
 }

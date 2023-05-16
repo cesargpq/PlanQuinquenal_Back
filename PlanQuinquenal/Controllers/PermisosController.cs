@@ -63,5 +63,19 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _repositoryPermisos.ConsAccionesPerfil();
             return Ok(resultado);
         }
+
+        [HttpGet("ObtenerConfRolesPerm")]
+        public async Task<IActionResult> ObtenerConfRolesPerm()
+        {
+            var resultado = await _repositoryPermisos.ObtenerConfRolesPerm();
+            return Ok(resultado);
+        }
+
+        [HttpPost("ActConfRolesPerm")]
+        public async Task<IActionResult> ActConfRolesPerm(List<ConfRolesPerm> conRolesPerm)
+        {
+            var resultado = await _repositoryPermisos.ActConfRolesPerm(conRolesPerm);
+            return Ok(resultado);
+        }
     }
 }
