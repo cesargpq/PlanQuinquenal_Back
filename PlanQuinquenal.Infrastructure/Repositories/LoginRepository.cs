@@ -2,6 +2,7 @@
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -14,21 +15,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     public class LoginRepository : IRepositoryLogin
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly HashService hashService;
 
-        public LoginRepository(PlanQuinquenalContext context)
+        public LoginRepository(PlanQuinquenalContext context, HashService hashService)
         {
             _context = context;
+            this.hashService = hashService;
         }
 
         
-        public async Task<LoginResponseDTO> Post(LoginRequestDTO loginRequestDTO)
+        public async Task<LoginResponseDTO> Post(string correo)
         {
             LoginResponseDTO lstRsp = new LoginResponseDTO();
-            string correoParam = loginRequestDTO.user;
 
             var queryable = _context.Usuario
-                                     .Where(x => x.correo_usu == loginRequestDTO.user)
-                                     .Where(x => x.passw_user == loginRequestDTO.password)
+                                     .Where(x => x.correo_usu == correo)
                                      .AsQueryable();
 
             double cantidad = await queryable.CountAsync();
@@ -40,13 +41,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     .ToListAsync();
                 //var entidades = await queryable2.ToListAsync();
                 lstRsp.idMensaje = "1";
-                lstRsp.mensaje = "Autencicacion correcta";
+                lstRsp.mensaje = "Autenticacion correcta";
                 lstRsp.nombre = queryable2[0].nombre_usu;
                 lstRsp.apellido = queryable2[0].apellido_usu;
-                lstRsp.correo = queryable2[0].correo_usu;
-                lstRsp.cod_perfil = queryable2[0].Perfil.cod_perfil;
-                lstRsp.cod_modulo_perf = queryable2[0].Perfil.Perm_viz_modulocodMod_permiso;
-                lstRsp.cod_secs_perf = queryable2[0].Perfil.Permisos_viz_seccioncodSec_permViz;
+                lstRsp.nom_perfil = queryable2[0].Perfil.nombre_perfil;
                 //var lstBDPermModulo = await _context.Perm_viz_modulo.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correoParam} , 'perm_viz_modulo'").ToListAsync();
                 //var lstBDPermCampos =  _context.Permisos_viz_seccion.FromSqlInterpolated($"EXEC sp_getPermissionsByUser {correoParam} , 'Permisos_viz_seccion'").ToList();
                 //lstRsp.perm_modulos = lstBDPermModulo;
@@ -55,7 +53,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             else
             {
                 lstRsp.idMensaje = "0";
-                lstRsp.mensaje = "Datos de logueo invalidos";
+                lstRsp.mensaje = "Hubo un error al obtener la informacion";
             }
 
             return lstRsp;

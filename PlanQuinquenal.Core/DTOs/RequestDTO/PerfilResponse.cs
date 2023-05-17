@@ -14,5 +14,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int Permisos_viz_seccioncodSec_permViz { get; set; }
         public string nombre_perfil { get; set; }
         public string estado_perfil { get; set; }
+        public int cod_unidadNeg { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -26,28 +27,64 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                // Crear una nueva instancia de la entidad
-                var nuevoPerfil = new Perfil
+                // Crear primero el registro en la tabla de roles
+                var nuevoRol = new Roles
                 {
-                    cod_rol = nvoPerfil.cod_rol,
-                    Perm_viz_modulocodMod_permiso = nvoPerfil.Perm_viz_modulocodMod_permiso,
-                    Permisos_viz_seccioncodSec_permViz = nvoPerfil.Permisos_viz_seccioncodSec_permViz,
-                    nombre_perfil = nvoPerfil.nombre_perfil,
-                    estado_perfil = nvoPerfil.estado_perfil
+                    nom_rol = nvoPerfil.nombre_perfil,
+                    estado_rol = "A"
                 };
 
-                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
-                _context.Perfil.Add(nuevoPerfil);
+                _context.Roles.Add(nuevoRol);
                 _context.SaveChanges();
 
-                var resp = new
-                {
-                    idMensaje = "1",
-                    mensaje = "Se creo el perfil correctamente"
-                };
+                // Consulta del Rol creado
 
-                var json = JsonConvert.SerializeObject(resp);
-                return json;
+                var queryable = _context.Roles
+                                     .Where(x => x.nom_rol == nvoPerfil.nombre_perfil)
+                                     .AsQueryable();
+                double cantidad = await queryable.CountAsync();
+                if (cantidad == 1)
+                {
+                    var queryCons = await _context.Roles
+                                     .Where(x => x.nom_rol == nvoPerfil.nombre_perfil)
+                                     .ToListAsync();
+                    // Crear una nueva instancia de la entidad
+                    var nPerfil = new Perfil
+                    {
+                        cod_rol = queryCons[0].cod_rol,
+                        Perm_viz_modulocodMod_permiso = 1,
+                        Permisos_viz_seccioncodSec_permViz = 1,
+                        nombre_perfil = nvoPerfil.nombre_perfil,
+                        estado_perfil = nvoPerfil.estado_perfil,
+                        cod_unidadNeg = nvoPerfil.cod_unidadNeg
+                    };
+
+                    // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
+                    _context.Perfil.Add(nPerfil);
+                    _context.SaveChanges();
+
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se creo el perfil correctamente"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                else
+                {
+                    var resp = new
+                    {
+                        idMensaje = "0",
+                        mensaje = "Hubo un error al crear el perfil"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+
+                
             }
             catch (Exception ex)
             {
@@ -77,6 +114,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 objPerfil.Permisos_viz_seccioncodSec_permViz = perfil.Permisos_viz_seccioncodSec_permViz;
                 objPerfil.nombre_perfil = perfil.nombre_perfil;
                 objPerfil.estado_perfil = perfil.estado_perfil;
+                objPerfil.cod_unidadNeg = perfil.cod_unidadNeg;
 
                 lstPerfil.Add(objPerfil);
 
@@ -130,6 +168,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 modPerfil.Permisos_viz_seccioncodSec_permViz = nvoPerfil.Permisos_viz_seccioncodSec_permViz;
                 modPerfil.nombre_perfil = nvoPerfil.nombre_perfil;
                 modPerfil.estado_perfil = nvoPerfil.estado_perfil;
+                modPerfil.cod_unidadNeg = nvoPerfil.cod_unidadNeg;
                 _context.SaveChanges();
 
                 var resp = new

@@ -19,12 +19,25 @@ namespace PlanQuinquenal.Controllers
         {
             _repositoryLogin = repositoryLogin;
         }
-        [AllowAnonymous]
         [HttpPost("AutenticarUsuario")]
-        public async Task<IActionResult> AutenticarUsuario(LoginRequestDTO reqLogin)
+        public async Task<IActionResult> AutenticarUsuario()
         {
-            var resultado = await _repositoryLogin.Post(reqLogin);
-            return Ok(resultado);
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+
+            if (identity?.Claims.ElementAt(1) != null)
+            {
+                var correo = identity.Claims.ElementAt(1).Value;
+                var resultado = await _repositoryLogin.Post(correo);
+                return Ok(resultado);
+            }
+            else
+            {
+                ModulosResponse resp = new ModulosResponse();
+                resp.idMensaje = "0";
+                resp.mensaje = "Hubo un error al momento de obtener su informacion";
+                return Ok(resp);
+            }
+            
         }
 
         [HttpGet("ObtenerModulos")]
