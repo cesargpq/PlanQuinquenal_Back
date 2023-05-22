@@ -32,6 +32,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Acciones_Rol> Acciones_Rol { get; set; }
         public virtual DbSet<Unidad_negocio> Unidad_negocio { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
+        public virtual DbSet<Proyectos> Proyectos { get; set; }
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
         //    modelBuilder.Entity<Usuario>().ToTable("usuario").
