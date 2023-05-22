@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.Interfaces
 {
-    public interface IAuthRepository
+    public interface IPlanQuinquenalesRepository
     {
-        Task<JwtResponse> Autenticar(LoginRequestDTO usuario);
-        Task<bool> CerrarSesion(int id);
+        Task<IEnumerable<PlanQuinquenal.Core.Entities.PlanQuinquenal>> Get();
 
+        Task<bool> CreatePQ(PQuinquenalReqDTO pQuinquenalReqDTO);
     }
 }

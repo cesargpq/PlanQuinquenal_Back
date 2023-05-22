@@ -24,6 +24,28 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._constantes = constantes;
         }
 
+        public async Task<bool> CerrarSesion(int id)
+        {
+
+
+            var userUpdate = await _context.Usuario.FirstOrDefaultAsync( x=> x.cod_usu == id);
+            if(userUpdate != null)
+            {
+                if(!userUpdate.Conectado)
+                {
+                    return false;
+                }
+                userUpdate.Conectado = false;
+                _context.Update(userUpdate);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+           
+        }
         public async Task<JwtResponse> Autenticar(LoginRequestDTO usuario)
         {
             JwtResponse jwt = new JwtResponse();
@@ -31,7 +53,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user).FirstOrDefaultAsync();
            if(userResult != null)
             {
-                if (userResult.Interno )
+                if (userResult.Conectado)
+                {
+                    jwt = LoggedUser();
+                    return jwt;
+                }
+                if (userResult.Interno)
                 {
                     jwt = ActiveDirectory(usuario);
                     if(!jwt.state && userResult.Intentos <_constantes.CANTIDAD_INTENTOS)
@@ -53,20 +80,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     jwt = await LoginInterno(usuario,_context);
 
-                    if(!jwt.state && userResult.Intentos < _constantes.CANTIDAD_INTENTOS)
-                    {
-                        userResult.Intentos = userResult.Intentos + 1;
-                        _context.Update(userResult);
-                        await _context.SaveChangesAsync();
-                        return DatosInvalidos();
-                    }
-                    else if (!jwt.state && (userResult.Intentos == _constantes.CANTIDAD_INTENTOS || !userResult.Estado))
-                    {
-                        userResult.Estado = false;
-                        _context.Update(userResult);
-                        await _context.SaveChangesAsync();
-                        return BloqueadoUser();
-                    }
+                        if (!jwt.state && userResult.Intentos < _constantes.CANTIDAD_INTENTOS)
+                        {
+                            userResult.Intentos = userResult.Intentos + 1;
+                            _context.Update(userResult);
+                            await _context.SaveChangesAsync();
+                            return DatosInvalidos();
+                        }
+                        else if (!jwt.state && (userResult.Intentos == _constantes.CANTIDAD_INTENTOS || !userResult.Estado))
+                        {
+                            userResult.Estado = false;
+                            _context.Update(userResult);
+                            await _context.SaveChangesAsync();
+                            return BloqueadoUser();
+                        }                    
                 }
             }
             else
@@ -77,8 +104,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             if(jwt.state)
             {
+               
                 jwt = await hashService.ConstruirToken(userResult,jwt);
+                userResult.LastSesion = DateTime.Now;
+                userResult.Conectado = true;
+                _context.Update(userResult);
+                await _context.SaveChangesAsync();
             }
+            
             return jwt;
         }
         
@@ -95,15 +128,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             try
             {
                 var resultUser = await context.Usuario.Where(u => u.correo_usu == usuario.user && u.passw_user == usuario.password).FirstOrDefaultAsync();
+
                 if (resultUser != null)
                 {
+
+                    if (resultUser.Conectado)
+                    {
+
+                        jwt = LoggedUser();
+                        return jwt;
+                    }
                     jwt = ExisteUsuario();
                     return jwt;
-
                 }
                 else
                 {
-                    jwt = NoExisteUsuario();
+                    jwt = DatosInvalidos();
                     return jwt;
                 }
             }
@@ -112,8 +152,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 throw;
             }
-         
-          return jwt;
+    
+        }
+        public static JwtResponse LoggedUser()
+        {
+            JwtResponse jwt = new JwtResponse();
+            jwt.state = false;
+            jwt.Message = "Hay una sesión activa, cierre y vuelva a ingresar";
+            return jwt;
         }
         public static JwtResponse BloqueadoUser()
         {
