@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.Entities
 {
-    public class Secc_modulos
+    public class Acciones_Rol
     {
         [Key]
         public int id { get; set; }
         public string modulo { get; set; }
-        public string seccion { get; set; }
-        public bool vis_seccion { get; set; }
-        public ICollection<TablaPermisos_viz_seccion> permisosVizSecciones { get; set; }
+        public string unid_neg { get; set; }
+        public bool acc_ver { get; set; }
+        public bool acc_crear { get; set; }
+        public bool acc_eliminar { get; set; }
     }
 }

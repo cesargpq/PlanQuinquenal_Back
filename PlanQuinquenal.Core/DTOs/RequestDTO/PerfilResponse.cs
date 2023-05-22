@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanQuinquenal.Core.Entities
+namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
-    [Table("perfil")]
-    public class Perfil
+    public class PerfilResponse
     {
-        [Key]
         public int cod_perfil { get; set; }
         public int cod_rol { get; set; }
         public int Perm_viz_modulocodMod_permiso { get; set; }
@@ -19,6 +15,5 @@ namespace PlanQuinquenal.Core.Entities
         public string nombre_perfil { get; set; }
         public string estado_perfil { get; set; }
         public int cod_unidadNeg { get; set; }
-        public TablaPerm_viz_modulo Perm_viz_modulo { get; set;}
     }
 }

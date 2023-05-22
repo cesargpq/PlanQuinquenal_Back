@@ -8,6 +8,9 @@ using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using PlanQuinquenal.Infrastructure.Repositories;
+using Quartz;
+using Quartz.Impl;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -34,6 +37,9 @@ namespace PlanQuinquenal
             services.AddTransient<IRepositoryPermisos, PermisosRepository>();
             services.AddTransient<IUsuarioRepository, UsuarioRepository>();
             services.AddTransient<IPlanQuinquenalesRepository,PlanQuinquenalesRepository>();
+            services.AddTransient<IRepositoryPerfil, PerfilRepository>();
+            services.AddTransient<IRepositoryUnidadNeg, UnidadNegRepository>();
+            services.AddTransient<IRepositoryProyecto, ProyectoRepository>();
             services.AddTransient<HashService>();
             services.AddTransient<Constantes>();
 
@@ -44,6 +50,24 @@ namespace PlanQuinquenal
             services.AddDbContext<PlanQuinquenalContext>(options => 
               options.UseSqlServer(Configuration.GetConnectionString("PlanQuinquenal"))
           );
+            //------------------------------------- JOB ----------------------------------------
+            // Configuración de Quartz.NET
+            var schedulerFactory = new StdSchedulerFactory();
+            var scheduler = schedulerFactory.GetScheduler().Result;
+            scheduler.Start().Wait();
+
+            var job = JobBuilder.Create<JobInfoHIS>()
+                .WithIdentity("MyJob", "MyJobGroup")
+                .Build();
+
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("MyTrigger", "MyTriggerGroup")
+                .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(15, 6)) // Se ejecutará todos los días a las 7 am
+                .Build();
+
+            scheduler.ScheduleJob(job, trigger).Wait();
+            //-------------------------------------------------------------------------------------
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opciones => opciones.TokenValidationParameters = new TokenValidationParameters
                 {

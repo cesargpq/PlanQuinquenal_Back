@@ -50,7 +50,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             JwtResponse jwt = new JwtResponse();
             usuario.password = hashService.Encriptar(usuario.password);
-            var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user).FirstOrDefaultAsync();
+            var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user).Include(s => s.Perfil).FirstOrDefaultAsync();
            if(userResult != null)
             {
                 if (userResult.Conectado)

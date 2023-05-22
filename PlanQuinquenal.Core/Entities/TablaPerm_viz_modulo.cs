@@ -20,5 +20,7 @@ namespace PlanQuinquenal.Core.Entities
         public bool perm_infActas { get; set; }
         public bool perm_reportes { get; set; }
         public bool perm_admin { get; set; }
+        public bool perm_baremo { get; set; }
+        public bool perm_planAnual { get; set; }
     }
 }
