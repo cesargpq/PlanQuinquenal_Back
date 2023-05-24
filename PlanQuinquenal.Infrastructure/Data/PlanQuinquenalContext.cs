@@ -19,6 +19,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         {
         }
 
+       
         public virtual DbSet<Logs> Logs { get; set; }
         public virtual DbSet<TablaLogicaDatos> TablaLogicaDatos { get; set; }
         public virtual DbSet<TablaLogica> TablaLogica { get; set; }
@@ -37,11 +38,9 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Unidad_negocio> Unidad_negocio { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<Proyectos> Proyectos { get; set; }
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<Usuario>().ToTable("usuario").
-        //        HasKey(x => new { x.cod_usu, x.cod_perfil }).HasRequired(x => x.PersonOne).WithMany().HasForeignKey(x => x.Person1Id);
-        //}
+        public virtual DbSet<TokenAuth> TokenAuth { get; set; }
+
+       
 
     }
 }

@@ -10,7 +10,9 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IAuthRepository
     {
         Task<JwtResponse> Autenticar(LoginRequestDTO usuario);
-        Task<bool> CerrarSesion(int id);
+        Task<bool> CerrarSesion(LoginRequestDTO login);
+
+        Task<bool> GetToken(int idUsuario);
 
     }
 }

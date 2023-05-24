@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
@@ -24,11 +26,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._constantes = constantes;
         }
 
-        public async Task<bool> CerrarSesion(int id)
+        public async Task<bool> GetToken(int idUsuario)
+        {
+            var token = await _context.TokenAuth.Where(x=> x.cod_usu == idUsuario).FirstOrDefaultAsync();
+            if (token.Token != null || !token.Equals(""))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+           
+        }
+        public async Task<bool> CerrarSesion(LoginRequestDTO login)
         {
 
 
-            var userUpdate = await _context.Usuario.FirstOrDefaultAsync( x=> x.cod_usu == id);
+            var userUpdate = await _context.Usuario.FirstOrDefaultAsync( x=> x.correo_usu == login.user);
             if(userUpdate != null)
             {
                 if(!userUpdate.Conectado)
@@ -53,11 +68,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user).Include(s => s.Perfil).FirstOrDefaultAsync();
            if(userResult != null)
             {
-                if (userResult.Conectado)
-                {
-                    jwt = LoggedUser();
-                    return jwt;
-                }
+                //if (userResult.Conectado)
+                //{
+                //    jwt = LoggedUser();
+                //    return jwt;
+                //}
                 if (userResult.Interno)
                 {
                     jwt = ActiveDirectory(usuario);
@@ -104,12 +119,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             if(jwt.state)
             {
-               
-                jwt = await hashService.ConstruirToken(userResult,jwt);
+
+                jwt = await hashService.ConstruirToken(userResult, jwt);
+                jwt.DobleFactor = userResult.DobleFactor;
                 userResult.LastSesion = DateTime.Now;
                 userResult.Conectado = true;
                 _context.Update(userResult);
+                List<string> correos = new List<string>();
+                correos.Add(userResult.correo_usu);
+                DobleFactorDTO message = new DobleFactorDTO();
+                message.Nombre = userResult.nombre_usu + userResult.apellido_usu;
+                message.DobleFactor = await hashService.GeneraDobuleFactor();
+                string templateKey = "templateKey_DobleFactor";
+                if (userResult.DobleFactor)
+                {
+                    var obj = new EmailData<DobleFactorDTO>
+                    {
+                        EmailType = 2,
+                        EmailList = correos,
+                        Model = message,
+                        HtmlTemplateName = Constantes.DobleFactor
+                    };
+                    var resultDobleFactror = await hashService.EnviarDobleFactor(obj,message, templateKey);
+                    if (resultDobleFactror)
+                    {
+
+                    }
+                }
+                
                 await _context.SaveChangesAsync();
+
             }
             
             return jwt;
@@ -132,12 +171,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 if (resultUser != null)
                 {
 
-                    if (resultUser.Conectado)
-                    {
+                    //if (resultUser.Conectado)
+                    //{
 
-                        jwt = LoggedUser();
-                        return jwt;
-                    }
+                    //    jwt = LoggedUser();
+                    //    return jwt;
+                    //}
                     jwt = ExisteUsuario();
                     return jwt;
                 }
