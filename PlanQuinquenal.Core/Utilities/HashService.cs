@@ -76,12 +76,8 @@ namespace PlanQuinquenal.Core.Utilities
         {
             var claims = new List<Claim>()
             {
-                new Claim("Id", credencialesUsuario.Interno.ToString()),
-                new Claim("userName", credencialesUsuario.correo_usu),
-                new Claim("email",credencialesUsuario.correo_usu),
-                new Claim("rol",credencialesUsuario.Interno.ToString()),
-                new Claim("perfil",credencialesUsuario.Perfilcod_perfil.ToString()),
-                new Claim("modulos",credencialesUsuario.Perfil.Perm_viz_modulocodMod_permiso.ToString())
+                new Claim("$I$Us$@I@D", credencialesUsuario.cod_usu.ToString()),
+                new Claim("LastSesion",credencialesUsuario.LastSesion.ToString())
             };
 
             var llave = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("ASK9DASDASJD9ASJD9ASJDA9SJDAS9JDAS9JDA9SJD9ASJDAS9JDAS9DJAS9JDAS9DJAS9DJAS9DJAS9DAJS"));

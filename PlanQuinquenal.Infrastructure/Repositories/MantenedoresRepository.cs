@@ -28,7 +28,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
           
 
             var queryable = _context.TablaLogicaDatos
-                                     .Where(x => x.IdTablaLogica == dato.ElementAt(0).IdTablaLogica)
+                                     .Where(x => x.IdTablaLogica == dato.ElementAt(0).Id)
                                      .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
                                      .Where(x => entidad.Valor != "" ? x.Descripcion == entidad.Valor : true)
                                      .Where(x => entidad.Codigo != "" ? x.Descripcion == entidad.Codigo : true)
@@ -80,7 +80,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             TablaLogicaDatos data = new TablaLogicaDatos();
 
-            data.IdTablaLogica = dato.ElementAt(0).IdTablaLogica;
+            data.IdTablaLogica = dato.ElementAt(0).Id;
             data.Descripcion = postEntityReqDTO.Descripcion;
             data.Codigo = postEntityReqDTO.Codigo;
             data.Valor = postEntityReqDTO.Valor;

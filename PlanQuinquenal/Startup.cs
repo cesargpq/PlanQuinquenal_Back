@@ -35,6 +35,8 @@ namespace PlanQuinquenal
             services.AddTransient<IRepositoryMantenedores, MantenedoresRepository>();
             services.AddTransient<IRepositoryLogin, LoginRepository>();
             services.AddTransient<IRepositoryPermisos, PermisosRepository>();
+            services.AddTransient<IUsuarioRepository, UsuarioRepository>();
+            services.AddTransient<IPlanQuinquenalesRepository,PlanQuinquenalesRepository>();
             services.AddTransient<IRepositoryPerfil, PerfilRepository>();
             services.AddTransient<IRepositoryUnidadNeg, UnidadNegRepository>();
             services.AddTransient<IRepositoryProyecto, ProyectoRepository>();
@@ -103,7 +105,7 @@ namespace PlanQuinquenal
                     }
                 });
             });
-
+            services.AddAutoMapper(typeof(Startup));
             services.AddCors(opciones =>
             {
                 var urlList = Configuration.GetSection("AllowedOrigin").GetChildren().Select(c => c.Value)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,9 +21,10 @@ namespace PlanQuinquenal.Core.Entities
         public int cod_rol { get; set; }
         public int Perfilcod_perfil { get; set; }
         public Perfil Perfil { get; set; }
-        public int cod_und { get; set; }
         public bool Estado { get; set; }
         public int Intentos { get; set; }
         public bool Interno { get; set; }
+        public DateTime LastSesion { get; set; }
+        public bool Conectado { get; set; }
     }
 }
