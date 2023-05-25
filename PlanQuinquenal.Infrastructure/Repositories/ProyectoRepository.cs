@@ -193,5 +193,97 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return lstPro;
 
         }
+
+        public async Task<Object> CrearComentario(Comentarios_proyec comentario)
+        {
+            try
+            {
+                var nvoComentario = new Comentarios_proyec
+                {
+                    id_pry = comentario.id_pry,
+                    comentario = comentario.comentario,
+                    tipo_coment = comentario.tipo_coment,
+                    usuario = comentario.usuario,
+                    area = comentario.area,
+                    fecha_coment = comentario.fecha_coment
+                };
+
+                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
+                _context.Comentarios_proyec.Add(nvoComentario);
+                _context.SaveChanges();
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se creó el comentario correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch (Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo un error al crear el comentario"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+        }
+
+        public async Task<Object> CrearImpedimento(ImpedimentoRequest impedimento)
+        {
+            try
+            {
+                var nvoImpedimento = new Impedimentos
+                {
+                     id_pry = impedimento.id_pry,
+                     cod_pry = impedimento.cod_pry,
+                     cod_pbReal = impedimento.cod_pbReal,
+                     long_imped =  impedimento.long_imped,
+                     cod_cauReemp = impedimento.cod_cauReemp,
+                     estrato1 = impedimento.estrato1,
+                     estrato2 = impedimento.estrato2,
+                     estrato3 = impedimento.estrato3,
+                     estrato4 = impedimento.estrato4,
+                     estrato5 = impedimento.estrato5,
+                     long_reemp = impedimento.long_reemp,
+                     costo_inv = impedimento.costo_inv,
+                     valid_cargo_planos = impedimento.valid_cargo_planos,
+                     valid_cargo_susAmb = impedimento.valid_cargo_susAmb,
+                     valid_cargo_susArq = impedimento.valid_cargo_susArq,
+                     valid_cargo_susRRCC = impedimento.valid_cargo_susRRCC,
+                     cod_validLegal = impedimento.cod_validLegal,
+                     fecha_prestReemp = impedimento.fecha_prestReemp,
+                     coment_eva = impedimento.coment_eva
+
+                };
+
+                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
+                _context.Impedimentos.Add(nvoImpedimento);
+                _context.SaveChanges();
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se creó el impedimento correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch (Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo un error al crear el impedimento"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+        }
     }
 }

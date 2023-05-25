@@ -33,6 +33,13 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Unidad_negocio> Unidad_negocio { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<Proyectos> Proyectos { get; set; }
+        public virtual DbSet<Impedimentos> Impedimentos { get; set; }
+        public virtual DbSet<Imped_evi_reempla> Imped_evi_reempla { get; set; }
+        public virtual DbSet<Imped_gest_inast> Imped_gest_inast { get; set; }
+        public virtual DbSet<Comentarios_proyec> Comentarios_proyec { get; set; }
+        public virtual DbSet<Permisos_proyec> Permisos_proyec { get; set; }
+        public virtual DbSet<Docum_proyecto> Docum_proyecto { get; set; }
+        public virtual DbSet<Informes_actas> Informes_actas { get; set; }
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
         //    modelBuilder.Entity<Usuario>().ToTable("usuario").
