@@ -44,6 +44,8 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Permisos_proyec> Permisos_proyec { get; set; }
         public virtual DbSet<Docum_proyecto> Docum_proyecto { get; set; }
         public virtual DbSet<Informes_actas> Informes_actas { get; set; }
+        public virtual DbSet<Notificaciones> Notificaciones { get; set; }
+        public virtual DbSet<Config_notificaciones> Config_notificaciones { get; set; }
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
         //    modelBuilder.Entity<Usuario>().ToTable("usuario").
