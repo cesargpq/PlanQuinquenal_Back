@@ -41,6 +41,9 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<TokenAuth> TokenAuth { get; set; }
         public virtual DbSet<DobleFactor> DobleFactor { get; set; }
         
+        public virtual DbSet<Baremo> Baremo { get; set; }
+
+
     }
 }
 

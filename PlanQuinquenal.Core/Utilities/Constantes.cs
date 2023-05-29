@@ -11,5 +11,7 @@ namespace PlanQuinquenal.Core.Utilities
         public  int CANTIDAD_INTENTOS = 3;
         public const string PathFinanciamientoTemplate = "\\\\Content\\";
         public const string DobleFactor = "\\doble.html";
+        public const string ErrorImport = "Hubo un error en la carga del archivo";
+        public const string SatisfactorioImport = "Se cargó el archivo correctamente";
     }
 }
