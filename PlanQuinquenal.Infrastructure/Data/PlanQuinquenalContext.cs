@@ -39,8 +39,8 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<Proyectos> Proyectos { get; set; }
         public virtual DbSet<TokenAuth> TokenAuth { get; set; }
+        public virtual DbSet<Baremo> Baremo { get; set; }
 
-       
 
     }
 }

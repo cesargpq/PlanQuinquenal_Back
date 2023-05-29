@@ -50,6 +50,7 @@ namespace PlanQuinquenal.Controllers
         {
 
             var resultado = await _repositoryProyecto.ObtenerProyectoxNro(nroProy);
+
             return Ok(resultado);
         }
     }
