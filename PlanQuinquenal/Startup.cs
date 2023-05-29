@@ -82,7 +82,7 @@ namespace PlanQuinquenal
                 });
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Servicios Rest - DavisPeru", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Servicios Rest - Plan Quinquenal", Version = "v1" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",

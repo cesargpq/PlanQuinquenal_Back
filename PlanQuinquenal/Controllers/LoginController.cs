@@ -86,6 +86,25 @@ namespace PlanQuinquenal.Controllers
 
             
         }
+        [AllowAnonymous]
+        [HttpPost("VerificaDobleFactor")]
+        public async Task<IActionResult> VerificaDobleFactor(DFactorDTO dFactorDTO)
+        {
+            ResponseDTO rp = new ResponseDTO();
+            var resultado = await _repositoryLogin.VerificaDobleFactor(dFactorDTO);
+            if (resultado)
+            {
+                rp.Valid = true;
+                rp.Message = "Doble Factor verificado";
+            }
+            else
+            {
+                rp.Valid = false;
+                rp.Message = "Doble Factor no verificado";
+
+            }
+            return Ok(rp);
+        }
 
         [HttpGet("ObtenerSeccionesMod")]
         public async Task<IActionResult> ObtenerSecciones(string modulo, string seccion)

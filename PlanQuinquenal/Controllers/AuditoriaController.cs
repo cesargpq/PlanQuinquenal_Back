@@ -14,7 +14,7 @@ using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class AuditoriaController : ControllerBase
@@ -31,36 +31,36 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult>  Get()
         {
         
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            int idUsuario = 0;
-            foreach (var item in identity.Claims)
-            {
-                if (item.Type.Equals("$I$Us$@I@D"))
-                {
-                    idUsuario = Convert.ToInt16(item.Value);
-                }
-            }
+            //var identity = HttpContext.User.Identity as ClaimsIdentity;
+            //int idUsuario = 0;
+            //foreach (var item in identity.Claims)
+            //{
+            //    if (item.Type.Equals("$I$Us$@I@D"))
+            //    {
+            //        idUsuario = Convert.ToInt16(item.Value);
+            //    }
+            //}
 
-            var datazz = await authRepository.GetToken(idUsuario);
+            //var datazz = await authRepository.GetToken(idUsuario);
 
-            if (!datazz)
-            {
-                return Unauthorized();
-            }
+            //if (!datazz)
+            //{
+            //    return Unauthorized();
+            //}
             
-            Logs log = new Logs();
-            string ipAddress = Response.HttpContext.Connection.RemoteIpAddress.ToString();
-            if (ipAddress == "::1")
-            {
-                var datas = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
-                ipAddress = Dns.GetHostEntry(Dns.GetHostName()).AddressList[5].ToString() + "-" + Dns.GetHostEntry(Dns.GetHostName()).AddressList[6].ToString();
-            }
+            //Logs log = new Logs();
+            //string ipAddress = Response.HttpContext.Connection.RemoteIpAddress.ToString();
+            //if (ipAddress == "::1")
+            //{
+            //    var datas = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
+            //    ipAddress = Dns.GetHostEntry(Dns.GetHostName()).AddressList[5].ToString() + "-" + Dns.GetHostEntry(Dns.GetHostName()).AddressList[6].ToString();
+            //}
 
-            log.servicio = ipAddress;
+            //log.servicio = ipAddress;
 
             
-            _context.Add(log);
-            await _context.SaveChangesAsync();
+            //_context.Add(log);
+            //await _context.SaveChangesAsync();
             var resultado = await _context.TablasAuditoria.Include(x => x.EventosAuditoria).ToListAsync();
 
             var cont = resultado.Count();

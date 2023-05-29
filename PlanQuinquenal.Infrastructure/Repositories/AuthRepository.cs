@@ -143,8 +143,26 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var resultDobleFactror = await hashService.EnviarDobleFactor(obj,message, templateKey);
                     if (resultDobleFactror)
                     {
-
+                        DobleFactor db = new DobleFactor();
+                        db.cod_usu= userResult.cod_usu;
+                        db.Codigo = message.DobleFactor;
+                        
+                        var existe = await _context.DobleFactor.Where(x => x.cod_usu == userResult.cod_usu).FirstOrDefaultAsync();
+                        
+                        if (existe!=null)
+                        {
+                            existe.Codigo = db.Codigo;
+                            _context.Update(existe);
+                            
+                        }
+                        else
+                        {
+                            _context.Add(db);
+                        }
+                        
+                     
                     }
+                    
                 }
                 
                 await _context.SaveChangesAsync();
