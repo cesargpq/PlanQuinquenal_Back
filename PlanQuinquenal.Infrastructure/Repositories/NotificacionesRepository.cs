@@ -212,7 +212,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<List<Notificaciones>> ObtenerListaNotif(int cod_usu)
         {
             List<Notificaciones> lstNotificaciones = new List<Notificaciones>();
-            var queryable = await _context.Notificaciones.ToListAsync();
+            var queryable = await _context.Notificaciones.Where(x => x.cod_usu == cod_usu).ToListAsync();
 
             return queryable;
         }

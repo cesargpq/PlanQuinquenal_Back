@@ -23,28 +23,147 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Object> NuevoProyecto(Proyectos nvoProyecto)
+        public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto)
         {
             try
             {
-                var nvoProyect = new Proyectos
+                var contadorProyecto = await _context.Proyectos
+                                     .Where(x => x.cod_pry == nvoProyecto.proyecto.cod_pry)
+                                     .Where(x => x.cod_etapa == nvoProyecto.proyecto.cod_etapa)
+                                     .AsQueryable().CountAsync();
+                if (contadorProyecto > 0)
                 {
-                    des_pry = nvoProyecto.des_pry,
-                    cod_anioPA = nvoProyecto.cod_anioPA,
-                    
-                };
+                    var resp = new
+                    {
+                        idMensaje = "0",
+                        mensaje = "El proyecto con dicha etapa ingresado ya existe "
+                    };
 
-                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
-                _context.Proyectos.Add(nvoProyect);
-                _context.SaveChanges();
-                var resp = new
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                else
                 {
-                    idMensaje = "1",
-                    mensaje = "Se creó el proyecto correctamente"
-                };
+                    string fechaHoraActual = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    var nvoProyect = new Proyectos
+                    {
+                        cod_pry = nvoProyecto.proyecto.cod_pry,
+                        cod_PQ = nvoProyecto.proyecto.cod_PQ,
+                        anioPQ = nvoProyecto.proyecto.anioPQ,
+                        cod_anioPA = nvoProyecto.proyecto.cod_anioPA,
+                        cod_material = nvoProyecto.proyecto.cod_material,
+                        constructor = nvoProyecto.proyecto.constructor,
+                        tipo_reg = nvoProyecto.proyecto.tipo_reg,
+                        cod_dist = nvoProyecto.proyecto.cod_dist,
+                        long_aprob = nvoProyecto.proyecto.long_aprob,
+                        tipo_pry = nvoProyecto.proyecto.tipo_pry,
+                        cod_etapa = nvoProyecto.proyecto.cod_etapa,
+                        cod_vnr = nvoProyecto.proyecto.cod_vnr
+                    };
 
-                var json = JsonConvert.SerializeObject(resp);
-                return json;
+                    _context.Proyectos.Add(nvoProyect);
+                    _context.SaveChanges();
+
+                    var lstUsuarioCreado = await _context.Proyectos
+                                     .Where(x => x.cod_pry == nvoProyecto.proyecto.cod_pry)
+                                     .Where(x => x.cod_etapa == nvoProyecto.proyecto.cod_etapa)
+                                     .AsQueryable().ToListAsync();
+                    int codPry = lstUsuarioCreado[0].id;
+
+                    #region Creacion de lista de usuarios interesados
+                    foreach (var usuInt in nvoProyecto.lstUsuaInter_Inicial)
+                    {
+                        var entidad = new UsuariosIntersados_pry
+                        {
+                            id_pry = codPry,
+                            cod_usu = usuInt.cod_usu
+                        };
+                        _context.UsuariosIntersados_pry.Add(entidad);
+                    }
+                    #endregion
+
+                    #region Creacion de permisos
+                    List<string> lstNombrePermisos = new List<string>();
+                    foreach (var listaPermis in nvoProyecto.lstPermisos_Inicial)
+                    {
+                        string NombreArch = listaPermis.nom_doc;
+                        string nombreFinal = NombreArch.Replace(".", $"_{fechaHoraActual}.");
+                        var entidad = new Permisos_proyec
+                        {
+                            id_pry = codPry,
+                            cod_tipoPerm = listaPermis.cod_tipoPerm, //1 - proyecto , 2 - PQ 
+                            nom_doc = nombreFinal,
+                            num_exp = listaPermis.num_exp,
+                            fecha_reg = DateTime.Now,
+                            mime_type = listaPermis.mime_type
+                        };
+                        _context.Permisos_proyec.Add(entidad);
+                        lstNombrePermisos.Add(nombreFinal);
+                    }
+                    #endregion
+
+                    #region Creacion de informes y actas
+                    foreach (var listaInfActas in nvoProyecto.lstInformes_Inicial)
+                    {
+                        var entidad = new Informes_actas
+                        {
+                            id_pry = codPry,
+                            cod_tipoSeg = 1, //1 - proyecto , 2 - PQ 
+                            cod_tipoDoc = listaInfActas.cod_tipoDoc,//1 - Informe , 2 - Acta 
+                            aprobacion = listaInfActas.aprobacion,
+                            fecha_emis = DateTime.Now
+                        };
+                        _context.Informes_actas.Add(entidad);
+                    }
+                    #endregion
+
+                    #region Creacion de Documentos
+                    List<string> lstNombreDocumentos = new List<string>();
+                    foreach (var listaDocumentos in nvoProyecto.lstDocumentos_Inicial)
+                    {
+                        string NombreArch = listaDocumentos.nom_doc;
+                        string nombreFinal = NombreArch.Replace(".", $"_{fechaHoraActual}.");
+                        var entidad = new Docum_proyecto
+                        {
+                            id_pry = codPry,
+                            nom_doc = nombreFinal,
+                            fecha_reg = DateTime.Now,
+                            mime_type = listaDocumentos.mime_type
+                        };
+                        _context.Docum_proyecto.Add(entidad);
+                        lstNombreDocumentos.Add(nombreFinal);
+                    }
+                    #endregion
+
+                    #region Creacion de Comentarios
+                    foreach (var listaComentarios in nvoProyecto.lstComentarios_Inicial)
+                    {
+                        var entidad = new Comentarios_proyec
+                        {
+                            id_pry = codPry,
+                            comentario = listaComentarios.comentario,
+                            tipo_coment = listaComentarios.tipo_coment,
+                            usuario = listaComentarios.usuario,
+                            area= listaComentarios.area,
+                            fecha_coment = DateTime.Now
+                        };
+                        _context.Comentarios_proyec.Add(entidad);
+                    }
+                    #endregion
+
+                    _context.SaveChanges();
+
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se creó el proyecto correctamente",
+                        listaNomDocum = lstNombreDocumentos
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -64,6 +183,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             var base64Content = reqMasivo.base64; 
             var bytes = Convert.FromBase64String(base64Content);
+            bool flagValid = true;
+            var mensajeErrado  = "Los siguientes codigos hubieron errores al crearlos: ";
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             try
             {
@@ -75,30 +196,100 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         for (int row = 2; row <= worksheet.Dimension.Rows; row++)
                         {
-                            if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
-                            var valor1 = worksheet.Cells[row, 1].Value?.ToString();
-                            var valor2 = worksheet.Cells[row, 2].Value?.ToString();
-                            var valor3 = worksheet.Cells[row, 3].Value?.ToString();
+                            bool flareg = true;
+                            var codPry = worksheet.Cells[row, 1].Value?.ToString();
+                            try { 
+                                if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
+                                string desPQ = worksheet.Cells[row, 2].Value?.ToString();
+                                string desAnioPQ = worksheet.Cells[row, 3].Value?.ToString();
+                                string desAnioPA = worksheet.Cells[row, 4].Value?.ToString();
+                                string desEtapa = worksheet.Cells[row, 5].Value?.ToString();
+                                string codMater = worksheet.Cells[row, 6].Value?.ToString();
+                                string codConst = worksheet.Cells[row, 8].Value?.ToString();
+                                string tipoReg = worksheet.Cells[row, 10].Value?.ToString();
+                                string codDist = worksheet.Cells[row, 11].Value?.ToString();
+                                string longAprob = worksheet.Cells[row, 13].Value?.ToString();
+                                string codTipoPry = worksheet.Cells[row, 14].Value?.ToString();
+                                string codMalla = worksheet.Cells[row, 16].Value?.ToString();
+                                string codVNR = worksheet.Cells[row, 17].Value?.ToString();
 
-                            var entidad = new Proyectos
+                                #region
+                                //-------------------hacer una consulta para validar la descripcion del PQ----------------------
+                                int codPQ = 1;
+                                #endregion
+
+                                #region
+                                //---------------------hacer una consulta para validar la el año PA-------------------
+                                int codPA = 1;
+                                #endregion
+
+                                #region
+                                //--------------------Grabar registros------------------------
+                                if (flareg)
+                                {
+                                    var entidad = new Proyectos
+                                    {
+                                        cod_pry = codPry,
+                                        cod_PQ = codPQ,
+                                        anioPQ = desAnioPQ,
+                                        cod_anioPA = codPA,
+                                        cod_etapa = int.Parse(desEtapa),
+                                        cod_material = int.Parse(codMater),
+                                        constructor = codConst,
+                                        tipo_reg = tipoReg,
+                                        cod_dist = int.Parse(codDist),
+                                        long_aprob = int.Parse(longAprob),
+                                        tipo_pry = int.Parse(codTipoPry),
+                                        cod_malla = codMalla,
+                                        cod_vnr = codVNR
+                                    };
+                                    _context.Proyectos.Add(entidad);
+                                    _context.SaveChanges();
+                                }
+                                else
+                                {
+                                    flagValid = false;
+                                    mensajeErrado = mensajeErrado + codPry + ", ";
+                                }
+                                #endregion
+                                
+
+                                
+                            }catch(Exception ex)
                             {
-                                des_pry = valor2
-                            };
-
-                            _context.Proyectos.Add(entidad);
+                                flagValid = false;
+                                mensajeErrado = mensajeErrado + codPry + ", ";
+                            }
                         }
 
-                        _context.SaveChanges();
+                        
                     }
                 }
-                var resp = new
-                {
-                    idMensaje = "1",
-                    mensaje = "Se crearon los proyectos correctamente"
-                };
 
-                var json = JsonConvert.SerializeObject(resp);
-                return json;
+                if (!flagValid)
+                {
+                    mensajeErrado = mensajeErrado.Remove(mensajeErrado.Length - 1);
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = mensajeErrado
+                    };
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                else
+                {
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se crearon los proyectos correctamente"
+                    };
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                
+
+                
             }
             catch (Exception ex)
             {

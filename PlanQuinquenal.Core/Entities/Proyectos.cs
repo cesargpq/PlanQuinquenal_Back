@@ -18,7 +18,7 @@ namespace PlanQuinquenal.Core.Entities
         public int cod_anioPA { get; set; }
         public int cod_material { get; set; }
         public string constructor { get; set; }
-        public int tipo_reg { get; set; }
+        public string tipo_reg { get; set; }
         public int cod_dist { get; set; }
         public float long_aprob { get; set; }
         public float long_realPend { get; set; }
@@ -31,5 +31,6 @@ namespace PlanQuinquenal.Core.Entities
         public string user_reg { get; set; }
         public DateTime fecha_gas { get; set; }
         public int cod_pryReemp { get; set; }
+        public string cod_vnr { get; set; }
     }
 }

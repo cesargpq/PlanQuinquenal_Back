@@ -22,7 +22,7 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpPost("NuevoProyecto")]
-        public async Task<IActionResult> NuevoProyecto(Proyectos nvoProyecto)
+        public async Task<IActionResult> NuevoProyecto(ProyectoRequest nvoProyecto)
         {
 
             var resultado = await _repositoryProyecto.NuevoProyecto(nvoProyecto);

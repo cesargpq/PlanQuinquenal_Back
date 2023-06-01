@@ -61,8 +61,8 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("AutenticarUsuario")]
         public async Task<IActionResult> AutenticarUsuario()
         {
-            
-            var resultado = await _repositoryLogin.Post(reqLogin);
+
+            var resultado = ""; //await _repositoryLogin.Post(reqLogin);
             return Ok(resultado);
         }
 
