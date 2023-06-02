@@ -10,7 +10,9 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IRepositoryProyecto
     {
-        Task<Object> NuevoProyecto(Proyectos nvoProyecto);
+        Task<Object> CrearComentario(Comentarios_proyec comentario);
+        Task<Object> CrearImpedimento(ImpedimentoRequest impedimento);
+        Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto);
         Task<Object> NuevosProyectosMasivo(ProyectoRequest reqMasivo);
         Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filterProyectos);
         Task<Proyectos> ObtenerProyectoxNro(string nroProy);

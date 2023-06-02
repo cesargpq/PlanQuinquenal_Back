@@ -63,7 +63,17 @@ namespace PlanQuinquenal.Controllers
             return Ok(rdto);
         }
 
+
         
+
+        [HttpPost("AutenticarUsuario")]
+        public async Task<IActionResult> AutenticarUsuario()
+        {
+
+            var resultado = ""; //await _repositoryLogin.Post(reqLogin);
+            return Ok(resultado);
+        }
+
 
         [HttpGet("ObtenerModulos")]
         public async Task<IActionResult> GetById()

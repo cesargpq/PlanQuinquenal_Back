@@ -22,7 +22,7 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpPost("NuevoProyecto")]
-        public async Task<IActionResult> NuevoProyecto(Proyectos nvoProyecto)
+        public async Task<IActionResult> NuevoProyecto(ProyectoRequest nvoProyecto)
         {
 
             var resultado = await _repositoryProyecto.NuevoProyecto(nvoProyecto);
@@ -51,6 +51,38 @@ namespace PlanQuinquenal.Controllers
 
             var resultado = await _repositoryProyecto.ObtenerProyectoxNro(nroProy);
 
+            return Ok(resultado);
+        }
+
+        [HttpPost("CrearImpedimento")]
+        public async Task<IActionResult> CrearImpedimento(ImpedimentoRequest impedimento)
+        {
+
+            var resultado = await _repositoryProyecto.CrearImpedimento(impedimento);
+            return Ok(resultado);
+        }
+
+        [HttpPost("ModificarImpedimento")]
+        public async Task<IActionResult> ModificarImpedimento(ImpedimentoRequest impedimento)
+        {
+
+            var resultado = "";
+            return Ok(resultado);
+        }
+
+        [HttpPost("CrearComentario")]
+        public async Task<IActionResult> CrearComentario(Comentarios_proyec comentario)
+        {
+
+            var resultado = await _repositoryProyecto.CrearComentario(comentario);
+            return Ok(resultado);
+        }
+
+        [HttpPost("ModificarComentario")]
+        public async Task<IActionResult> ModificarComentario(Comentarios_proyec comentario)
+        {
+
+            var resultado = "";
             return Ok(resultado);
         }
     }
