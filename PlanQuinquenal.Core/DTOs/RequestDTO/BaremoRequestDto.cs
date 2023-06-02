@@ -1,14 +1,14 @@
-﻿using System;
+﻿using PlanQuinquenal.Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanQuinquenal.Core.Entities
+namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
-    public class Baremo
+    public class BaremoRequestDto
     {
-        public int Id { get; set; }
         public string CodigoBaremo { get; set; }
         public string Descripcion { get; set; }
         public Decimal Precio { get; set; }

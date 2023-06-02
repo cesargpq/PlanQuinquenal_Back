@@ -41,7 +41,7 @@ namespace PlanQuinquenal.Controllers
             if (resultado)
             {
                 dto.Valid = true;
-                dto.Message = $"Se eliminó la entidad correctamente";
+                dto.Message = $"Se actualizó la entidad correctamente";
             }
             else
             {

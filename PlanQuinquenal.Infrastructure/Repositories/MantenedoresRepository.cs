@@ -64,8 +64,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 else
                 {
-                    var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id && x.Estado == true).FirstOrDefaultAsync();
-                    resultado.Estado = false;
+                    var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id ).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false: true;
                     _context.Update(resultado);
                     await _context.SaveChangesAsync();
                     return true;
