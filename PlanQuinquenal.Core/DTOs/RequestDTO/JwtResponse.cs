@@ -12,5 +12,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public DateTime ExpireIn { get; set; }
         public string Message { get; set; }
         public bool state { get; set; }
+        public bool DobleFactor { get; set; }
     }
 }

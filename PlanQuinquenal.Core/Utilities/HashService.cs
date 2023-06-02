@@ -1,10 +1,17 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
+using RazorEngine;
+using RazorEngine.Templating;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,10 +26,13 @@ namespace PlanQuinquenal.Core.Utilities
         private const string SaltKey = "s@lAvz10";
         private const string VIKey = "@1B2c3D4e5F6g7H8";
         private const int KeySize = 128;
-
-        public HashService()
+        private readonly IConfiguration configuration;
+        private readonly string _pathRoot;
+        public HashService(IServiceProvider serviceProvider,IServiceScopeFactory factory)
         {
-            
+            var env = serviceProvider.GetService<IHostingEnvironment>();
+            _pathRoot = $"{env.ContentRootPath}{Constantes.PathFinanciamientoTemplate}";
+            configuration = factory.CreateScope().ServiceProvider.GetRequiredService<IConfiguration>();
         }
         public string Encriptar(string plainText)
         {
@@ -71,7 +81,47 @@ namespace PlanQuinquenal.Core.Utilities
             cryptoStream.Close();
             return System.Text.Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount).TrimEnd("\0".ToCharArray());
         }
+        public async Task<string> GeneraDobuleFactor()
+        {
+            var characters = "1234567890";
+            var Charsarr = new char[6];
+            var random = new Random();
 
+            for (int i = 0; i < Charsarr.Length; i++)
+            {
+                Charsarr[i] = characters[random.Next(characters.Length)];
+            }
+
+            var resultString = new String(Charsarr);
+            return resultString;
+        }
+        public async Task<bool> EnviarDobleFactor<T>(EmailData<T> obj, DobleFactorDTO message, string templateKey)
+        {
+
+            string smtp = configuration.GetSection("EmailSettings").GetSection("Smtp").Value;
+            string correoEnvioConf = configuration.GetSection("EmailSettings").GetSection("CorreoEnvio").Value;
+            string key = configuration.GetSection("EmailSettings").GetSection("Key").Value;
+            string port = configuration.GetSection("EmailSettings").GetSection("Port").Value;
+            string ruta = "";
+            ruta = $@"{_pathRoot}{obj.HtmlTemplateName}";
+            string html = System.IO.File.ReadAllText(ruta);
+            string body = Engine.Razor.RunCompile(html, $"{templateKey}", typeof(T), message);
+            string correoDestino = string.Join(',', obj.EmailList);
+            string correoSend = correoEnvioConf;
+            string clave = key;
+            MailMessage mail = new MailMessage();
+            SmtpClient SmtpServer = new SmtpClient(smtp, Convert.ToInt32(port));
+            mail.From = new System.Net.Mail.MailAddress(correoSend);
+            mail.To.Add(correoDestino);
+            mail.Subject = "Codigo de verificacion";
+            mail.Body = body;
+            mail.IsBodyHtml = true;
+            SmtpServer.Port = Convert.ToInt32(port);
+            SmtpServer.UseDefaultCredentials = true;
+            SmtpServer.EnableSsl = false;
+            SmtpServer.Send(mail);
+            return true;
+        }
         public async Task<JwtResponse> ConstruirToken(Usuario credencialesUsuario, JwtResponse jwt)
         {
             var claims = new List<Claim>()
@@ -82,7 +132,7 @@ namespace PlanQuinquenal.Core.Utilities
 
             var llave = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("ASK9DASDASJD9ASJD9ASJDA9SJDAS9JDAS9JDA9SJD9ASJDAS9JDAS9DJAS9JDAS9DJAS9DJAS9DJAS9DAJS"));
             var creds = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
-            var expiracion = DateTime.UtcNow.AddMinutes(120);
+            var expiracion = DateTime.UtcNow.AddMinutes(200);
 
             var securityToken = new JwtSecurityToken(issuer: null, audience: null, claims: claims,
                 expires: expiracion, signingCredentials: creds);
