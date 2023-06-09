@@ -11,7 +11,7 @@ namespace PlanQuinquenal.Core.Entities
     {
         [Key]
         public int IdTablaLogicaDatos { get; set; }
-        public int IdTablaLogica { get; set; }
+        public int TablaLogicaId { get; set; }
         public string Descripcion { get; set; }
         public string Codigo { get; set; }
 

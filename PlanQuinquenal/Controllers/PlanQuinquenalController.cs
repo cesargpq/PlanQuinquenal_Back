@@ -26,7 +26,7 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> CreatePQ(PQuinquenalReqDTO pQuinquenalReqDTO)
         {
             var resultado = await planQuinquenalesRepository.CreatePQ(pQuinquenalReqDTO);
-            return Ok();
+            return Ok(resultado);
         }
     }
 }

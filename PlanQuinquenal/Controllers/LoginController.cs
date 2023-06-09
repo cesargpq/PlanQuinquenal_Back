@@ -30,23 +30,28 @@ namespace PlanQuinquenal.Controllers
 
             return Ok(jwtToken);
         }
-
+        [AllowAnonymous]
         [HttpPut("CerrarSesion")]
-        public async Task<IActionResult> CerrarSesion()
+        public async Task<IActionResult> CerrarSesion(LoginRequestDTO login)
         {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            int idUser = 0;
+            //var identity = HttpContext.User.Identity as ClaimsIdentity;
+            //int idUser = 0;
             ResponseDTO rdto = new ResponseDTO();
-            foreach (var item in identity.Claims)
-            {
-                if (item.Type.Equals("$I$Us$@I@D"))
-                {
-                    idUser = Convert.ToInt16(item.Value);
-                    break;
-                }
-            }
-         
-            var userResponse = await _authRepository.CerrarSesion(idUser);
+            //if (identity!= null)
+            //{
+
+            //    foreach (var item in identity.Claims)
+            //    {
+            //        if (item.Type.Equals("$I$Us$@I@D"))
+            //        {
+            //            idUser = Convert.ToInt16(item.Value);
+            //            break;
+            //        }
+            //    }
+            //}
+
+
+            var userResponse = await _authRepository.CerrarSesion(login);
             if(!userResponse)
             {
                 rdto.Valid = false;
@@ -58,6 +63,9 @@ namespace PlanQuinquenal.Controllers
             return Ok(rdto);
         }
 
+
+        
+
         [HttpPost("AutenticarUsuario")]
         public async Task<IActionResult> AutenticarUsuario()
         {
@@ -65,6 +73,7 @@ namespace PlanQuinquenal.Controllers
             var resultado = ""; //await _repositoryLogin.Post(reqLogin);
             return Ok(resultado);
         }
+
 
         [HttpGet("ObtenerModulos")]
         public async Task<IActionResult> GetById()
@@ -86,6 +95,25 @@ namespace PlanQuinquenal.Controllers
             }
 
             
+        }
+        [AllowAnonymous]
+        [HttpPost("VerificaDobleFactor")]
+        public async Task<IActionResult> VerificaDobleFactor(DFactorDTO dFactorDTO)
+        {
+            ResponseDTO rp = new ResponseDTO();
+            var resultado = await _repositoryLogin.VerificaDobleFactor(dFactorDTO);
+            if (resultado)
+            {
+                rp.Valid = true;
+                rp.Message = "Doble Factor verificado";
+            }
+            else
+            {
+                rp.Valid = false;
+                rp.Message = "Doble Factor no verificado";
+
+            }
+            return Ok(rp);
         }
 
         [HttpGet("ObtenerSeccionesMod")]

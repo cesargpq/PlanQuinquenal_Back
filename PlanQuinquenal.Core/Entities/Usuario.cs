@@ -26,5 +26,6 @@ namespace PlanQuinquenal.Core.Entities
         public bool Interno { get; set; }
         public DateTime LastSesion { get; set; }
         public bool Conectado { get; set; }
+        public bool DobleFactor { get; set; }
     }
 }

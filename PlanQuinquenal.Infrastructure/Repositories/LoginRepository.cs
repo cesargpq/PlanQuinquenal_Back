@@ -60,7 +60,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
         }
-
+        public async Task<bool> VerificaDobleFactor(DFactorDTO dFactorDTO)
+        {
+            var resultado = await _context.DobleFactor.Where(x => x.cod_usu == dFactorDTO.cod_usu && x.Codigo.Equals(dFactorDTO.codigo)).FirstOrDefaultAsync();
+            if(resultado!= null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
         public async Task<ModulosResponse> ObtenerModulos(string correo)
         {
             ModulosResponse respMod = new ModulosResponse();
