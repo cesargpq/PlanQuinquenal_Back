@@ -120,7 +120,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     cod_reg = notificacion.cod_reg,
                     area = notificacion.area,
                     fechora_not = notificacion.fechora_not,
-                    flag_visto = notificacion.flag_visto
+                    flag_visto = notificacion.flag_visto,
+                    tipo_accion = notificacion.tipo_accion,
+                    mensaje = notificacion.mensaje
                 };
 
                 // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos

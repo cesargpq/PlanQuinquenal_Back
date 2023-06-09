@@ -18,5 +18,7 @@ namespace PlanQuinquenal.Core.Entities
         public string area { get; set; }
         public DateTime fechora_not { get; set; }
         public bool flag_visto { get; set; }
+        public string tipo_accion { get; set; }
+        public string mensaje { get; set; }
     }
 }

@@ -47,6 +47,12 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Notificaciones> Notificaciones { get; set; }
         public virtual DbSet<Config_notificaciones> Config_notificaciones { get; set; }
         public virtual DbSet<UsuariosIntersados_pry> UsuariosIntersados_pry { get; set; }
+        public virtual DbSet<Informes> Informes { get; set; }
+        public virtual DbSet<Actas> Actas { get; set; }
+        public virtual DbSet<UsuariosIntersados_Inf> UsuariosIntersados_Inf { get; set; }
+        public virtual DbSet<UsuAsisten_Acta> UsuAsisten_Acta { get; set; }
+        public virtual DbSet<UsuParticip_Acta> UsuParticip_Acta { get; set; }
+        public virtual DbSet<CamposDinam_Acta> CamposDinam_Acta { get; set; }
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
         //    modelBuilder.Entity<Usuario>().ToTable("usuario").
