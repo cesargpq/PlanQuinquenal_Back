@@ -11,7 +11,7 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IRepositoryPerfil
     {
         Task<Object> NuevoPerfil(PerfilResponse nvoPerfil);
-        Task<List<PerfilResponse>> ObtenerPerfiles();
+        Task<List<PerfilResponse>> ObtenerPerfiles(string buscador);
         Task<Object> EliminarPerfil(int cod_perfil);
         Task<Object> ActualizarPerfil(PerfilResponse nvoPerfil);
     }

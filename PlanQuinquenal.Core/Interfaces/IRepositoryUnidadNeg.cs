@@ -11,7 +11,7 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IRepositoryUnidadNeg
     {
         Task<Object> NuevoUnidadNeg(Unidad_negocio nvoUnidNeeg);
-        Task<List<Unidad_negocio>> ObtenerUnidadNeg();
+        Task<List<Unidad_negocio>> ObtenerUnidadNeg(string buscador);
         Task<Object> EliminarUnidadNeg(int cod_uniNeg);
         Task<Object> ActualizarUnidadNeg(Unidad_negocio uniNeg);
     }

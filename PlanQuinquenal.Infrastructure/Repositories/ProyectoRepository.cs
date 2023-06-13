@@ -19,6 +19,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     {
         private readonly PlanQuinquenalContext _context;
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
+        private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
 
         public ProyectoRepository(PlanQuinquenalContext context)
         {
@@ -369,11 +370,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
 
         }
-        public async Task<Object> ObtenerProyectoxNro(int nroProy)
+        public async Task<Object> ObtenerProyectoxNro(int nroProy, int cod_usu)
         {
             Proyectos lstPro = new Proyectos();
             var queryable = _context.Proyectos
-                                     .Where(x =>  x.id == nroProy)
+                                     .Where(x => x.id == nroProy)
                                      .AsQueryable();
 
             double cantidad = await queryable.CountAsync();
@@ -382,10 +383,31 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var entidades = await queryable.ToListAsync();
                 lstPro = entidades[0];
             }
-
+            var usuLog = await _context.Usuario.Where(x => x.cod_usu == cod_usu).ToListAsync();
+            var lstUsuInteresados = await _context.UsuariosIntersados_pry.Include(x => x.usuario).ToListAsync();
             var listaPermisos = await _context.Permisos_proyec.Where(x => x.id_pry == nroProy).ToListAsync();
-            var listaComent = await _context.Comentarios_proyec.Where(x => x.id_pry == nroProy).ToListAsync();
+            var listaComent = await _context.Comentarios_proyec.Include(x => x.regusuario).Where(x => x.id_pry == nroProy).ToListAsync();
             var listaDocument = await _context.Docum_proyecto.Where(x => x.id_pry == nroProy).ToListAsync();
+
+            foreach (var coment in listaComent)
+            {
+                bool validUsuInter = false;
+                foreach (var usuInter in lstUsuInteresados)
+                {
+                    if (usuInter.cod_usu == cod_usu)
+                    {
+                        validUsuInter = true;
+                        break;
+                    }
+                }
+                if (coment.tipo_coment == "PR" && (coment.regusuario.cod_und != usuLog[0].cod_und || !validUsuInter))
+                {
+                    listaComent.Remove(coment);
+                    continue;
+                }
+                
+            }
+
             var listaInforme = await _context.Informes.Join(_context.Proyectos,
                                     Info => Info.cod_seg,
                                     Proyec => Proyec.id,
@@ -454,7 +476,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 proyecto = lstPro,
                 lstPermisos = listaPermisos,
-                lstComent = listaDocument,
+                lstComent = listaComent,
                 lstDocum = listaDocument,
                 lstActasInfo = lstInfoActas
             };
@@ -518,7 +540,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         //    }
         //}
 
-        public async Task<object> CrearDocumento(DocumentoProyRequest requestDoc)
+        public async Task<object> CrearDocumentoPr(DocumentoProyRequest requestDoc, string modulo)
         {
             try
             {
@@ -548,6 +570,78 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var json = JsonConvert.SerializeObject(resp);
                 return json;
             }
+        }
+
+        public async Task<object> CrearComentario(Comentarios_proyecDTO comentario, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.CrearComentario(comentario, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> EliminarComentario(int codigo, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.EliminarComentario(codigo, modulo);
+            return obj;
+        }
+
+        public async Task<object> CrearDocumento(Docum_proyectoDTO requestDoc, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.CrearDocumento(requestDoc, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> EliminarDocumento(int codigo, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.EliminarDocumento(codigo, modulo);
+            return obj;
+        }
+
+        public async Task<object> CrearPermiso(Permisos_proyecDTO requestDoc, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.CrearPermiso(requestDoc, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> EliminarPermiso(int codigo, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.EliminarPermiso(codigo, modulo);
+            return obj;
+        }
+
+        public async Task<object> CrearInforme(InformeRequestDTO requestDoc, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.CrearInforme(requestDoc, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> ModificarInforme(InformeRequestDTO requestDoc, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.ModificarInforme(requestDoc, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> EliminarInforme(int codigo, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.EliminarInforme(codigo, modulo);
+            return obj;
+        }
+
+        public async Task<object> CrearActa(ActaRequestDTO requestDoc, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.CrearActa(requestDoc, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> ModificarActa(ActaRequestDTO requestDoc, int idUser, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.ModificarActa(requestDoc, idUser, modulo);
+            return obj;
+        }
+
+        public async Task<object> EliminarActa(int codigo, string modulo)
+        {
+            var obj = await _repositoryMetodosRehusables.EliminarActa(codigo, modulo);
+            return obj;
         }
     }
 }

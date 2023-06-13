@@ -17,12 +17,10 @@ namespace PlanQuinquenal.Controllers
     public class ProyectosController : ControllerBase
     {
         private readonly IRepositoryProyecto _repositoryProyecto;
-        private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
 
-        public ProyectosController(IRepositoryProyecto repositoryProyecto, IRepositoryMetodosRehusables repositoryMetodosRehusables)
+        public ProyectosController(IRepositoryProyecto repositoryProyecto)
         {
             _repositoryProyecto = repositoryProyecto;
-            _repositoryMetodosRehusables = repositoryMetodosRehusables;
         }
 
         [HttpPost("NuevoProyecto")]
@@ -79,14 +77,24 @@ namespace PlanQuinquenal.Controllers
         [HttpGet("ObtenerProyectoxNro")]
         public async Task<IActionResult> ObtenerProyectoxNro(int nroProy)
         {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
 
-            var resultado = await _repositoryProyecto.ObtenerProyectoxNro(nroProy);
+                }
+            }
+
+            var resultado = await _repositoryProyecto.ObtenerProyectoxNro(nroProy, idUser);
 
             return Ok(resultado);
         }
 
         [HttpPost("CrearComentario")]
-        public async Task<IActionResult> CrearComentario(Comentarios_proyec comentario)
+        public async Task<IActionResult> CrearComentario(Comentarios_proyecDTO comentario)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
@@ -98,7 +106,7 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.CrearComentario(comentario, idUser);
+            var resultado = await _repositoryProyecto.CrearComentario(comentario, idUser , "P");
             return Ok(resultado);
         }
 
@@ -106,12 +114,12 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> EliminarComentario(int codigo)
         {
 
-            var resultado = await _repositoryMetodosRehusables.EliminarComentario(codigo);
+            var resultado = await _repositoryProyecto.EliminarComentario(codigo, "P");
             return Ok(resultado);
         }
 
         [HttpPost("CrearDocumento")]
-        public async Task<IActionResult> CrearDocumento(Docum_proyecto requestDoc)
+        public async Task<IActionResult> CrearDocumento(Docum_proyectoDTO requestDoc)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
@@ -123,7 +131,7 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.CrearDocumento(requestDoc, idUser);
+            var resultado = await _repositoryProyecto.CrearDocumento(requestDoc, idUser, "P");
             return Ok(resultado);
         }
 
@@ -131,12 +139,12 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> EliminarDocumento(int codigo)
         {
 
-            var resultado = await _repositoryMetodosRehusables.EliminarDocumento(codigo);
+            var resultado = await _repositoryProyecto.EliminarDocumento(codigo, "P");
             return Ok(resultado);
         }
 
         [HttpPost("CrearPermiso")]
-        public async Task<IActionResult> CrearPermiso(Permisos_proyec requestDoc)
+        public async Task<IActionResult> CrearPermiso(Permisos_proyecDTO requestDoc)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
@@ -148,7 +156,7 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.CrearPermiso(requestDoc, idUser);
+            var resultado = await _repositoryProyecto.CrearPermiso(requestDoc, idUser, "P");
             return Ok(resultado);
         }
 
@@ -156,7 +164,7 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> EliminarPermiso(int codigo)
         {
 
-            var resultado = await _repositoryMetodosRehusables.EliminarPermiso(codigo);
+            var resultado = await _repositoryProyecto.EliminarPermiso(codigo, "P");
             return Ok(resultado);
         }
 
@@ -173,7 +181,7 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.CrearInforme(requestDoc, idUser);
+            var resultado = await _repositoryProyecto.CrearInforme(requestDoc, idUser, "P");
             return Ok(resultado);
         }
 
@@ -190,14 +198,14 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.ModificarInforme(requestDoc, idUser);
+            var resultado = await _repositoryProyecto.ModificarInforme(requestDoc, idUser, "P");
             return Ok(resultado);
         }
         [HttpPost("EliminarInforme")]
         public async Task<IActionResult> EliminarInforme(int codigo)
         {
 
-            var resultado = await _repositoryMetodosRehusables.EliminarInforme(codigo);
+            var resultado = await _repositoryProyecto.EliminarInforme(codigo, "P");
             return Ok(resultado);
         }
 
@@ -214,7 +222,7 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.CrearActa(requestDoc,idUser);
+            var resultado = await _repositoryProyecto.CrearActa(requestDoc,idUser, "P");
             return Ok(resultado);
         }
 
@@ -231,22 +239,22 @@ namespace PlanQuinquenal.Controllers
 
                 }
             }
-            var resultado = await _repositoryMetodosRehusables.ModificarActa(requestDoc, idUser); 
+            var resultado = await _repositoryProyecto.ModificarActa(requestDoc, idUser, "P"); 
             return Ok(resultado);
         }
         [HttpPost("EliminarActa")]
         public async Task<IActionResult> EliminarActa(int codigo)
         {
 
-            var resultado = await _repositoryMetodosRehusables.EliminarInforme(codigo);
+            var resultado = await _repositoryProyecto.EliminarInforme(codigo, "P");
             return Ok(resultado);
         }
 
-        [HttpPost("CrearDocumento")]
-        public async Task<IActionResult> CrearDocumento(DocumentoProyRequest requestDoc)
+        [HttpPost("CrearDocumentoPr")]
+        public async Task<IActionResult> CrearDocumentoPr(DocumentoProyRequest requestDoc)
         {
 
-            var resultado = await _repositoryProyecto.CrearDocumento(requestDoc);
+            var resultado = await _repositoryProyecto.CrearDocumentoPr(requestDoc, "P");
             return Ok(resultado);
         }
     }

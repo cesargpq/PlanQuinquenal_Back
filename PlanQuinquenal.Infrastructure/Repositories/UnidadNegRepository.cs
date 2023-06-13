@@ -60,10 +60,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Unidad_negocio>> ObtenerUnidadNeg()
+        public async Task<List<Unidad_negocio>> ObtenerUnidadNeg(string buscador)
         {
             List<Unidad_negocio> lstUnidadNeg = new List<Unidad_negocio>();
-            var queryable = await _context.Unidad_negocio.ToListAsync();
+            var queryable = new List<Unidad_negocio>();
+            if (buscador == "") {
+                queryable = await _context.Unidad_negocio.ToListAsync();
+            } else
+            {
+                queryable = await _context.Unidad_negocio.Where(x => x.nom_und == buscador).ToListAsync();
+            }
 
             foreach (var unidNeg in queryable)
             {

@@ -9,7 +9,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class Permisos_proyecDTO
     {
         public int id { get; set; }
-        public int id_pry { get; set; }
+        public int codigo { get; set; }
         public int cod_tipoPerm { get; set; }
         public string nom_doc { get; set; }
         public string num_exp { get; set; }

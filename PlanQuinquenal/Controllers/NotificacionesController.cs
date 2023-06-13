@@ -101,7 +101,7 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("EnvioCorreoNotif")]
         public async Task<IActionResult> EnvioCorreoNotif(CorreoResponse correo)
         {
-            var resultado = await _repositoryNotificaciones.EnvioCorreoNotif(correo);
+            var resultado = "";//await _repositoryNotificaciones.EnvioCorreoNotif(correo);
             return Ok(resultado);
         }
 

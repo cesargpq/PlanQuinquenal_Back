@@ -19,6 +19,7 @@ namespace PlanQuinquenal.Core.Entities
         public string passw_user { get; set; }
         public string estado_user { get; set; }
         public int cod_rol { get; set; }
+        public int cod_und { get; set; }
         public int Perfilcod_perfil { get; set; }
         public Perfil Perfil { get; set; }
         public bool Estado { get; set; }
