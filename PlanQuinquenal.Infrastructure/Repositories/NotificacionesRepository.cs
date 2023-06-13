@@ -7,9 +7,12 @@ using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
+using System.Net.Mime;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -151,9 +154,57 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        public Task<object> EnvioCorreoNotif(CorreoResponse correo)
+        public async Task<object> EnvioCorreoNotif(Object lst1, Object lst2, int cod_usu)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Configurar el correo electrónico
+                string remitente = "erick2402199501@gmail.com";
+                string destinatario = "erick2402199501@gmail.com";
+                string asunto = "Correo con diseño personalizado";
+                string cuerpo = ConstruirCuerpoCorreo();
+
+                // Configurar el cliente SMTP
+                SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com", 587);
+                clienteSmtp.EnableSsl = true;
+                clienteSmtp.UseDefaultCredentials = false;
+                clienteSmtp.Credentials = new NetworkCredential("erick2402199501@gmail.com", "aafobhjkuqaogadq");
+
+                // Crear el correo
+                
+                MailMessage correo = new MailMessage();
+                correo.From = new MailAddress(remitente);
+                correo.To.Add(destinatario);
+                correo.Subject= asunto;
+                correo.IsBodyHtml = true;
+                AlternateView htmlView = AlternateView.CreateAlternateViewFromString(cuerpo, new ContentType("text/html"));
+                correo.AlternateViews.Add(htmlView);
+
+                // Enviar el correo
+                clienteSmtp.Send(correo);
+
+                Console.WriteLine("Correo enviado exitosamente.");
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "es una prueba"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch(Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = ex.Message
+                };
+
+                var json = JsonConvert.SerializeObject(resp); 
+                return json;
+            }
+            
         }
 
         public async Task<object> ModificarConfigNotif(Config_notificaciones config)
@@ -219,5 +270,84 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return queryable;
         }
 
+
+        #region
+        public static string ConstruirCuerpoCorreo()
+        {
+            // Leer el archivo CSS
+            string css = File.ReadAllText("Correo/main.css");
+
+            // Leer el archivo de imagen
+            string imagePath = "Correo/v270_5566.png";
+            string imagenBase64 = "";
+            if (File.Exists(imagePath))
+            {
+                // Convertir la imagen a base64
+                byte[] imagenBytes = File.ReadAllBytes(imagePath); 
+                imagenBase64 = Convert.ToBase64String(imagenBytes);
+            }
+
+            // URL del enlace externo para la fuente
+            string fontLink = "https://fonts.googleapis.com/css?family=Open+Sans&display=swap";
+            string html = @"
+                <html>
+                <head>
+                <link href=""{0}"" rel=""stylesheet"">
+                <style>{1}</style>
+                </head>
+                <body> 
+                   <div class=""v270_5541"">
+                        <img src=""https://www.calidda.com.pe/media/ohen2u1d/logo.png"" alt=""Mi imagen"" />
+                   </div>
+		        <div style=""width: 600px;height: 70px;"">
+		        <span class=""v270_5542"">Estimado Usuario,
+                Se le informa que se ha realizado una modificación en la sección Proyectos, a continuación, se presenta el detalle:</span>
+		        </div>
+         
+                <div style=""margin-bottom: 30px;"">
+		            <div class=""v270_5543"">
+			        <span class=""v270_5550"">Código de proyecto o PQ</span>
+		            </div>
+                    <div class=""v270_5546"">
+			        <span class=""v270_5551"">Valor modificado</span>
+		            </div>
+                    <div class=""v270_5547"">
+			        <span class=""v270_5552"">Campo modificado</span>
+		            </div>
+                    <div class=""v270_5548"">
+			        <span class=""v270_5553"">Fecha de modificación</span>
+		            </div>
+                    <div class=""v270_5549"">
+			        <span class=""v270_5554"">Modificado por</span>
+		            </div>
+		 
+                    <div class=""v270_5556"">
+			        <span class=""v270_5561"">PPE0-21-0304</span>
+		            </div>
+                    <div class=""v270_5557"">
+			        <span class=""v270_5562"">120</span>
+		            </div>
+                    <div class=""v270_5558"">
+			        <span class=""v270_5563"">LONG. REAL PEND.</span>
+		            </div>
+                    <div class=""v270_5559"">
+			        <span class=""v270_5564"">31/03/2023</span>
+		            </div>
+                    <div class=""v270_5560"">
+			        <span class=""v270_5565"">Juan Pérez</span>
+		            </div>
+                </div>
+         
+		        <div class=""v270_5544"">
+			    <span class=""v270_5545"">Cálidda 2023. Todos los derechos reservados.</span>
+		        </div>
+                </body>
+                </html>";
+            html = string.Format(html, fontLink, css);
+
+
+            return html;
+        }
+        #endregion
     }
 }

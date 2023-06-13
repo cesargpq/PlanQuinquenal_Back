@@ -10,17 +10,17 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IRepositoryMetodosRehusables
     {
-        Task<Object> CrearComentario(Comentarios_proyec comentario, int idUser);
-        Task<Object> EliminarComentario(int codigo);
-        Task<Object> CrearDocumento(Docum_proyecto requestDoc, int idUser);
-        Task<Object> EliminarDocumento(int codigo);
-        Task<Object> CrearPermiso(Permisos_proyec requestDoc, int idUser);
-        Task<Object> EliminarPermiso(int codigo);
-        Task<Object> CrearInforme(InformeRequestDTO requestDoc, int idUser);
-        Task<Object> ModificarInforme(InformeRequestDTO requestDoc, int idUser);
-        Task<Object> EliminarInforme(int codigo);
-        Task<Object> CrearActa(ActaRequestDTO requestDoc, int idUser);
-        Task<Object> ModificarActa(ActaRequestDTO requestDoc, int idUser);
-        Task<Object> EliminarActa(int codigo);
+        Task<Object> CrearComentario(Comentarios_proyecDTO comentario, int idUser, string modulo);
+        Task<Object> EliminarComentario(int codigo, string modulo);
+        Task<Object> CrearDocumento(Docum_proyectoDTO requestDoc, int idUser, string modulo);
+        Task<Object> EliminarDocumento(int codigo, string modulo);
+        Task<Object> CrearPermiso(Permisos_proyecDTO requestDoc, int idUser, string modulo);
+        Task<Object> EliminarPermiso(int codigo, string modulo);
+        Task<Object> CrearInforme(InformeRequestDTO requestDoc, int idUser, string modulo);
+        Task<Object> ModificarInforme(InformeRequestDTO requestDoc, int idUser, string modulo);
+        Task<Object> EliminarInforme(int codigo, string modulo);
+        Task<Object> CrearActa(ActaRequestDTO requestDoc, int idUser, string modulo);
+        Task<Object> ModificarActa(ActaRequestDTO requestDoc, int idUser, string modulo);
+        Task<Object> EliminarActa(int codigo, string modulo);
     }
 }
