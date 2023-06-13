@@ -10,7 +10,6 @@ namespace PlanQuinquenal.Core.Entities
     public class Proyectos
     {
         [Key]
-        []
         public int id { get; set; }
         public string des_pry { get; set; }
         public string cod_pry { get; set; }

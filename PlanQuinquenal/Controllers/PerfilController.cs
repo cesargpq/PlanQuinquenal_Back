@@ -28,10 +28,10 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpGet("ObtenerPerfiles")]
-        public async Task<IActionResult> ObtenerPerfiles()
+        public async Task<IActionResult> ObtenerPerfiles(string buscador)
         {
 
-            var resultado = await _repositoryPerfil.ObtenerPerfiles();
+            var resultado = await _repositoryPerfil.ObtenerPerfiles(buscador);
             return Ok(resultado);
         }
 

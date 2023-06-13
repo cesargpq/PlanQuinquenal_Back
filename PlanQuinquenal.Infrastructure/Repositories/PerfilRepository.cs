@@ -100,10 +100,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<PerfilResponse>> ObtenerPerfiles()
+        public async Task<List<PerfilResponse>> ObtenerPerfiles(string buscador)
         {
             List<PerfilResponse> lstPerfil = new List<PerfilResponse>();
-            var queryable = await _context.Perfil.ToListAsync();
+            var queryable = new List<Perfil>();
+            if (buscador == "")
+            {
+                queryable = await _context.Perfil.ToListAsync();
+            }
+            else
+            {
+                queryable = await _context.Perfil.Where(x => x.nombre_perfil == buscador).ToListAsync();
+            }
 
             foreach (var perfil in queryable)
             {

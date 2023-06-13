@@ -29,10 +29,10 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpGet("ObtenerUnidadNeg")]
-        public async Task<IActionResult> ObtenerUnidadNeg()
+        public async Task<IActionResult> ObtenerUnidadNeg(string buscador)
         {
 
-            var resultado = await _repositoryUnidadNeg.ObtenerUnidadNeg();
+            var resultado = await _repositoryUnidadNeg.ObtenerUnidadNeg(buscador);
             return Ok(resultado);
         }
 

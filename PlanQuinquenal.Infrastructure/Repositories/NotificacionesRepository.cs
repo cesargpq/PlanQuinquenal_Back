@@ -168,7 +168,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com", 587);
                 clienteSmtp.EnableSsl = true;
                 clienteSmtp.UseDefaultCredentials = false;
-                clienteSmtp.Credentials = new NetworkCredential("", "");
+                clienteSmtp.Credentials = new NetworkCredential("erick2402199501@gmail.com", "aafobhjkuqaogadq");
 
                 // Crear el correo
                 
