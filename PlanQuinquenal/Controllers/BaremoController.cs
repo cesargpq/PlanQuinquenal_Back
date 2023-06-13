@@ -7,6 +7,7 @@ using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
+using PlanQuinquenal.Infrastructure.Repositories;
 
 namespace PlanQuinquenal.Controllers
 {
@@ -23,15 +24,56 @@ namespace PlanQuinquenal.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearBaremo(BaremoRequestDto data)
         {
+            var ExisteQnq = await baremoRepository.ExisteQuinquenal(data.PlanQuinquenalId);
 
-            var resultado = await baremoRepository.CrearBaremo(data);
+            ResponseDTO dto =new  ResponseDTO();
+            if (ExisteQnq)
+            {
+                var resultado = await baremoRepository.CrearBaremo(data);
+                return Ok(resultado);
+            }
+            else
+            {
+                dto.Valid = false;
+                dto.Message = Constantes.NoExistePQNQ;
+                return Ok(dto);
+            }
+            
 
 
+       
+        }
+        [HttpGet("id")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var obj = new ResponseEntidadDto<Baremo>();
+            var resultado = await baremoRepository.GetById(id);
+            if (resultado != null)
+            {
+
+                obj.Model = resultado;
+                obj.Valid = true;
+                obj.Message = Constantes.RegistroExiste;
+                return Ok(obj);
+            }
+            else
+            {
+                obj.Valid = false;
+                obj.Message = Constantes.BaremoNoExiste;
+                return Ok(obj);
+            }
+          
+        }
+        [HttpPost("Listar")]
+        public async Task<IActionResult> GetAll(BaremoListDto baremoListDto)
+        {
+            var resultado = await baremoRepository.GetAll(baremoListDto);
+            
             return Ok(resultado);
         }
 
         [HttpPost("BaremoImport")]
-        public async Task<IActionResult> BaremoImport(ProyectoRequest data)
+        public async Task<IActionResult> BaremoImport(RequestMasivo data)
         {
             
             var resultado = await baremoRepository.BaremoImport(data);

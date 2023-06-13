@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApiDavis.Core.Utilidades;
+using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
@@ -6,7 +7,9 @@ using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
+using RazorEngine.Templating;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +26,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._context = context;
         }
 
-        public async Task<ImportResponseDto> BaremoImport(ProyectoRequest data)
+        public async Task<Baremo> GetById(int id)
+        {
+            var baremo = await _context.Baremo.Where(x=>x.Id == id).FirstOrDefaultAsync();
+            return baremo;
+        }
+        public async Task<ImportResponseDto> BaremoImport(RequestMasivo data)
         {
             ImportResponseDto dto = new ImportResponseDto();
             var base64Content = data.base64;
@@ -48,6 +56,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var valor1 = worksheet.Cells[row, 1].Value?.ToString();
                             var valor2 = worksheet.Cells[row, 2].Value?.ToString();
                             var valor3 = worksheet.Cells[row, 3].Value?.ToString();
+                            var valor4 = worksheet.Cells[row, 4].Value?.ToString();
+                            
+                            var dato =await _context.PlanQuinquenal.Where(x => x.Pq == valor4).FirstOrDefaultAsync();
+                            if(dato == null)
+                            {
+                                var entidadError = new Baremo
+                                {
+                                    CodigoBaremo = valor1,
+                                    Descripcion = "",
+                                    Precio = 0
+                                };
+                                listaBaremoError.Add(entidadError);
+                                break;
+                            }
+                          
                             try
                             {
                                 var entidad = new Baremo
@@ -55,7 +78,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     CodigoBaremo = valor1,
                                     Descripcion = valor2,
                                     Precio = Convert.ToDecimal(valor3),
-                                    Estado = true
+                                    Estado = true,
+                                    PlanQuinquenalId = dato.Id
                                 };
                                 listaBaremo.Add(entidad);
                             }
@@ -73,20 +97,30 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                         foreach (var item in listaBaremo)
                         {
-                            var existe = await _context.Baremo.Where(x => x.CodigoBaremo.Equals(item.CodigoBaremo)).FirstAsync();
-                            if (existe != null)
+                            try
                             {
-                                listaBaremoRepetidos.Add(item);
-                                existe.Precio = item.Precio;
-                                existe.Descripcion = item.Descripcion;
-                                existe.Estado = item.Estado;
-                                _context.Baremo.Update(existe);
-                                await _context.SaveChangesAsync();
+                                var existe = await _context.Baremo.Where(x => x.CodigoBaremo.Equals(item.CodigoBaremo)).FirstAsync();
+                                if (existe != null)
+                                {
+                                    listaBaremoRepetidos.Add(item);
+                                    existe.Precio = item.Precio;
+                                    existe.Descripcion = item.Descripcion;
+                                    existe.Estado = item.Estado;
+                                    existe.PlanQuinquenalId = item.PlanQuinquenalId;
+                                    _context.Baremo.Update(existe);
+                                    await _context.SaveChangesAsync();
+                                }
+                                else
+                                {
+                                    listaBaremoInsert.Add(item);
+                                }
                             }
-                            else
+                            catch (Exception e )
                             {
+
                                 listaBaremoInsert.Add(item);
                             }
+                            
 
                         }
                         if (listaBaremoInsert.Count > 0)
@@ -128,9 +162,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             ResponseDTO dto = new ResponseDTO();
             try
             {
-                
 
+                var ExisteQnq = await ExisteQuinquenal(data.PlanQuinquenalId);
+
+                if (!ExisteQnq)
+                {
+                    dto.Valid = false;
+                    dto.Message = Constantes.NoExistePQNQ;
+                    return dto;
+                }
                 var baremoExiste = await _context.Baremo.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                
 
                 if (baremoExiste != null)
                 {
@@ -138,6 +181,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     baremoExiste.Precio = data.Precio;
                     baremoExiste.CodigoBaremo = data.CodigoBaremo;
                     baremoExiste.Estado = data.Estado;
+                    baremoExiste.PlanQuinquenalId = data.PlanQuinquenalId;
                     _context.Update(baremoExiste);
                     await _context.SaveChangesAsync();
                     dto.Message = Constantes.ActualizacionSatisfactoria;
@@ -159,6 +203,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             return dto;
             
+        }
+        public async Task<bool> ExisteQuinquenal(int data)
+        {
+
+            var existQnq = await _context.PlanQuinquenal.Where(x => x.Id.Equals(data)).FirstOrDefaultAsync();
+            if(existQnq != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         public async Task<ResponseDTO> EliminarBaremo( int id)
         {
@@ -202,6 +259,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var baremoExiste = await _context.Baremo.Where(x => x.CodigoBaremo.Equals(data.CodigoBaremo)).FirstOrDefaultAsync();
 
+               
                 if (baremoExiste != null)
                 {
                     
@@ -231,6 +289,31 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             return dto;
 
+        }
+
+        public async Task<PaginacionResponseDto<Baremo>> GetAll(BaremoListDto entidad)
+        {
+
+            
+
+            var queryable = _context.Baremo
+                                    .Where(x => entidad.CodigoBaremo!= "" ? x.CodigoBaremo == entidad.CodigoBaremo : true)
+                                    .Where(x => entidad.Estado != false ? x.Estado == entidad.Estado : true)
+                                    .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                    .Where(x => entidad.Precio > 0 ? x.Precio == entidad.Precio : true)
+                                     .AsQueryable();
+
+
+            var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                   .ToListAsync();
+            int cantidad = queryable.Count();
+            var objeto = new PaginacionResponseDto<Baremo>
+            {
+                Cantidad = cantidad,
+                Model = entidades
+
+            };
+            return objeto;
         }
     }
 }

@@ -24,8 +24,12 @@ namespace PlanQuinquenal.Core.Entities
         public bool Estado { get; set; }
         public int Intentos { get; set; }
         public bool Interno { get; set; }
-        public DateTime LastSesion { get; set; }
+        public DateTime? LastSesion { get; set; }
         public bool Conectado { get; set; }
         public bool DobleFactor { get; set; }
+        public int cod_und { get; set; }
+        public DateTime? FechaModifica { get; set; }
+        public DateTime? FechaCreacion { get; set; }
+
     }
 }

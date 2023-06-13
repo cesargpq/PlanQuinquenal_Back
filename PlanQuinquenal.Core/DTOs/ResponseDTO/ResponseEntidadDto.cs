@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
-    public class ResponseDTO
+    public class ResponseEntidadDto<T>
     {
-        
+        public T Model { get; set; }
         public bool Valid { get; set; }
         public string Message { get; set; }
-        
     }
 }
