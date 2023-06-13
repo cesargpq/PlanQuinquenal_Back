@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
@@ -17,14 +18,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     public class ProyectoRepository : IRepositoryProyecto
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IRepositoryNotificaciones _repositoryNotificaciones;
 
         public ProyectoRepository(PlanQuinquenalContext context)
         {
             _context = context;
         }
 
-        public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto)
+        public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto, int idUser)
         {
+            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+            string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+            string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
             try
             {
                 var contadorProyecto = await _context.Proyectos
@@ -82,82 +87,26 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                     #endregion
 
-                    #region Creacion de permisos
-                    List<string> lstNombrePermisos = new List<string>();
-                    foreach (var listaPermis in nvoProyecto.lstPermisos_Inicial)
-                    {
-                        string NombreArch = listaPermis.nom_doc;
-                        string nombreFinal = NombreArch.Replace(".", $"_{fechaHoraActual}.");
-                        var entidad = new Permisos_proyec
-                        {
-                            id_pry = codPry,
-                            cod_tipoPerm = listaPermis.cod_tipoPerm, //1 - proyecto , 2 - PQ 
-                            nom_doc = nombreFinal,
-                            num_exp = listaPermis.num_exp,
-                            fecha_reg = DateTime.Now,
-                            mime_type = listaPermis.mime_type
-                        };
-                        _context.Permisos_proyec.Add(entidad);
-                        lstNombrePermisos.Add(nombreFinal);
-                    }
-                    #endregion
-
-                    #region Creacion de informes y actas
-                    foreach (var listaInfActas in nvoProyecto.lstInformes_Inicial)
-                    {
-                        var entidad = new Informes_actas
-                        {
-                            id_pry = codPry,
-                            cod_tipoSeg = 1, //1 - proyecto , 2 - PQ 
-                            cod_tipoDoc = listaInfActas.cod_tipoDoc,//1 - Informe , 2 - Acta 
-                            aprobacion = listaInfActas.aprobacion,
-                            fecha_emis = DateTime.Now
-                        };
-                        _context.Informes_actas.Add(entidad);
-                    }
-                    #endregion
-
-                    #region Creacion de Documentos
-                    List<string> lstNombreDocumentos = new List<string>();
-                    foreach (var listaDocumentos in nvoProyecto.lstDocumentos_Inicial)
-                    {
-                        string NombreArch = listaDocumentos.nom_doc;
-                        string nombreFinal = NombreArch.Replace(".", $"_{fechaHoraActual}.");
-                        var entidad = new Docum_proyecto
-                        {
-                            id_pry = codPry,
-                            nom_doc = nombreFinal,
-                            fecha_reg = DateTime.Now,
-                            mime_type = listaDocumentos.mime_type
-                        };
-                        _context.Docum_proyecto.Add(entidad);
-                        lstNombreDocumentos.Add(nombreFinal);
-                    }
-                    #endregion
-
-                    #region Creacion de Comentarios
-                    foreach (var listaComentarios in nvoProyecto.lstComentarios_Inicial)
-                    {
-                        var entidad = new Comentarios_proyec
-                        {
-                            id_pry = codPry,
-                            comentario = listaComentarios.comentario,
-                            tipo_coment = listaComentarios.tipo_coment,
-                            usuario = listaComentarios.usuario,
-                            area= listaComentarios.area,
-                            fecha_coment = DateTime.Now
-                        };
-                        _context.Comentarios_proyec.Add(entidad);
-                    }
-                    #endregion
-
                     _context.SaveChanges();
+
+
+                    Notificaciones notifProyecto = new Notificaciones();
+                    notifProyecto.cod_usu = idUser;
+                    notifProyecto.seccion = "PROYECTOS";
+                    notifProyecto.nombreComp_usu = NomCompleto;
+                    notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
+                    notifProyecto.area = nomPerfil;
+                    notifProyecto.fechora_not = DateTime.Now;
+                    notifProyecto.flag_visto = false;
+                    notifProyecto.tipo_accion = "C";
+                    notifProyecto.mensaje = $"Se creó el proyecto {nvoProyecto.proyecto.cod_pry}";
+
+                    await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
 
                     var resp = new
                     {
                         idMensaje = "1",
-                        mensaje = "Se creó el proyecto correctamente",
-                        listaNomDocum = lstNombreDocumentos
+                        mensaje = "Se creó el proyecto correctamente"
                     };
 
                     var json = JsonConvert.SerializeObject(resp);
@@ -336,14 +285,67 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<Object> ActualizarProyecto(Proyectos proyecto)
+        public async Task<Object> ActualizarProyecto(ProyectoRequest nvoProyecto, int idUser)
         {
+            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+            string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+            string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+            string fechaHoraActual = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             try
             {
-                var modPry = _context.Proyectos.FirstOrDefault(p => p.id == proyecto.id);
-                modPry.des_pry = proyecto.des_pry;
-                modPry.cod_pry = proyecto.cod_pry;
+                var modPry = _context.Proyectos.FirstOrDefault(p => p.id == nvoProyecto.proyecto.id);
+                modPry.cod_pry = nvoProyecto.proyecto.cod_pry;
+                modPry.cod_PQ = nvoProyecto.proyecto.cod_PQ;
+                modPry.anioPQ = nvoProyecto.proyecto.anioPQ;
+                modPry.cod_anioPA = nvoProyecto.proyecto.cod_anioPA;
+                modPry.cod_material = nvoProyecto.proyecto.cod_material;
+                modPry.constructor = nvoProyecto.proyecto.constructor;
+                modPry.tipo_reg = nvoProyecto.proyecto.tipo_reg;
+                modPry.cod_dist = nvoProyecto.proyecto.cod_dist;
+                modPry.long_aprob = nvoProyecto.proyecto.long_aprob;
+                modPry.tipo_pry = nvoProyecto.proyecto.tipo_pry;
+                modPry.cod_etapa = nvoProyecto.proyecto.cod_etapa;
+                modPry.cod_vnr = nvoProyecto.proyecto.cod_vnr;
+
+                #region MODULO DE USUARIOS INTERESADOS
+
+                foreach (var listaUsuInter in nvoProyecto.lstUsuaInter_Inicial)
+                {
+                    if (listaUsuInter.tipoAccion == "C")
+                    {
+                        #region Creacion de usuario interesado
+                        var entidad = new UsuariosIntersados_pry
+                        {
+                            id_pry = nvoProyecto.proyecto.id, 
+                            cod_usu = listaUsuInter.cod_usu
+                        };
+                        _context.UsuariosIntersados_pry.Add(entidad);
+                        #endregion
+                    }
+                    else if (listaUsuInter.tipoAccion == "E")
+                    {
+                        #region Eliminacion de usuario interesado
+                        var codUsuInterEliminar = _context.UsuariosIntersados_pry.Find(listaUsuInter.id);
+                        _context.UsuariosIntersados_pry.Remove(codUsuInterEliminar);
+                        #endregion
+                    }
+                }
+                #endregion
+
                 _context.SaveChanges();
+
+                Notificaciones notifProyecto = new Notificaciones();
+                notifProyecto.cod_usu = idUser;
+                notifProyecto.seccion = "PROYECTOS";
+                notifProyecto.nombreComp_usu = NomCompleto;
+                notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
+                notifProyecto.area = nomPerfil;
+                notifProyecto.fechora_not = DateTime.Now;
+                notifProyecto.flag_visto = false;
+                notifProyecto.tipo_accion = "M";
+                notifProyecto.mensaje = $"Se modificó el proyecto {nvoProyecto.proyecto.cod_pry}"; 
+
+                await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
 
                 var resp = new
                 {
@@ -367,11 +369,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
 
         }
-        public async Task<Proyectos> ObtenerProyectoxNro(string nroProy)
+        public async Task<Object> ObtenerProyectoxNro(int nroProy)
         {
             Proyectos lstPro = new Proyectos();
             var queryable = _context.Proyectos
-                                     .Where(x =>  x.cod_pry == nroProy)
+                                     .Where(x =>  x.id == nroProy)
                                      .AsQueryable();
 
             double cantidad = await queryable.CountAsync();
@@ -380,32 +382,156 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var entidades = await queryable.ToListAsync();
                 lstPro = entidades[0];
             }
-                
-            return lstPro;
+
+            var listaPermisos = await _context.Permisos_proyec.Where(x => x.id_pry == nroProy).ToListAsync();
+            var listaComent = await _context.Comentarios_proyec.Where(x => x.id_pry == nroProy).ToListAsync();
+            var listaDocument = await _context.Docum_proyecto.Where(x => x.id_pry == nroProy).ToListAsync();
+            var listaInforme = await _context.Informes.Join(_context.Proyectos,
+                                    Info => Info.cod_seg,
+                                    Proyec => Proyec.id,
+                                    (Info, Proyec) => new
+                                    {
+                                        id = Info.id,
+                                        cod_tipoSeg = Info.cod_tipoSeg,
+                                        des_tipoSeg = "Proyecto",
+                                        cod_seg = Info.cod_seg,
+                                        des_seg = Proyec.cod_pry,
+                                        cod_tipoDoc = "I",
+                                        aprobacion = false,
+                                        fecha_emis = Info.fecha_emis
+                                    }).ToListAsync();
+            var listaActa = await _context.Actas.Join(_context.Proyectos,
+                                    Acta => Acta.cod_seg,
+                                    Proyec => Proyec.id,
+                                    (Acta, Proyec) => new
+                                    {
+                                        id = Acta.id,
+                                        cod_tipoSeg = Acta.cod_tipoSeg,
+                                        des_tipoSeg = "Proyecto",
+                                        cod_seg = Acta.cod_seg, 
+                                        des_seg = Proyec.cod_pry,
+                                        cod_tipoDoc = "I",
+                                        aprobacion = Acta.aprobacion,
+                                        fecha_emis = Acta.fecha_emis
+                                    }).ToListAsync();
+
+            List<Informes_actas> lstInfoActas = new List<Informes_actas>();
+            foreach (var listaInfo in listaInforme)
+            {
+                var entidad = new Informes_actas 
+                {
+                    id = "I" + listaInfo.id,
+                    cod_tipoSeg = listaInfo.cod_tipoSeg.ToString(),
+                    des_tipoSeg = listaInfo.des_tipoSeg,
+                    cod_seg = listaInfo.cod_seg,
+                    des_seg = listaInfo.des_seg,
+                    cod_tipoDoc = listaInfo.cod_tipoDoc,
+                    aprobacion = listaInfo.aprobacion, 
+                    fecha_emis = listaInfo.fecha_emis
+                };
+
+                lstInfoActas.Add(entidad);
+            }
+
+            foreach (var lisActa in listaActa)
+            {
+                var entidad = new Informes_actas
+                {
+                    id = "A" + lisActa.id,
+                    cod_tipoSeg = lisActa.cod_tipoSeg.ToString(),
+                    des_tipoSeg = lisActa.des_tipoSeg,
+                    cod_seg = lisActa.cod_seg,
+                    des_seg = lisActa.des_seg,
+                    cod_tipoDoc = lisActa.cod_tipoDoc,
+                    aprobacion = lisActa.aprobacion,
+                    fecha_emis = lisActa.fecha_emis
+                };
+
+                lstInfoActas.Add(entidad);
+            }
+
+            var resp = new
+            {
+                proyecto = lstPro,
+                lstPermisos = listaPermisos,
+                lstComent = listaDocument,
+                lstDocum = listaDocument,
+                lstActasInfo = lstInfoActas
+            };
+
+            var json = JsonConvert.SerializeObject(resp);
+            return json;
+
 
         }
 
-        public async Task<Object> CrearComentario(Comentarios_proyec comentario)
+        //public async Task<Object> CrearImpedimento(ImpedimentoRequest impedimento)
+        //{
+        //    try
+        //    {
+        //        var nvoImpedimento = new Impedimentos
+        //        {
+        //             id_pry = impedimento.id_pry,
+        //             cod_pry = impedimento.cod_pry,
+        //             cod_pbReal = impedimento.cod_pbReal,
+        //             long_imped =  impedimento.long_imped,
+        //             cod_cauReemp = impedimento.cod_cauReemp,
+        //             estrato1 = impedimento.estrato1,
+        //             estrato2 = impedimento.estrato2,
+        //             estrato3 = impedimento.estrato3,
+        //             estrato4 = impedimento.estrato4,
+        //             estrato5 = impedimento.estrato5,
+        //             long_reemp = impedimento.long_reemp,
+        //             costo_inv = impedimento.costo_inv,
+        //             valid_cargo_planos = impedimento.valid_cargo_planos,
+        //             valid_cargo_susAmb = impedimento.valid_cargo_susAmb,
+        //             valid_cargo_susArq = impedimento.valid_cargo_susArq,
+        //             valid_cargo_susRRCC = impedimento.valid_cargo_susRRCC,
+        //             cod_validLegal = impedimento.cod_validLegal,
+        //             fecha_prestReemp = impedimento.fecha_prestReemp,
+        //             coment_eva = impedimento.coment_eva
+
+        //        };
+
+        //        // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
+        //        _context.Impedimentos.Add(nvoImpedimento);
+        //        _context.SaveChanges();
+        //        var resp = new
+        //        {
+        //            idMensaje = "1",
+        //            mensaje = "Se creó el impedimento correctamente"
+        //        };
+
+        //        var json = JsonConvert.SerializeObject(resp);
+        //        return json;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        var resp = new
+        //        {
+        //            idMensaje = "0",
+        //            mensaje = "Hubo un error al crear el impedimento"
+        //        };
+
+        //        var json = JsonConvert.SerializeObject(resp);
+        //        return json;
+        //    }
+        //}
+
+        public async Task<object> CrearDocumento(DocumentoProyRequest requestDoc)
         {
             try
             {
-                var nvoComentario = new Comentarios_proyec
-                {
-                    id_pry = comentario.id_pry,
-                    comentario = comentario.comentario,
-                    tipo_coment = comentario.tipo_coment,
-                    usuario = comentario.usuario,
-                    area = comentario.area,
-                    fecha_coment = comentario.fecha_coment
-                };
+                // Decodificar el base64 a bytes
+                byte[] archivoBytes = Convert.FromBase64String(requestDoc.Base64);
 
-                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
-                _context.Comentarios_proyec.Add(nvoComentario);
-                _context.SaveChanges();
+                string rutaCompleta = Path.Combine("C:/Ruta/Archivos/", requestDoc.NombreArchivo);
+
+                File.WriteAllBytes(rutaCompleta, archivoBytes);
                 var resp = new
                 {
                     idMensaje = "1",
-                    mensaje = "Se creó el comentario correctamente"
+                    mensaje = "Se creó el documento correctamente"
                 };
 
                 var json = JsonConvert.SerializeObject(resp);
@@ -416,60 +542,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resp = new
                 {
                     idMensaje = "0",
-                    mensaje = "Hubo un error al crear el comentario"
-                };
-
-                var json = JsonConvert.SerializeObject(resp);
-                return json;
-            }
-        }
-
-        public async Task<Object> CrearImpedimento(ImpedimentoRequest impedimento)
-        {
-            try
-            {
-                var nvoImpedimento = new Impedimentos
-                {
-                     id_pry = impedimento.id_pry,
-                     cod_pry = impedimento.cod_pry,
-                     cod_pbReal = impedimento.cod_pbReal,
-                     long_imped =  impedimento.long_imped,
-                     cod_cauReemp = impedimento.cod_cauReemp,
-                     estrato1 = impedimento.estrato1,
-                     estrato2 = impedimento.estrato2,
-                     estrato3 = impedimento.estrato3,
-                     estrato4 = impedimento.estrato4,
-                     estrato5 = impedimento.estrato5,
-                     long_reemp = impedimento.long_reemp,
-                     costo_inv = impedimento.costo_inv,
-                     valid_cargo_planos = impedimento.valid_cargo_planos,
-                     valid_cargo_susAmb = impedimento.valid_cargo_susAmb,
-                     valid_cargo_susArq = impedimento.valid_cargo_susArq,
-                     valid_cargo_susRRCC = impedimento.valid_cargo_susRRCC,
-                     cod_validLegal = impedimento.cod_validLegal,
-                     fecha_prestReemp = impedimento.fecha_prestReemp,
-                     coment_eva = impedimento.coment_eva
-
-                };
-
-                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
-                _context.Impedimentos.Add(nvoImpedimento);
-                _context.SaveChanges();
-                var resp = new
-                {
-                    idMensaje = "1",
-                    mensaje = "Se creó el impedimento correctamente"
-                };
-
-                var json = JsonConvert.SerializeObject(resp);
-                return json;
-            }
-            catch (Exception ex)
-            {
-                var resp = new
-                {
-                    idMensaje = "0",
-                    mensaje = "Hubo un error al crear el impedimento"
+                    mensaje = "Hubo un error al crear el documento"
                 };
 
                 var json = JsonConvert.SerializeObject(resp);

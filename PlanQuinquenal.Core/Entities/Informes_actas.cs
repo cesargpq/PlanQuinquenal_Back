@@ -10,10 +10,12 @@ namespace PlanQuinquenal.Core.Entities
     public class Informes_actas
     {
         [Key]
-        public int id { get; set; }
-        public int cod_tipoSeg { get; set; }
-        public int id_pry { get; set; }
-        public int cod_tipoDoc { get; set; }
+        public string id { get; set; }
+        public string cod_tipoSeg { get; set; }
+        public string des_tipoSeg { get; set; }
+        public int cod_seg { get; set; }
+        public string des_seg { get; set; }
+        public string cod_tipoDoc { get; set; }
         public bool aprobacion { get; set; }
         public DateTime fecha_emis { get; set; }
     }
