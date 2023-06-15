@@ -9,7 +9,9 @@ using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -90,19 +92,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     _context.SaveChanges();
 
+                    #region Comparacion de estructuras y agregacion de cambios
 
-                    Notificaciones notifProyecto = new Notificaciones();
-                    notifProyecto.cod_usu = idUser;
-                    notifProyecto.seccion = "PROYECTOS";
-                    notifProyecto.nombreComp_usu = NomCompleto;
-                    notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
-                    notifProyecto.area = nomPerfil;
-                    notifProyecto.fechora_not = DateTime.Now;
-                    notifProyecto.flag_visto = false;
-                    notifProyecto.tipo_accion = "C";
-                    notifProyecto.mensaje = $"Se creó el proyecto {nvoProyecto.proyecto.cod_pry}";
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = codPry.ToString()
+                    };
 
-                    await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+
+                    foreach (var listaUsuInters in nvoProyecto.lstUsuaInter_Inicial)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "PROYECTOS";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el proyecto {nvoProyecto.proyecto.cod_pry}";
+                            notifProyecto.codigo = codPry;
+                            notifProyecto.modulo = "P";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
+                        }
+                    }
+
+                    #endregion
+
 
                     var resp = new
                     {
@@ -135,7 +165,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var bytes = Convert.FromBase64String(base64Content);
             bool flagValid = true;
             var mensajeErrado  = "Los siguientes codigos hubieron errores al crearlos: ";
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             try
             {
                 using (var memoryStream = new MemoryStream(bytes))
@@ -292,6 +322,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             string nomPerfil = Usuario[0].Perfil.nombre_perfil;
             string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
             string fechaHoraActual = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var ProyectoOriginal = await _context.Informes.Where(x => x.id == nvoProyecto.proyecto.id).ToListAsync();
             try
             {
                 var modPry = _context.Proyectos.FirstOrDefault(p => p.id == nvoProyecto.proyecto.id);
@@ -335,18 +366,61 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 _context.SaveChanges();
 
-                Notificaciones notifProyecto = new Notificaciones();
-                notifProyecto.cod_usu = idUser;
-                notifProyecto.seccion = "PROYECTOS";
-                notifProyecto.nombreComp_usu = NomCompleto;
-                notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
-                notifProyecto.area = nomPerfil;
-                notifProyecto.fechora_not = DateTime.Now;
-                notifProyecto.flag_visto = false;
-                notifProyecto.tipo_accion = "M";
-                notifProyecto.mensaje = $"Se modificó el proyecto {nvoProyecto.proyecto.cod_pry}"; 
+                #region Comparacion de estructuras y agregacion de cambios
+                Proyectos proyectoModificado = new Proyectos
+                {
+                    id = nvoProyecto.proyecto.id,
+                    cod_pry = nvoProyecto.proyecto.cod_pry,
+                    cod_PQ = nvoProyecto.proyecto.cod_PQ,
+                    anioPQ = nvoProyecto.proyecto.anioPQ,
+                    cod_anioPA = nvoProyecto.proyecto.cod_anioPA,
+                    cod_material = nvoProyecto.proyecto.cod_material,
+                    constructor = nvoProyecto.proyecto.constructor,
+                    tipo_reg = nvoProyecto.proyecto.tipo_reg,
+                    cod_dist = nvoProyecto.proyecto.cod_dist,
+                    long_aprob = nvoProyecto.proyecto.long_aprob,
+                    tipo_pry = nvoProyecto.proyecto.tipo_pry,
+                    cod_etapa = nvoProyecto.proyecto.cod_etapa,
+                    cod_vnr = nvoProyecto.proyecto.cod_vnr
+            };
 
-                await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                List<CorreoTabla> camposModificados = CompararPropiedades(ProyectoOriginal[0], proyectoModificado, nvoProyecto.proyecto.cod_pry.ToString(), NomCompleto);
+                #endregion
+
+                #region Envio de notificacion
+
+                foreach (var listaUsuInters in nvoProyecto.lstUsuaInter_Inicial)
+                {
+                    int cod_usu = listaUsuInters.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    string correo = UsuarioInt[0].correo_usu.ToString();
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifProyecto = new Notificaciones();
+                        notifProyecto.cod_usu = cod_usu;
+                        notifProyecto.seccion = "PROYECTOS";
+                        notifProyecto.nombreComp_usu = NomCompleto;
+                        notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
+                        notifProyecto.area = nomPerfil;
+                        notifProyecto.fechora_not = DateTime.Now;
+                        notifProyecto.flag_visto = false;
+                        notifProyecto.tipo_accion = "M";
+                        notifProyecto.mensaje = $"Se modificó el proyecto {nvoProyecto.proyecto.cod_pry}";
+                        notifProyecto.codigo = nvoProyecto.proyecto.id; 
+                        notifProyecto.modulo = "P";
+
+                        var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                        dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                        int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                        await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
+                        camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                        _context.CorreoTabla.AddRange(camposModificados);
+                        _context.SaveChanges();
+                    }
+                }
+
+                #endregion
 
                 var resp = new
                 {
@@ -642,6 +716,45 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             var obj = await _repositoryMetodosRehusables.EliminarActa(codigo, modulo);
             return obj;
+        }
+
+        public static List<CorreoTabla> CompararPropiedades(object valOriginal, object valModificado, string cod_mod, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            DateTime fechaActual = DateTime.Today;
+            string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+            Type tipo = typeof(object);
+
+            // Obtener las propiedades del tipo
+            PropertyInfo[] propiedades = tipo.GetProperties();
+            // Comparar las propiedades 
+            foreach (PropertyInfo propiedad in propiedades)
+            {
+                object valor1 = propiedad.GetValue(valOriginal);
+                object valor2 = propiedad.GetValue(valModificado);
+                string desCampo = "";
+                var descriptionAttribute = propiedad.GetCustomAttribute<DescriptionAttribute>();
+                if (descriptionAttribute != null)
+                {
+                    desCampo = descriptionAttribute.Description;
+                }
+
+                if (!valor1.Equals(valor2))
+                {
+                    CorreoTabla fila = new CorreoTabla
+                    {
+                        codigo = cod_mod,
+                        campoModificado = desCampo,
+                        valorModificado = propiedad.GetValue(valModificado).ToString(),
+                        fechaMod = fechaFormateada,
+                        usuModif = nomCompleto,
+
+                    };
+                    camposModificados.Add(fila);
+                }
+            }
+
+            return camposModificados;
         }
     }
 }

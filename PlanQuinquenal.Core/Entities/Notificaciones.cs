@@ -20,5 +20,7 @@ namespace PlanQuinquenal.Core.Entities
         public bool flag_visto { get; set; }
         public string tipo_accion { get; set; }
         public string mensaje { get; set; }
+        public int codigo { get; set; }
+        public string modulo { get; set; }
     }
 }

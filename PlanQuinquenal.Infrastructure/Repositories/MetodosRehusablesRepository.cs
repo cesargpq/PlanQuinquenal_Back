@@ -6,7 +6,9 @@ using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -84,22 +86,48 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     _context.SaveChanges();
                     #endregion
 
+                    #region Comparacion de estructuras y agregacion de cambios
+                    
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = idGeneradoActa.ToString()
+                    };
+
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
                     #region Envio de notificacion
+
                     var Proyecto = await _context.Proyectos.Where(x => x.id == requestDoc.cod_seg).ToListAsync();
                     string cod_proy = Proyecto[0].cod_pry;
 
-                    Notificaciones notifInfoActas = new Notificaciones();
-                    notifInfoActas.cod_usu = idUser;
-                    notifInfoActas.seccion = "INFORMES Y ACTAS";
-                    notifInfoActas.nombreComp_usu = NomCompleto;
-                    notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
-                    notifInfoActas.area = nomPerfil;
-                    notifInfoActas.fechora_not = DateTime.Now;
-                    notifInfoActas.flag_visto = false;
-                    notifInfoActas.tipo_accion = "C";
-                    notifInfoActas.mensaje = $"Se creó el acta {idGeneradoActa} para el proyecto {cod_proy}";
+                    foreach (var listaUsuParticActa in requestDoc.lstPartActas)
+                    {
+                        int cod_usu = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "C";
+                            notifInfoActas.mensaje = $"Se creó el acta {idGeneradoActa} para el proyecto {cod_proy}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "P";
 
-                    await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Acta");
+                        }
+                    }
+                    
                     #endregion
                     var resp = new
                     {
@@ -157,22 +185,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 _context.Comentarios_proyec.Add(entidad);
                 _context.SaveChanges();
 
+                #region Comparacion de estructuras y agregacion de cambios
+
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = entidad.id.ToString()
+                };
+
+                composCorreo.Add(correoDatos);
+                #endregion
+
                 #region Envio de notificacion
+                var lstUsuInteresados = await _context.UsuariosIntersados_pry.Where(x => x.id_pry == comentario.codigo).ToListAsync(); 
                 var Proyecto = await _context.Proyectos.Where(x => x.id == comentario.codigo).ToListAsync();
                 string cod_proy = Proyecto[0].cod_pry;
 
-                Notificaciones notifComentarios = new Notificaciones();
-                notifComentarios.cod_usu = idUser;
-                notifComentarios.seccion = "COMENTARIOS";
-                notifComentarios.nombreComp_usu = NomCompleto;
-                notifComentarios.cod_reg = comentario.codigo.ToString();
-                notifComentarios.area = nomPerfil;
-                notifComentarios.fechora_not = DateTime.Now;
-                notifComentarios.flag_visto = false;
-                notifComentarios.tipo_accion = "C";
-                notifComentarios.mensaje = $"Se creó el comentario {entidad.id} para el proyecto {cod_proy}";
+                foreach (var listaUsuInterPry in lstUsuInteresados)
+                {
+                    int cod_usu = listaUsuInterPry.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    string correo = UsuarioInt[0].correo_usu.ToString();
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifComentarios = new Notificaciones();
+                        notifComentarios.cod_usu = cod_usu;
+                        notifComentarios.seccion = "COMENTARIOS";
+                        notifComentarios.nombreComp_usu = NomCompleto;
+                        notifComentarios.cod_reg = comentario.codigo.ToString();
+                        notifComentarios.area = nomPerfil;
+                        notifComentarios.fechora_not = DateTime.Now;
+                        notifComentarios.flag_visto = false;
+                        notifComentarios.tipo_accion = "C";
+                        notifComentarios.mensaje = $"Se creó el comentario {entidad.id} para el proyecto {cod_proy}";
+                        notifComentarios.codigo = comentario.codigo;
+                        notifComentarios.modulo = "P";
 
-                await _repositoryNotificaciones.CrearNotificacion(notifComentarios);
+                        await _repositoryNotificaciones.CrearNotificacion(notifComentarios);
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Comentarios");
+                    }
+                }
                 #endregion
 
                 var resp = new
@@ -273,22 +326,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         _context.SaveChanges();
                     }
 
+                    #region Comparacion de estructuras y agregacion de cambios
+
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = idGenerado.ToString()
+                    };
+
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
                     #region Envio de notificacion
                     var Proyecto = await _context.Proyectos.Where(x => x.id == requestDoc.cod_seg).ToListAsync();
                     string cod_proy = Proyecto[0].cod_pry;
 
-                    Notificaciones notifInfoActas = new Notificaciones();
-                    notifInfoActas.cod_usu = idUser;
-                    notifInfoActas.seccion = "INFORMES Y ACTAS";
-                    notifInfoActas.nombreComp_usu = NomCompleto;
-                    notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
-                    notifInfoActas.area = nomPerfil;
-                    notifInfoActas.fechora_not = DateTime.Now;
-                    notifInfoActas.flag_visto = false;
-                    notifInfoActas.tipo_accion = "C";
-                    notifInfoActas.mensaje = $"Se creó el informe {entidad.id} para el proyecto {cod_proy}";
+                    foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
+                    {
+                        int cod_usu = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "C";
+                            notifInfoActas.mensaje = $"Se creó el informe {entidad.id} para el proyecto {cod_proy}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "P";
 
-                    await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Informes");
+                        }
+                    }
+                    
                     #endregion
 
                     var resp = new
@@ -350,22 +428,48 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 _context.Permisos_proyec.Add(entidad);
                 _context.SaveChanges();
 
+                #region Comparacion de estructuras y agregacion de cambios
+
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = entidad.id.ToString()
+                };
+
+                composCorreo.Add(correoDatos);
+                #endregion
+
                 #region Envio de notificacion
+                var lstUsuInteresados = await _context.UsuariosIntersados_pry.Where(x => x.id_pry == requestDoc.codigo).ToListAsync(); 
                 var Proyecto = await _context.Proyectos.Where(x => x.id == requestDoc.codigo).ToListAsync();
                 string cod_proy = Proyecto[0].cod_pry;
 
-                Notificaciones notifPermisos = new Notificaciones();
-                notifPermisos.cod_usu = idUser;
-                notifPermisos.seccion = "PERMISOS";
-                notifPermisos.nombreComp_usu = NomCompleto;
-                notifPermisos.cod_reg = requestDoc.codigo.ToString();
-                notifPermisos.area = nomPerfil;
-                notifPermisos.fechora_not = DateTime.Now;
-                notifPermisos.flag_visto = false;
-                notifPermisos.tipo_accion = "C";
-                notifPermisos.mensaje = $"Se creó el permiso {entidad.id} para el proyecto {cod_proy}";
+                foreach (var listaUsuInterPry in lstUsuInteresados)
+                {
+                    int cod_usu = listaUsuInterPry.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPer == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    string correo = UsuarioInt[0].correo_usu.ToString();
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifPermisos = new Notificaciones();
+                        notifPermisos.cod_usu = cod_usu;
+                        notifPermisos.seccion = "PERMISOS";
+                        notifPermisos.nombreComp_usu = NomCompleto;
+                        notifPermisos.cod_reg = requestDoc.codigo.ToString();
+                        notifPermisos.area = nomPerfil;
+                        notifPermisos.fechora_not = DateTime.Now;
+                        notifPermisos.flag_visto = false;
+                        notifPermisos.tipo_accion = "C";
+                        notifPermisos.mensaje = $"Se creó el permiso {entidad.id} para el proyecto {cod_proy}";
+                        notifPermisos.codigo = requestDoc.codigo;
+                        notifPermisos.modulo = "P";
 
-                await _repositoryNotificaciones.CrearNotificacion(notifPermisos);
+                        await _repositoryNotificaciones.CrearNotificacion(notifPermisos);
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Permisos");
+                    }
+                }
+
                 #endregion
 
                 var resp = new
@@ -566,8 +670,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                var ActaOriginal = await _context.Actas.Where(x => x.id == requestDoc.id).ToListAsync();
                 try
                 {
+                    #region Modificacion de acta
                     var modActa = _context.Actas.FirstOrDefault(p => p.id == requestDoc.id);
                     modActa.fecha_reu = requestDoc.fecha_reu;
                     modActa.agenda = requestDoc.agenda;
@@ -652,23 +758,65 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
 
                     }
+                    #endregion
+
+                    #region Comparacion de estructuras y agregacion de cambios
+                    Actas actaModificada = new Actas {
+                        id = requestDoc.id,
+                        fecha_reu = requestDoc.fecha_reu,
+                        agenda = requestDoc.agenda,
+                        acuerdos = requestDoc.acuerdos,
+                        obj_reu = requestDoc.obj_reu,
+                        compromisos = requestDoc.compromisos,
+                        fecha_limComp = requestDoc.fecha_limComp,
+                        cod_resp = requestDoc.cod_resp,
+                        fecha_emis = requestDoc.fecha_emis,
+                        aprobacion = requestDoc.aprobacion,
+                        cod_tipoSeg = requestDoc.cod_tipoSeg,
+                        cod_seg = requestDoc.cod_seg
+                    };
+                    
+                    List<CorreoTabla> camposModificados = CompararPropiedades(ActaOriginal[0], actaModificada, requestDoc.cod_seg.ToString(), NomCompleto);
+                    #endregion
 
                     #region Envio de notificacion 
+
                     var Proyecto = await _context.Proyectos.Where(x => x.id == requestDoc.cod_seg).ToListAsync();
                     string cod_proy = Proyecto[0].cod_pry;
 
-                    Notificaciones notifInfoActas = new Notificaciones();
-                    notifInfoActas.cod_usu = idUser;
-                    notifInfoActas.seccion = "INFORMES Y ACTAS";
-                    notifInfoActas.nombreComp_usu = NomCompleto;
-                    notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
-                    notifInfoActas.area = nomPerfil;
-                    notifInfoActas.fechora_not = DateTime.Now;
-                    notifInfoActas.flag_visto = false;
-                    notifInfoActas.tipo_accion = "M";
-                    notifInfoActas.mensaje = $"Se modificó el acta {requestDoc.id} para el proyecto {cod_proy}";
+                    foreach (var listaUsuParticActa in requestDoc.lstPartActas)
+                    {
+                        int cod_usu = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "M";
+                            notifInfoActas.mensaje = $"Se modificó el acta {requestDoc.id} para el proyecto {cod_proy}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "P";
 
-                    await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                            int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Actas");
+                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            _context.CorreoTabla.AddRange(camposModificados);
+                            _context.SaveChanges();
+
+
+                        }
+                    }
+
                     #endregion
 
                     var resp = new
@@ -714,6 +862,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                var InformeOriginal = await _context.Informes.Where(x => x.id == requestDoc.id).ToListAsync();
                 try
                 {
                     var modInforme = _context.Informes.FirstOrDefault(p => p.id == requestDoc.id);
@@ -749,22 +898,58 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     }
 
+                    #region Comparacion de estructuras y agregacion de cambios
+                    Informes informeModificado = new Informes
+                    {
+                        id = requestDoc.id,
+                        fecha_inf = requestDoc.fecha_inf,
+                        res_general = requestDoc.res_general,
+                        prox_pasos = requestDoc.prox_pasos,
+                        act_realiz = requestDoc.act_realiz,
+                        fecha_emis = requestDoc.fecha_emis,
+                        cod_tipoSeg = requestDoc.cod_tipoSeg,
+                        cod_seg = requestDoc.cod_seg
+                    };
+
+                    List<CorreoTabla> camposModificados = CompararPropiedades(InformeOriginal[0], informeModificado, requestDoc.cod_seg.ToString(), NomCompleto);
+                    #endregion
+
                     #region Envio de notificacion
+
                     var Proyecto = await _context.Proyectos.Where(x => x.id == requestDoc.cod_seg).ToListAsync();
                     string cod_proy = Proyecto[0].cod_pry;
 
-                    Notificaciones notifInfoActas = new Notificaciones();
-                    notifInfoActas.cod_usu = idUser;
-                    notifInfoActas.seccion = "INFORMES Y ACTAS";
-                    notifInfoActas.nombreComp_usu = NomCompleto;
-                    notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
-                    notifInfoActas.area = nomPerfil;
-                    notifInfoActas.fechora_not = DateTime.Now;
-                    notifInfoActas.flag_visto = false;
-                    notifInfoActas.tipo_accion = "M";
-                    notifInfoActas.mensaje = $"Se modificó el informe {requestDoc.id} para el proyecto {cod_proy}";
+                    foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
+                    {
+                        int cod_usu = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "M";
+                            notifInfoActas.mensaje = $"Se modificó el informe {requestDoc.id} para el proyecto {cod_proy}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "P";
 
-                    await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                            int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Informe");
+                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            _context.CorreoTabla.AddRange(camposModificados);
+                            _context.SaveChanges();
+                        }
+                    }
+                    
                     #endregion
 
                     var resp = new
@@ -801,6 +986,44 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             
             
+        }
+
+        public static List<CorreoTabla> CompararPropiedades(object valOriginal, object valModificado, string cod_mod, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            DateTime fechaActual = DateTime.Today;
+            string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+            Type tipo = typeof(object);
+
+            // Obtener las propiedades del tipo
+            PropertyInfo[] propiedades = tipo.GetProperties(); 
+            // Comparar las propiedades 
+            foreach (PropertyInfo propiedad in propiedades)
+            {
+                object valor1 = propiedad.GetValue(valOriginal);
+                object valor2 = propiedad.GetValue(valModificado);
+                string desCampo = "";
+                var descriptionAttribute = propiedad.GetCustomAttribute<DescriptionAttribute>();
+                if (descriptionAttribute != null)
+                {
+                    desCampo = descriptionAttribute.Description;
+                }
+
+                if (!valor1.Equals(valor2))
+                {
+                    CorreoTabla fila = new CorreoTabla { 
+                        codigo = cod_mod,
+                        campoModificado = desCampo,
+                        valorModificado = propiedad.GetValue(valModificado).ToString(),
+                        fechaMod = fechaFormateada,
+                        usuModif= nomCompleto,
+
+                    };
+                    camposModificados.Add(fila);
+                }
+            }
+
+            return camposModificados;
         }
     }
 }
