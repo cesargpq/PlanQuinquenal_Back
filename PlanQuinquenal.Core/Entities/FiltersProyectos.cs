@@ -24,7 +24,7 @@ namespace PlanQuinquenal.Core.Entities
         public string constructor { get; set; }
         public string ingRespon { get; set; }
         public string user_reg { get; set; }
-        public DateTime fecha_gas { get; set; }
+        public string fecha_gas { get; set; }
         public int cod_pryReemp { get; set; }
     }
 }

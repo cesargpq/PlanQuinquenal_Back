@@ -306,7 +306,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      .Where(x => filterProyectos.constructor != null ? x.constructor == filterProyectos.constructor : true)
                                      .Where(x => filterProyectos.ingRespon != null ? x.ingRespon == filterProyectos.ingRespon : true)
                                      .Where(x => filterProyectos.user_reg != null ? x.user_reg == filterProyectos.user_reg : true)
-                                     .Where(x => filterProyectos.fecha_gas != null ? x.fecha_gas == filterProyectos.fecha_gas : true)
+                                     .Where(x => filterProyectos.fecha_gas != "" ? x.fecha_gas == DateTime.Parse(filterProyectos.fecha_gas) : true)
                                      .Where(x => filterProyectos.cod_pryReemp != null ? x.cod_pryReemp == filterProyectos.cod_pryReemp : true)
                                      .AsQueryable();
 
