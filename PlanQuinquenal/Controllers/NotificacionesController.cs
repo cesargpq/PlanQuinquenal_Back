@@ -111,5 +111,12 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _repositoryNotificaciones.CrearConfigNotif(config);
             return Ok(resultado);
         }
+
+        [HttpGet("ObtenerListaModif")]
+        public async Task<IActionResult> ObtenerListaModif(int codNot)
+        {
+            var resultado = await _repositoryNotificaciones.ObtenerListaModif(codNot);
+            return Ok(resultado);
+        }
     }
 }

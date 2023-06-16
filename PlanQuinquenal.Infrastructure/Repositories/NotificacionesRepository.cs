@@ -135,7 +135,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resp = new
                 {
                     idMensaje = "1",
-                    mensaje = "Se creo la notificacion correctamente"
+                    mensaje = "Se creo la notificacion correctamente",
+                    codigoNot = nuevaNotificacion.id
                 };
 
                 var json = JsonConvert.SerializeObject(resp);
@@ -154,15 +155,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        public async Task<object> EnvioCorreoNotif(Object lst1, Object lst2, int cod_usu)
+        public async Task<object> EnvioCorreoNotif(List<CorreoTabla> lstModif, string correoUsu, string tipoOperacion, string modulo)
         {
             try
             {
                 // Configurar el correo electrónico
                 string remitente = "erick2402199501@gmail.com";
-                string destinatario = "erick2402199501@gmail.com";
-                string asunto = "Correo con diseño personalizado";
-                string cuerpo = ConstruirCuerpoCorreo();
+                string destinatario = correoUsu;
+                string asunto = "Notificacion de modficacion";
+                string cuerpo = ConstruirCuerpoCorreo(lstModif, modulo, tipoOperacion);
 
                 // Configurar el cliente SMTP
                 SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com", 587);
@@ -171,11 +172,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 clienteSmtp.Credentials = new NetworkCredential("", "");
 
                 // Crear el correo
-                
+
                 MailMessage correo = new MailMessage();
                 correo.From = new MailAddress(remitente);
                 correo.To.Add(destinatario);
-                correo.Subject= asunto;
+                correo.Subject = asunto;
                 correo.IsBodyHtml = true;
                 AlternateView htmlView = AlternateView.CreateAlternateViewFromString(cuerpo, new ContentType("text/html"));
                 correo.AlternateViews.Add(htmlView);
@@ -187,11 +188,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resp = new
                 {
                     idMensaje = "1",
-                    mensaje = "es una prueba"
+                    mensaje = "Correo enviado exitosamente.",
+                    correoHtml = cuerpo
                 };
 
                 var json = JsonConvert.SerializeObject(resp);
                 return json;
+
             }
             catch(Exception ex)
             {
@@ -264,7 +267,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<List<Notificaciones>> ObtenerListaNotif(int cod_usu)
         {
-            List<Notificaciones> lstNotificaciones = new List<Notificaciones>();
+            //List<Notificaciones> lstNotificaciones = new List<Notificaciones>();
             var queryable = await _context.Notificaciones.Where(x => x.cod_usu == cod_usu).ToListAsync();
 
             return queryable;
@@ -272,7 +275,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
         #region
-        public static string ConstruirCuerpoCorreo()
+        public static string ConstruirCuerpoCorreo(List<CorreoTabla> lstModif, string modulo, string tipoOperacion)
         {
             // Leer el archivo CSS
             string css = File.ReadAllText("Correo/main.css");
@@ -289,64 +292,107 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             // URL del enlace externo para la fuente
             string fontLink = "https://fonts.googleapis.com/css?family=Open+Sans&display=swap";
-            string html = @"
+
+
+            if (tipoOperacion == "M")
+            {
+                // Generar las filas de la tabla dinámicamente
+                StringBuilder tablaHtml = new StringBuilder();
+                foreach (var item in lstModif)
+                {
+                    tablaHtml.Append("<div class=\"v270_5556\">");
+                    tablaHtml.Append($"<span class=\"v270_5561\">{item.codigo}</span>");
+                    tablaHtml.Append("</div>");
+                    tablaHtml.Append("<div class=\"v270_5557\">");
+                    tablaHtml.Append($"<span class=\"v270_5562\">{item.valorModificado}</span>");
+                    tablaHtml.Append("</div>");
+                    tablaHtml.Append("<div class=\"v270_5558\">");
+                    tablaHtml.Append($"<span class=\"v270_5563\">{item.campoModificado}</span>");
+                    tablaHtml.Append("</div>");
+                    tablaHtml.Append("<div class=\"v270_5559\">");
+                    tablaHtml.Append($"<span class=\"v270_5564\">{item.fechaMod}</span>");
+                    tablaHtml.Append("</div>");
+                    tablaHtml.Append("<div class=\"v270_5560\">");
+                    tablaHtml.Append($"<span class=\"v270_5565\">{item.usuModif}</span>");
+                    tablaHtml.Append("</div>");
+                }
+
+                // Combinar el HTML generado con la plantilla
+                string html = $@"
                 <html>
                 <head>
-                <link href=""{0}"" rel=""stylesheet"">
-                <style>{1}</style>
+                    <link href=""{fontLink}"" rel=""stylesheet"">
+                    <style>{css}</style>
                 </head>
                 <body> 
-                   <div class=""v270_5541"">
+                    <div class=""v270_5541"">
                         <img src=""https://www.calidda.com.pe/media/ohen2u1d/logo.png"" alt=""Mi imagen"" />
-                   </div>
-		        <div style=""width: 600px;height: 70px;"">
-		        <span class=""v270_5542"">Estimado Usuario,
-                Se le informa que se ha realizado una modificación en la sección Proyectos, a continuación, se presenta el detalle:</span>
-		        </div>
-         
-                <div style=""margin-bottom: 30px;"">
-		            <div class=""v270_5543"">
-			        <span class=""v270_5550"">Código de proyecto o PQ</span>
-		            </div>
-                    <div class=""v270_5546"">
-			        <span class=""v270_5551"">Valor modificado</span>
-		            </div>
-                    <div class=""v270_5547"">
-			        <span class=""v270_5552"">Campo modificado</span>
-		            </div>
-                    <div class=""v270_5548"">
-			        <span class=""v270_5553"">Fecha de modificación</span>
-		            </div>
-                    <div class=""v270_5549"">
-			        <span class=""v270_5554"">Modificado por</span>
-		            </div>
-		 
-                    <div class=""v270_5556"">
-			        <span class=""v270_5561"">PPE0-21-0304</span>
-		            </div>
-                    <div class=""v270_5557"">
-			        <span class=""v270_5562"">120</span>
-		            </div>
-                    <div class=""v270_5558"">
-			        <span class=""v270_5563"">LONG. REAL PEND.</span>
-		            </div>
-                    <div class=""v270_5559"">
-			        <span class=""v270_5564"">31/03/2023</span>
-		            </div>
-                    <div class=""v270_5560"">
-			        <span class=""v270_5565"">Juan Pérez</span>
-		            </div>
-                </div>
-         
-		        <div class=""v270_5544"">
-			    <span class=""v270_5545"">Cálidda 2023. Todos los derechos reservados.</span>
-		        </div>
+                    </div>
+                    <div style=""width: 600px;height: 70px;"">
+                        <span class=""v270_5542"">Estimado Usuario,<br>
+                        Se le informa que se ha realizado una modificación en la sección {modulo}, a continuación, se presenta el detalle:</span>
+                    </div>
+                    <div style=""margin-bottom: 30px;"">
+                        <div class=""v270_5543"">
+                            <span class=""v270_5550"">Código de proyecto o PQ</span>
+                        </div>
+                        <div class=""v270_5546"">
+                            <span class=""v270_5551"">Valor modificado</span>
+                        </div>
+                        <div class=""v270_5547"">
+                            <span class=""v270_5552"">Campo modificado</span>
+                        </div>
+                        <div class=""v270_5548"">
+                            <span class=""v270_5553"">Fecha de modificación</span>
+                        </div>
+                        <div class=""v270_5549"">
+                            <span class=""v270_5554"">Modificado por</span>
+                        </div>
+                        {tablaHtml}
+                    </div>
+                    <div class=""v270_5544"">
+                        <span class=""v270_5545"">Cálidda 2023. Todos los derechos reservados.</span>
+                    </div>
                 </body>
                 </html>";
-            html = string.Format(html, fontLink, css);
 
 
-            return html;
+                return html;
+            }
+            else
+            {
+                string codigoCreacion = lstModif[0].codigo;
+                string html = $@"
+                <html>
+                <head>
+                    <link href=""{fontLink}"" rel=""stylesheet"">
+                    <style>{css}</style>
+                </head>
+                <body> 
+                    <div class=""v270_5541"">
+                        <img src=""https://www.calidda.com.pe/media/ohen2u1d/logo.png"" alt=""Mi imagen"" />
+                    </div>
+                    <div style=""width: 600px;height: 70px;"">
+                        <span class=""v270_5542"">Estimado Usuario,<br>
+                        Se le informa que se ha realizado una creación en la sección {modulo} con el codigo {codigoCreacion}.</span>
+                    </div>
+                    <div class=""v270_5544"">
+                        <span class=""v270_5545"">Cálidda 2023. Todos los derechos reservados.</span>
+                    </div>
+                </body>
+                </html>";
+
+
+                return html;
+            }
+            
+        }
+
+        public async Task<List<CorreoTabla>> ObtenerListaModif(int codNot)
+        {
+            var queryable = await _context.CorreoTabla.Where(x => x.idNotif == codNot).ToListAsync();
+
+            return queryable;
         }
         #endregion
     }

@@ -18,11 +18,11 @@ namespace PlanQuinquenal.Controllers
             _repositoryNotificaciones = repositoryNotificaciones;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ServicioPrueba()
+        [HttpPost]
+        public async Task<IActionResult> ServicioPrueba(List<CorreoTabla> lstmodif)
         {
             List<Notificaciones> noti = new List<Notificaciones>();
-            var resultado = await _repositoryNotificaciones.EnvioCorreoNotif(noti, noti,1);
+            var resultado = await _repositoryNotificaciones.EnvioCorreoNotif(lstmodif, "erick2402199501@gmail.com", "M", "Proyectos");
             return Ok(resultado);
         }
     }
