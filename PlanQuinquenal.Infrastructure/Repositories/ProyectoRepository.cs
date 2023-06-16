@@ -1,11 +1,13 @@
-ï»¿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -14,18 +16,22 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using OfficeOpenXml;
+using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
     public class ProyectoRepository : IRepositoryProyecto
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
         private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
 
-        public ProyectoRepository(PlanQuinquenalContext context)
+        public ProyectoRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores)
         {
             _context = context;
+            this._repositoryMantenedores = repositoryMantenedores;
         }
 
         public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto, int idUser)
@@ -122,7 +128,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.fechora_not = DateTime.Now;
                             notifProyecto.flag_visto = false;
                             notifProyecto.tipo_accion = "C";
-                            notifProyecto.mensaje = $"Se creÃ³ el proyecto {nvoProyecto.proyecto.cod_pry}";
+                            notifProyecto.mensaje = $"Se creó el proyecto {nvoProyecto.proyecto.cod_pry}";
                             notifProyecto.codigo = codPry;
                             notifProyecto.modulo = "P";
 
@@ -137,13 +143,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var resp = new
                     {
                         idMensaje = "1",
-                        mensaje = "Se creÃ³ el proyecto correctamente"
+                        mensaje = "Se creó el proyecto correctamente"
                     };
 
                     var json = JsonConvert.SerializeObject(resp);
                     return json;
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -161,10 +167,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<object> NuevosProyectosMasivo(ProyectoRequest reqMasivo)
         {
-            var base64Content = reqMasivo.base64; 
+            var base64Content = reqMasivo.base64;
             var bytes = Convert.FromBase64String(base64Content);
             bool flagValid = true;
-            var mensajeErrado  = "Los siguientes codigos hubieron errores al crearlos: ";
+            var mensajeErrado = "Los siguientes codigos hubieron errores al crearlos: ";
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             try
             {
@@ -178,7 +184,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             bool flareg = true;
                             var codPry = worksheet.Cells[row, 1].Value?.ToString();
-                            try { 
+                            try
+                            {
                                 if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
                                 string desPQ = worksheet.Cells[row, 2].Value?.ToString();
                                 string desAnioPQ = worksheet.Cells[row, 3].Value?.ToString();
@@ -199,7 +206,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 #endregion
 
                                 #region
-                                //---------------------hacer una consulta para validar la el aÃ±o PA-------------------
+                                //---------------------hacer una consulta para validar la el año PA-------------------
                                 int codPA = 1;
                                 #endregion
 
@@ -232,17 +239,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     mensajeErrado = mensajeErrado + codPry + ", ";
                                 }
                                 #endregion
-                                
 
-                                
-                            }catch(Exception ex)
+
+
+                            }
+                            catch (Exception ex)
                             {
                                 flagValid = false;
                                 mensajeErrado = mensajeErrado + codPry + ", ";
                             }
                         }
 
-                        
+
                     }
                 }
 
@@ -267,9 +275,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var json = JsonConvert.SerializeObject(resp);
                     return json;
                 }
-                
 
-                
+
+
             }
             catch (Exception ex)
             {
@@ -283,7 +291,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return json;
             }
 
-            
+
         }
 
         public async Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filterProyectos)
@@ -348,7 +356,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         #region Creacion de usuario interesado
                         var entidad = new UsuariosIntersados_pry
                         {
-                            id_pry = nvoProyecto.proyecto.id, 
+                            id_pry = nvoProyecto.proyecto.id,
                             cod_usu = listaUsuInter.cod_usu
                         };
                         _context.UsuariosIntersados_pry.Add(entidad);
@@ -382,7 +390,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     tipo_pry = nvoProyecto.proyecto.tipo_pry,
                     cod_etapa = nvoProyecto.proyecto.cod_etapa,
                     cod_vnr = nvoProyecto.proyecto.cod_vnr
-            };
+                };
 
                 List<CorreoTabla> camposModificados = CompararPropiedades(ProyectoOriginal[0], proyectoModificado, nvoProyecto.proyecto.cod_pry.ToString(), NomCompleto);
                 #endregion
@@ -406,8 +414,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         notifProyecto.fechora_not = DateTime.Now;
                         notifProyecto.flag_visto = false;
                         notifProyecto.tipo_accion = "M";
-                        notifProyecto.mensaje = $"Se modificÃ³ el proyecto {nvoProyecto.proyecto.cod_pry}";
-                        notifProyecto.codigo = nvoProyecto.proyecto.id; 
+                        notifProyecto.mensaje = $"Se modificó el proyecto {nvoProyecto.proyecto.cod_pry}";
+                        notifProyecto.codigo = nvoProyecto.proyecto.id;
                         notifProyecto.modulo = "P";
 
                         var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
@@ -474,12 +482,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         break;
                     }
                 }
-                if (coment.tipo_coment == "PR" && (coment.regusuario.cod_und != usuLog[0].cod_und || !validUsuInter))
+                if (coment.tipo_coment == "PR" && (coment.regusuario.Unidad_negociocod_und != usuLog[0].Unidad_negociocod_und || !validUsuInter))
                 {
                     listaComent.Remove(coment);
                     continue;
                 }
-                
+
             }
 
             var listaInforme = await _context.Informes.Join(_context.Proyectos,
@@ -504,7 +512,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         id = Acta.id,
                                         cod_tipoSeg = Acta.cod_tipoSeg,
                                         des_tipoSeg = "Proyecto",
-                                        cod_seg = Acta.cod_seg, 
+                                        cod_seg = Acta.cod_seg,
                                         des_seg = Proyec.cod_pry,
                                         cod_tipoDoc = "I",
                                         aprobacion = Acta.aprobacion,
@@ -514,7 +522,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             List<Informes_actas> lstInfoActas = new List<Informes_actas>();
             foreach (var listaInfo in listaInforme)
             {
-                var entidad = new Informes_actas 
+                var entidad = new Informes_actas
                 {
                     id = "I" + listaInfo.id,
                     cod_tipoSeg = listaInfo.cod_tipoSeg.ToString(),
@@ -522,7 +530,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     cod_seg = listaInfo.cod_seg,
                     des_seg = listaInfo.des_seg,
                     cod_tipoDoc = listaInfo.cod_tipoDoc,
-                    aprobacion = listaInfo.aprobacion, 
+                    aprobacion = listaInfo.aprobacion,
                     fecha_emis = listaInfo.fecha_emis
                 };
 
@@ -595,7 +603,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         //        var resp = new
         //        {
         //            idMensaje = "1",
-        //            mensaje = "Se creÃ³ el impedimento correctamente"
+        //            mensaje = "Se creó el impedimento correctamente"
         //        };
 
         //        var json = JsonConvert.SerializeObject(resp);
@@ -627,7 +635,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resp = new
                 {
                     idMensaje = "1",
-                    mensaje = "Se creÃ³ el documento correctamente"
+                    mensaje = "Se creó el documento correctamente"
                 };
 
                 var json = JsonConvert.SerializeObject(resp);
@@ -755,6 +763,166 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
 
             return camposModificados;
+        }
+        public async Task<ImportResponseDto<ExportMasivoDTO>> ProyectoImport(RequestMasivo data)
+        {
+            ImportResponseDto<ExportMasivoDTO> dto = new ImportResponseDto<ExportMasivoDTO>();
+            var Material = await _repositoryMantenedores.GetAllByAttribute(Constantes.Material);
+            var Constructor = await _repositoryMantenedores.GetAllByAttribute(Constantes.Constructor);
+            var TipoProyecto = await _repositoryMantenedores.GetAllByAttribute(Constantes.TipoProyecto);
+            var Distrito = await _repositoryMantenedores.GetAllByAttribute(Constantes.Distrito);
+
+            var base64Content = data.base64;
+            var bytes = Convert.FromBase64String(base64Content);
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            List<Proyectos> lista = new List<Proyectos>();
+            List<ExportMasivoDTO> listaError = new List<ExportMasivoDTO>();
+            List<ExportMasivoDTO> listaRepetidos = new List<ExportMasivoDTO>();
+            List<ExportMasivoDTO> listaInsert = new List<ExportMasivoDTO>();
+
+            try
+            {
+                using (var memoryStream = new MemoryStream(bytes))
+                {
+                    using (var package = new ExcelPackage(memoryStream))
+                    {
+                        var worksheet = package.Workbook.Worksheets["Proyecto"];
+
+                        for (int row = 2; row <= worksheet.Dimension.Rows; row++)
+                        {
+                            if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
+                            var codPry = worksheet.Cells[row, 1].Value?.ToString();
+                            var codPQ = worksheet.Cells[row, 2].Value?.ToString();
+                            var anioPQ = worksheet.Cells[row, 3].Value?.ToString();
+                            var anioPA = worksheet.Cells[row, 4].Value?.ToString();
+                            var etapa = worksheet.Cells[row, 5].Value?.ToString();
+                            var material = worksheet.Cells[row, 6].Value?.ToString();
+                            var constructor = worksheet.Cells[row, 7].Value?.ToString();
+                            var tipoRegistro = worksheet.Cells[row, 8].Value?.ToString();
+                            var distrito = worksheet.Cells[row, 9].Value?.ToString();
+                            var tipoProyecto = worksheet.Cells[row, 10].Value?.ToString();
+                            var longAproPa = worksheet.Cells[row, 11].Value?.ToString();
+                            var longRealHab = worksheet.Cells[row, 12].Value?.ToString();
+                            var longRealPend = worksheet.Cells[row, 13].Value?.ToString();
+                            var longImpedimentos = worksheet.Cells[row, 14].Value?.ToString();
+                            var longReemplazada = worksheet.Cells[row, 15].Value?.ToString();
+                            var codMalla = worksheet.Cells[row, 16].Value?.ToString();
+                            var codVNR = worksheet.Cells[row, 17].Value?.ToString();
+
+                            var dPQ = await _context.PlanQuinquenal.Where(x => x.Pq == codPQ).FirstOrDefaultAsync();
+                            var dMaterial = Material.Where(x => x.Descripcion == material).FirstOrDefault();
+                            var dConstructor = Constructor.Where(x => x.Descripcion == constructor).FirstOrDefault();
+                            var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion == tipoProyecto).FirstOrDefault();
+                            var dDistrito = Distrito.Where(x => x.Descripcion == distrito).FirstOrDefault();
+                            if (dPQ == null || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            {
+                                var entidadError = new ExportMasivoDTO
+                                {
+                                    Codigo = codPry,
+
+                                };
+                                listaError.Add(entidadError);
+                                break;
+                            }
+
+                            try
+                            {
+                                var entidad = new Proyectos
+                                {
+                                    cod_pry = codPry,
+                                    cod_PQ = dPQ.Id,
+                                    anioPQ = anioPQ,
+                                    cod_anioPA = Convert.ToInt32(anioPA),
+                                    cod_etapa = Convert.ToInt32(etapa),
+                                    cod_material = dMaterial.IdTablaLogicaDatos
+                                };
+                                lista.Add(entidad);
+                            }
+                            catch (Exception e)
+                            {
+                                var entidadError = new ExportMasivoDTO
+                                {
+                                    Codigo = codPry
+                                };
+                                listaError.Add(entidadError);
+
+                            }
+                        }
+                        foreach (var item in lista)
+                        {
+                            try
+                            {
+                                var existe = await _context.Proyectos.Where(x => x.cod_pry.Equals(item.cod_pry)).FirstAsync();
+                                if (existe != null)
+                                {
+                                    var repetidos = new ExportMasivoDTO
+                                    {
+                                        Codigo = existe.cod_pry
+                                    };
+                                    listaRepetidos.Add(repetidos);
+                                    existe.cod_pry = item.cod_pry;
+                                    existe.cod_PQ = item.cod_PQ;
+                                    //existe.Precio = item.Precio;
+                                    //existe.Descripcion = item.Descripcion;
+                                    //existe.Estado = item.Estado;
+                                    //existe.PlanQuinquenalId = item.PlanQuinquenalId;
+                                    //_context.Baremo.Update(existe);
+                                    await _context.SaveChangesAsync();
+                                }
+                                else
+                                {
+                                    var insertlista = new ExportMasivoDTO
+                                    {
+                                        Codigo = existe.cod_pry
+                                    };
+                                    listaInsert.Add(insertlista);
+                                    lista.Add(item);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
+                                var entidadError = new ExportMasivoDTO
+                                {
+                                    Codigo = item.cod_pry
+                                };
+                                listaError.Add(entidadError);
+                            }
+
+
+                        }
+                        if (listaInsert.Count > 0)
+                        {
+                            await _context.Proyectos.AddRangeAsync(lista);
+                            await _context.SaveChangesAsync();
+                        }
+
+
+                    }
+                }
+
+
+                dto.listaError = listaError;
+                dto.listaRepetidos = listaRepetidos;
+                dto.listaInsert = listaInsert;
+                dto.Satisfactorios = listaInsert.Count();
+                dto.Error = listaError.Count();
+                dto.Actualizados = listaRepetidos.Count();
+                dto.Valid = true;
+                dto.Message = Constantes.SatisfactorioImport;
+            }
+            catch (Exception e)
+            {
+                dto.Satisfactorios = 0;
+                dto.Error = 0;
+                dto.Actualizados = 0;
+                dto.Valid = false;
+                dto.Message = Constantes.ErrorImport;
+
+                return dto;
+            }
+
+            return dto;
         }
     }
 }

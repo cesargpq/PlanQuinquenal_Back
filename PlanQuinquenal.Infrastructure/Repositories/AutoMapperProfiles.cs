@@ -15,6 +15,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
           
             CreateMap<PQuinquenalReqDTO, PlanQuinquenal.Core.Entities.PlanQuinquenal>();
+            CreateMap<UsuarioRequestDto, Usuario>();
+            CreateMap<Usuario, UsuarioRequestDto>();
 
         }
 

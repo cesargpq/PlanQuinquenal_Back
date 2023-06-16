@@ -7,11 +7,12 @@ using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Filters;
+using PlanQuinquenal.Infrastructure.Repositories;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //S[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class ProyectosController : ControllerBase
@@ -41,6 +42,15 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
+        [HttpPost("ProyectoImport")]
+        public async Task<IActionResult> ProyectoImport(RequestMasivo data)
+        {
+
+            var resultado = await _repositoryProyecto.ProyectoImport(data);
+
+
+            return Ok(resultado);
+        }
         [HttpPost("ObtenerProyectos")]
         public async Task<IActionResult> ObtenerProyectos(FiltersProyectos filterProyectos)
         {

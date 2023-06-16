@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
-    public class ResponseDTO
+    public class ExportMasivoDTO
     {
-        
-        public bool Valid { get; set; }
-        public string Message { get; set; }
-        
+        public string Codigo { get; set; }
     }
 }

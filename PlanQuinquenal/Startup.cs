@@ -41,6 +41,7 @@ namespace PlanQuinquenal
             services.AddTransient<IRepositoryPerfil, PerfilRepository>();
             services.AddTransient<IRepositoryUnidadNeg, UnidadNegRepository>();
             services.AddTransient<IRepositoryProyecto, ProyectoRepository>();
+            services.AddTransient<IBaremoRepository, BaremoRepository>();
             services.AddTransient<IRepositoryNotificaciones, NotificacionesRepository>();
             services.AddTransient<HashService>();
             services.AddTransient<Constantes>();
@@ -112,6 +113,7 @@ namespace PlanQuinquenal
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
             services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(typeof(UsuarioRepository));
             services.AddCors(opciones =>
             {
                 var urlList = Configuration.GetSection("AllowedOrigin").GetChildren().Select(c => c.Value)

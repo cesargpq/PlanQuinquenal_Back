@@ -28,12 +28,16 @@ namespace PlanQuinquenal.Core.Utilities
         private const int KeySize = 128;
         private readonly IConfiguration configuration;
         private readonly string _pathRoot;
+
+
+        // This constant determines the number of iterations for the password bytes generation function.
+        private const int DerivationIterations = 1000;
         public HashService(IServiceProvider serviceProvider,IServiceScopeFactory factory)
         {
             var env = serviceProvider.GetService<IHostingEnvironment>();
             _pathRoot = $"{env.ContentRootPath}{Constantes.PathFinanciamientoTemplate}";
             configuration = factory.CreateScope().ServiceProvider.GetRequiredService<IConfiguration>();
-        }
+        }        
         public string Encriptar(string plainText)
         {
             if (string.IsNullOrEmpty(plainText))
@@ -62,6 +66,7 @@ namespace PlanQuinquenal.Core.Utilities
 
             return Convert.ToBase64String(cipherTextBytes);
         }
+
         public string Desencriptar(string encryptedText)
         {
             if (string.IsNullOrEmpty(encryptedText))
