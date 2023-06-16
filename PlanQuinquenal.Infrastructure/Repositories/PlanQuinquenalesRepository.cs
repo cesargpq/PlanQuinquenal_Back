@@ -32,7 +32,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             var pqFirst = await _context.PlanQuinquenal.Where(x => x.Pq == pQuinquenalReqDTO.Pq).FirstOrDefaultAsync();
             
-            List< PQUsuariosInteresados> listPqUser = new List<PQUsuariosInteresados>();
+            List<PQUsuariosInteresados> listPqUser = new List<PQUsuariosInteresados>();
             foreach (var item in pQuinquenalReqDTO.IdUsuario)
             {
                 PQUsuariosInteresados pqUser = new PQUsuariosInteresados();
