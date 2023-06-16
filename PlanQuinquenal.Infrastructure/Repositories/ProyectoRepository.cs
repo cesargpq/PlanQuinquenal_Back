@@ -222,7 +222,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         cod_anioPA = codPA,
                                         cod_etapa = int.Parse(desEtapa),
                                         cod_material = int.Parse(codMater),
-                                        constructor = codConst,
+                                        //constructor = codConst,
                                         tipo_reg = tipoReg,
                                         cod_dist = int.Parse(codDist),
                                         long_aprob = int.Parse(longAprob),
@@ -834,7 +834,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     anioPQ = anioPQ,
                                     cod_anioPA = Convert.ToInt32(anioPA),
                                     cod_etapa = Convert.ToInt32(etapa),
-                                    cod_material = dMaterial.IdTablaLogicaDatos
+                                    cod_material = dMaterial.IdTablaLogicaDatos,
+                                    constructor = dConstructor.IdTablaLogicaDatos
                                 };
                                 lista.Add(entidad);
                             }

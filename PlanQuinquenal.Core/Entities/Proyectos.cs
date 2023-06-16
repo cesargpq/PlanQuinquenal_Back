@@ -33,7 +33,7 @@ namespace PlanQuinquenal.Core.Entities
         public int cod_material { get; set; }
 
         [Description("Constructor")]
-        public string constructor { get; set; }
+        public int constructor { get; set; }
 
         [Description("Tipo de registro")]
         public string tipo_reg { get; set; }

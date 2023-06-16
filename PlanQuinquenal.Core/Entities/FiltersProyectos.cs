@@ -21,7 +21,7 @@ namespace PlanQuinquenal.Core.Entities
         public string anioPQ { get; set; }
         public int cod_anioPA { get; set; }
         public string cod_malla { get; set; }
-        public string constructor { get; set; }
+        public int constructor { get; set; }
         public string ingRespon { get; set; }
         public string user_reg { get; set; }
         public string fecha_gas { get; set; }
