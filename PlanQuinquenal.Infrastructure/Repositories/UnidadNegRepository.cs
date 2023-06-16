@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApiDavis.Core.Utilidades;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
@@ -60,29 +62,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Unidad_negocio>> ObtenerUnidadNeg(string buscador)
+        public async Task<PaginacionResponseDto<Unidad_negocio>> ObtenerUnidadNeg(UnidadNegocioDto entidad)
         {
             List<Unidad_negocio> lstUnidadNeg = new List<Unidad_negocio>();
-            var queryable = new List<Unidad_negocio>();
-            if (buscador == "") {
-                queryable = await _context.Unidad_negocio.ToListAsync();
+          
+            if (entidad.buscador == "") {
+                var queryable =  _context.Unidad_negocio
+                                    .Where(x => entidad.cod_und != 0 ? x.cod_und == entidad.cod_und : true)
+                                    .Where(x => entidad.nom_und != "" ? x.nom_und == entidad.nom_und : true)
+                                    .Where(x => entidad.estado_und != "" ? x.estado_und == entidad.estado_und : true)
+                                    .AsQueryable();
+
+
+
+                var entidades = await queryable.OrderBy(e => e.nom_und).Paginar(entidad)
+                                      .ToListAsync();
+                int cantidad = queryable.Count();
+                var objeto = new PaginacionResponseDto<Unidad_negocio>
+                {
+                    Cantidad = cantidad,
+                    Model = entidades
+
+                };
+                return objeto;
             } else
             {
-                queryable = await _context.Unidad_negocio.Where(x => x.nom_und == buscador).ToListAsync();
+                var queryable = _context.Unidad_negocio.Where(x => x.nom_und.Contains(entidad.buscador)).AsQueryable();
+                var entidades = await queryable.OrderBy(e => e.nom_und).Paginar(entidad)
+                                        .ToListAsync();
+                int cantidad = queryable.Count();
+                var objeto = new PaginacionResponseDto<Unidad_negocio>
+                {
+                    Cantidad = cantidad,
+                    Model = entidades
+
+                };
+                return objeto;
             }
 
-            foreach (var unidNeg in queryable)
-            {
-                Unidad_negocio objUnidNeg = new Unidad_negocio();
-                objUnidNeg.cod_und = unidNeg.cod_und;
-                objUnidNeg.nom_und = unidNeg.nom_und;
-                objUnidNeg.estado_und = unidNeg.estado_und;
-
-                lstUnidadNeg.Add(objUnidNeg);
-
-            }
-
-            return lstUnidadNeg;
+           
+            
+           
 
         }
 

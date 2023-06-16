@@ -9,6 +9,10 @@ namespace PlanQuinquenal.Core.Utilities
     public class Constantes
     {
         public  int CANTIDAD_INTENTOS = 3;
+        public const string Material = "Material";
+        public const string Constructor = "Constructor";
+        public const string TipoProyecto = "TipoProyecto";
+        public const string Distrito = "Distrito";
         public const string PathFinanciamientoTemplate = "\\\\Content\\";
         public const string DobleFactor = "\\doble.html";
         public const string ErrorImport = "Hubo un error en la carga del archivo";

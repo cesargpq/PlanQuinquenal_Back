@@ -1,4 +1,5 @@
 ﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace PlanQuinquenal.Core.Interfaces
         //Task<Object> CrearImpedimento(ImpedimentoRequest impedimento);
         Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto, int idUser);
         Task<Object> NuevosProyectosMasivo(ProyectoRequest reqMasivo);
+
+        Task<ImportResponseDto<ExportMasivoDTO>> ProyectoImport(RequestMasivo data);
         Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filterProyectos);
         Task<Object> ObtenerProyectoxNro(int nroProy, int cod_usu);
         Task<Object> CrearComentario(Comentarios_proyecDTO comentario, int idUser, string modulo);

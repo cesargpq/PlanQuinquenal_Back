@@ -31,9 +31,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var baremo = await _context.Baremo.Where(x=>x.Id == id).FirstOrDefaultAsync();
             return baremo;
         }
-        public async Task<ImportResponseDto> BaremoImport(RequestMasivo data)
+        public async Task<ImportResponseDto<Baremo>> BaremoImport(RequestMasivo data)
         {
-            ImportResponseDto dto = new ImportResponseDto();
+            ImportResponseDto<Baremo> dto = new ImportResponseDto<Baremo>();
             var base64Content = data.base64;
             var bytes = Convert.FromBase64String(base64Content);
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -134,9 +134,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
 
-                dto.listaBaremoError = listaBaremoError;
-                dto.listaBaremoRepetidos = listaBaremoRepetidos;
-                dto.listaBaremoInsert = listaBaremoInsert;
+                dto.listaError = listaBaremoError;
+                dto.listaRepetidos = listaBaremoRepetidos;
+                dto.listaInsert = listaBaremoInsert;
                 dto.Satisfactorios = listaBaremoInsert.Count();
                 dto.Error = listaBaremoError.Count();
                 dto.Actualizados = listaBaremoRepetidos.Count();
@@ -294,26 +294,52 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<PaginacionResponseDto<Baremo>> GetAll(BaremoListDto entidad)
         {
 
-            
+            if(entidad.Buscar != "")
+            {
+                int n;
+                var buscar = int.TryParse(entidad.Buscar, out n);
 
-            var queryable = _context.Baremo
-                                    .Where(x => entidad.CodigoBaremo!= "" ? x.CodigoBaremo == entidad.CodigoBaremo : true)
-                                    .Where(x => entidad.Estado != false ? x.Estado == entidad.Estado : true)
-                                    .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
-                                    .Where(x => entidad.Precio > 0 ? x.Precio == entidad.Precio : true)
+                var queryable = _context.Baremo
+                                    .Where( x => x.CodigoBaremo.Contains(entidad.Buscar) || x.Descripcion.Contains(entidad.Buscar) ||
+                                     (x.Precio.ToString()).Contains(entidad.Buscar) )
                                      .AsQueryable();
 
 
-            var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
-                                   .ToListAsync();
-            int cantidad = queryable.Count();
-            var objeto = new PaginacionResponseDto<Baremo>
-            {
-                Cantidad = cantidad,
-                Model = entidades
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+                int cantidad = queryable.Count();
+                var objeto = new PaginacionResponseDto<Baremo>
+                {
+                    Cantidad = cantidad,
+                    Model = entidades
 
-            };
-            return objeto;
+                };
+                return objeto;
+            }
+            else
+            {
+                var queryable = _context.Baremo
+                                    .Where(x => entidad.CodigoBaremo != "" ? x.CodigoBaremo == entidad.CodigoBaremo : true)
+                                    .Where(x => entidad.Estado != false ? x.Estado == entidad.Estado : true)
+                                    .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                    .Where(x => entidad.Precio > 0 ? x.Precio == entidad.Precio : true)
+                                    .Where(x => entidad.Precio != 0 ? x.PlanQuinquenalId == entidad.PlanQuinquenalId : true)
+                                     .AsQueryable();
+
+
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+                int cantidad = queryable.Count();
+                var objeto = new PaginacionResponseDto<Baremo>
+                {
+                    Cantidad = cantidad,
+                    Model = entidades
+
+                };
+                return objeto;
+            }
+
+            
         }
     }
 }

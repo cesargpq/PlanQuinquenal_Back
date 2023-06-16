@@ -1,6 +1,7 @@
 ﻿using ApiDavis.Core.Utilidades;
 using Microsoft.EntityFrameworkCore;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
@@ -20,7 +21,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<TablaLogicaDatos>> GetAll(ListEntidadDTO entidad)
+        public async Task<IEnumerable<TablaLogicaDatos>> GetAllByAttribute(string attribute)
+        {
+            var dato = await _context.TablaLogica.Where(x => x.Descripcion == attribute).ToListAsync();
+            var datoFinal = await _context.TablaLogicaDatos.Where(x => x.TablaLogicaId == dato.ElementAt(0).Id).ToListAsync();
+            return datoFinal;
+        }
+        public async Task<PaginacionResponseDto<TablaLogicaDatos>> GetAll(ListEntidadDTO entidad)
         {
 
             
@@ -34,11 +41,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      .Where(x => entidad.Codigo != "" ? x.Descripcion == entidad.Codigo : true)
                                      .AsQueryable();
 
-            double cantidad = await queryable.CountAsync();
+            int cantidad = await queryable.CountAsync();
             var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
                                    .ToListAsync();
 
-            return entidades;
+            var objeto = new PaginacionResponseDto<TablaLogicaDatos>
+            {
+                Cantidad = cantidad,
+                Model = entidades
+            };
+
+            return objeto;
 
         }
         public async Task<TablaLogicaDatos> GetById(int id)

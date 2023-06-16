@@ -31,8 +31,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<PaginacionResponseDto<Usuario>> GetAll(UsuarioListDTO entidad)
         {
             var usuarios = await _context.Usuario.ToListAsync();
-            var queryable = _context.Usuario
-                                     .Include(x=>x.Perfil)
+
+            
+            if(entidad.buscar != "")
+            {
+                 var queryable = _context.Usuario
+                                    .Include(x => x.Perfil)
+                                     .Include(x => x.Unidad_negocio)
+                                     .Where
+                                     (x =>
+                                     x.nombre_usu.Contains(entidad.buscar )||
+                                     x.apellido_usu.Contains(entidad.buscar) ||
+                                     x.correo_usu.Contains(entidad.buscar) ||
+                                     x.estado_user.Contains(entidad.buscar) ||
+                                     x.Perfil.nombre_perfil.Contains(entidad.buscar ))
+                                     .AsQueryable();
+                var entidades = await queryable.OrderBy(e => e.nombre_usu).Paginar(entidad)
+                                   .ToListAsync();
+                int cantidad = queryable.Count();
+                var objeto = new PaginacionResponseDto<Usuario>
+                {
+                    Cantidad = cantidad,
+                    Model = entidades
+                };
+                return objeto;
+            }
+            else
+            {
+                 var queryable = _context.Usuario
+                                     .Include(x => x.Perfil)
+                                     .Include(x => x.Unidad_negocio)
                                      .Where(x => entidad.cod_usuario != 0 ? x.cod_usu == entidad.cod_usuario : true)
                                      .Where(x => entidad.nombre_usu != "" ? x.nombre_usu == entidad.nombre_usu : true)
                                      .Where(x => entidad.apellido_usu != "" ? x.apellido_usu == entidad.apellido_usu : true)
@@ -42,23 +70,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      .Where(x => entidad.cod_perfil != 0 ? x.Perfilcod_perfil == entidad.cod_perfil : true)
                                      .AsQueryable();
 
-           
-            var entidades = await queryable.OrderBy(e => e.nombre_usu).Paginar(entidad)
+                var entidades = await queryable.OrderBy(e => e.nombre_usu).Paginar(entidad)
                                    .ToListAsync();
-            int cantidad = queryable.Count();
-            var objeto = new PaginacionResponseDto<Usuario>
-            {
-                Cantidad = cantidad,
-                Model = entidades
+                int cantidad = queryable.Count();
+                var objeto = new PaginacionResponseDto<Usuario>
+                {
+                    Cantidad = cantidad,
+                    Model = entidades
 
-            };
-            return objeto;
+                };
+                return objeto;
+            }            
         }
 
         public async Task<Usuario> GetById(int id)
         {
             var resultado = await _context.Usuario.FirstOrDefaultAsync( x => x.cod_usu == id);
-            
+            resultado.passw_user = hashService.Desencriptar(resultado.passw_user);
             return resultado;
         }
 
@@ -77,7 +105,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 resultado.Interno = usuario.Interno;
                 var perfil = await _context.Perfil.Where(x=>x.cod_perfil== usuario.Perfilcod_perfil).FirstOrDefaultAsync();
                 resultado.DobleFactor = usuario.DobleFactor;
-                resultado.cod_und = perfil.cod_unidadNeg;
+                resultado.Unidad_negociocod_und = perfil.cod_unidadNeg;
                 _context.Update(resultado);
                 await _context.SaveChangesAsync();
                 resp.Message = Constantes.ActualizacionSatisfactoria;
@@ -119,6 +147,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (resultado != null)
             {
                 resultado.estado_user = resultado.estado_user == "A" ? "D" : "A";
+                resultado.passw_user = hashService.Desencriptar(resultado.passw_user);
                 _context.Update(resultado);
                 await _context.SaveChangesAsync();
                 resp.Message = Constantes.ActualizacionSatisfactoria;
@@ -155,7 +184,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             usuarioDto.Intentos = 0;
             usuarioDto.LastSesion = null;
             usuarioDto.Conectado = false;
-            usuarioDto.cod_und = perfil.cod_unidadNeg;
+            usuarioDto.Unidad_negociocod_und = perfil.cod_unidadNeg;
             usuarioDto.FechaCreacion = DateTime.Now;
             usuarioDto.FechaModifica = null;
             _context.Add(usuarioDto);

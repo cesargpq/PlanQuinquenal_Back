@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApiDavis.Core.Utilidades;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Newtonsoft.Json;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
@@ -100,35 +102,79 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<PerfilResponse>> ObtenerPerfiles(string buscador)
+        public async Task<PaginacionResponseDto<PerfilResponse>> ObtenerPerfiles(PerfilListDto entidad)
         {
             List<PerfilResponse> lstPerfil = new List<PerfilResponse>();
-            var queryable = new List<Perfil>();
-            if (buscador == "")
+            if (entidad.buscador == "")
             {
-                queryable = await _context.Perfil.ToListAsync();
+                var queryable =  _context.Perfil
+                                        .Where(x => entidad.UnidadNegocioId != 0 ? x.cod_unidadNeg == entidad.UnidadNegocioId : true)
+                                        .AsQueryable();
+
+                var entidades = await queryable.OrderBy(e => e.nombre_perfil).Paginar(entidad).ToListAsync();
+
+                foreach (var perfil in entidades)
+                {
+                    PerfilResponse objPerfil = new PerfilResponse();
+                    objPerfil.cod_perfil = perfil.cod_perfil;
+                    objPerfil.cod_rol = perfil.cod_rol;
+                    objPerfil.Perm_viz_modulocodMod_permiso = perfil.Perm_viz_modulocodMod_permiso;
+                    objPerfil.Permisos_viz_seccioncodSec_permViz = perfil.Permisos_viz_seccioncodSec_permViz;
+                    objPerfil.nombre_perfil = perfil.nombre_perfil;
+                    objPerfil.estado_perfil = perfil.estado_perfil;
+                    objPerfil.cod_unidadNeg = perfil.cod_unidadNeg;
+
+                    lstPerfil.Add(objPerfil);
+
+                }
+                int cantidad = queryable.Count();
+                var objetos = new PaginacionResponseDto<PerfilResponse>
+                {
+                    Cantidad = cantidad,
+                    Model = lstPerfil
+
+                };
+                return objetos;
             }
             else
             {
-                queryable = await _context.Perfil.Where(x => x.nombre_perfil == buscador).ToListAsync();
+                var queryable =  _context.Perfil.Where(x => x.nombre_perfil.Equals(entidad.buscador)).AsQueryable();
+
+                var entidades = await queryable.OrderBy(e => e.nombre_perfil).Paginar(entidad).ToListAsync();
+
+                foreach (var perfil in entidades)
+                {
+                    PerfilResponse objPerfil = new PerfilResponse();
+                    objPerfil.cod_perfil = perfil.cod_perfil;
+                    objPerfil.cod_rol = perfil.cod_rol;
+                    objPerfil.Perm_viz_modulocodMod_permiso = perfil.Perm_viz_modulocodMod_permiso;
+                    objPerfil.Permisos_viz_seccioncodSec_permViz = perfil.Permisos_viz_seccioncodSec_permViz;
+                    objPerfil.nombre_perfil = perfil.nombre_perfil;
+                    objPerfil.estado_perfil = perfil.estado_perfil;
+                    objPerfil.cod_unidadNeg = perfil.cod_unidadNeg;
+
+                    lstPerfil.Add(objPerfil);
+
+                }
+                int cantidad = queryable.Count();
+                var objetos = new PaginacionResponseDto<PerfilResponse>
+                {
+                    Cantidad = cantidad,
+                    Model = lstPerfil
+
+                };
+                return objetos;
             }
 
-            foreach (var perfil in queryable)
+           
+
+            var objeto = new PaginacionResponseDto<PerfilResponse>
             {
-                PerfilResponse objPerfil = new PerfilResponse();
-                objPerfil.cod_perfil = perfil.cod_perfil;
-                objPerfil.cod_rol = perfil.cod_rol;
-                objPerfil.Perm_viz_modulocodMod_permiso = perfil.Perm_viz_modulocodMod_permiso;
-                objPerfil.Permisos_viz_seccioncodSec_permViz = perfil.Permisos_viz_seccioncodSec_permViz;
-                objPerfil.nombre_perfil = perfil.nombre_perfil;
-                objPerfil.estado_perfil = perfil.estado_perfil;
-                objPerfil.cod_unidadNeg = perfil.cod_unidadNeg;
+                Cantidad = 0,
+                Model = lstPerfil
 
-                lstPerfil.Add(objPerfil);
-
-            }
-
-            return lstPerfil;
+            };
+            return objeto;
 
         }
 

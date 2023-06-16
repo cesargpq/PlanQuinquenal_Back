@@ -4,8 +4,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -18,12 +20,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     public class ProyectoRepository : IRepositoryProyecto
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
         private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
 
-        public ProyectoRepository(PlanQuinquenalContext context)
+        public ProyectoRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores)
         {
             _context = context;
+            this._repositoryMantenedores = repositoryMantenedores;
         }
 
         public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto, int idUser)
@@ -400,7 +404,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         break;
                     }
                 }
-                if (coment.tipo_coment == "PR" && (coment.regusuario.cod_und != usuLog[0].cod_und || !validUsuInter))
+                if (coment.tipo_coment == "PR" && (coment.regusuario.Unidad_negociocod_und != usuLog[0].Unidad_negociocod_und || !validUsuInter))
                 {
                     listaComent.Remove(coment);
                     continue;
@@ -642,6 +646,151 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             var obj = await _repositoryMetodosRehusables.EliminarActa(codigo, modulo);
             return obj;
+        }
+
+        public async Task<ImportResponseDto<ExportMasivoDTO>> ProyectoImport(RequestMasivo data)
+        {
+            ImportResponseDto<ExportMasivoDTO> dto = new ImportResponseDto<ExportMasivoDTO>();
+            var Material = await _repositoryMantenedores.GetAllByAttribute(Constantes.Material);
+            var Constructor = await _repositoryMantenedores.GetAllByAttribute(Constantes.Constructor);
+            var TipoProyecto = await _repositoryMantenedores.GetAllByAttribute(Constantes.TipoProyecto);
+            var Distrito = await _repositoryMantenedores.GetAllByAttribute(Constantes.Distrito);
+
+            var base64Content = data.base64;
+            var bytes = Convert.FromBase64String(base64Content);
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            List<Proyectos> lista = new List<Proyectos>();
+            List<ExportMasivoDTO> listaError = new List<ExportMasivoDTO>();
+            List<ExportMasivoDTO> listaRepetidos = new List<ExportMasivoDTO>();
+            List<ExportMasivoDTO> listaInsert = new List<ExportMasivoDTO>();
+
+            try
+            {
+                using (var memoryStream = new MemoryStream(bytes))
+                {
+                    using (var package = new ExcelPackage(memoryStream))
+                    {
+                        var worksheet = package.Workbook.Worksheets["Baremo"];
+
+                        for (int row = 2; row <= worksheet.Dimension.Rows; row++)
+                        {
+                            if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
+                            var codPry = worksheet.Cells[row, 1].Value?.ToString();
+                            var codPQ = worksheet.Cells[row, 2].Value?.ToString();
+                            var valor3 = worksheet.Cells[row, 3].Value?.ToString();
+                            var valor4 = worksheet.Cells[row, 4].Value?.ToString();
+
+                            var dPQ = await _context.PlanQuinquenal.Where(x => x.Pq == valor4).FirstOrDefaultAsync();
+                            var dMaterial = Material.Where(x => x.Descripcion == valor4).FirstOrDefault();
+                            var dConstructor = Constructor.Where(x => x.Descripcion == valor4).FirstOrDefault();
+                            var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion == valor4).FirstOrDefault();
+                            var dDistrito = Distrito.Where(x => x.Descripcion == valor4).FirstOrDefault();
+                            if (dPQ == null || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            {
+                                var entidadError = new ExportMasivoDTO
+                                {
+                                    Codigo = codPry
+
+                                };
+                                listaError.Add(entidadError);
+                                break;
+                            }
+
+                            try
+                            {
+                                var entidad = new Proyectos
+                                {
+                                    cod_pry = codPry,
+                                    cod_PQ = dPQ.Id
+                                   
+                                };
+                                lista.Add(entidad);
+                            }
+                            catch (Exception e)
+                            {
+                                var entidadError = new ExportMasivoDTO
+                                {
+                                    Codigo = codPry
+                                };
+                                listaError.Add(entidadError);
+
+                            }
+                        }
+                        foreach (var item in lista)
+                        {
+                            try
+                            {
+                                var existe = await _context.Proyectos.Where(x => x.cod_pry.Equals(item.cod_pry)).FirstAsync();
+                                if (existe != null)
+                                {
+                                    var repetidos = new ExportMasivoDTO
+                                    {
+                                        Codigo = existe.cod_pry
+                                    };
+                                    listaRepetidos.Add(repetidos);
+                                    existe.cod_pry = item.cod_pry;
+                                    existe.cod_PQ = item.cod_PQ;
+                                    //existe.Precio = item.Precio;
+                                    //existe.Descripcion = item.Descripcion;
+                                    //existe.Estado = item.Estado;
+                                    //existe.PlanQuinquenalId = item.PlanQuinquenalId;
+                                    //_context.Baremo.Update(existe);
+                                    await _context.SaveChangesAsync();
+                                }
+                                else
+                                {
+                                    var insertlista = new ExportMasivoDTO
+                                    {
+                                        Codigo = existe.cod_pry
+                                    };
+                                    listaInsert.Add(insertlista);
+                                    lista.Add(item);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
+                                var entidadError = new ExportMasivoDTO
+                                {
+                                    Codigo = item.cod_pry
+                                };
+                                listaError.Add(entidadError);
+                            }
+
+
+                        }
+                        if (listaInsert.Count > 0)
+                        {
+                            await _context.Proyectos.AddRangeAsync(lista);
+                            await _context.SaveChangesAsync();
+                        }
+
+
+                    }
+                }
+
+
+                dto.listaError = listaError;
+                dto.listaRepetidos = listaRepetidos;
+                dto.listaInsert = listaInsert;
+                dto.Satisfactorios = listaInsert.Count();
+                dto.Error = listaError.Count();
+                dto.Actualizados = listaRepetidos.Count();
+                dto.Valid = true;
+                dto.Message = Constantes.SatisfactorioImport;
+            }
+            catch (Exception e)
+            {
+                dto.Satisfactorios = 0;
+                dto.Error = 0;
+                dto.Actualizados = 0;
+                dto.Valid = false;
+                dto.Message = Constantes.ErrorImport;
+
+                return dto;
+            }
+
+            return dto;
         }
     }
 }

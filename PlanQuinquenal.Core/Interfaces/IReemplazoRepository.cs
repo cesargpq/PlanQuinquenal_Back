@@ -1,5 +1,6 @@
 ﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
+using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IReemplazoRepository
     {
-        Task<ImportResponseDto> ReemplazoImport(RequestMasivo requestMasivo);
+        Task<ImportResponseDto<Baremo>> ReemplazoImport(RequestMasivo requestMasivo);
     }
 }

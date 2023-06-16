@@ -1,5 +1,6 @@
 ﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
+using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
@@ -19,7 +20,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._context = context;
         }
 
-        public async Task<ImportResponseDto> ReemplazoImport(RequestMasivo requestMasivo)
+        public async Task<ImportResponseDto<Baremo>> ReemplazoImport(RequestMasivo requestMasivo)
         {
             throw new NotImplementedException();
         }

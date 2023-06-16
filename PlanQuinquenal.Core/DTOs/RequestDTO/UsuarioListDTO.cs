@@ -15,6 +15,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string estado { get; set; }
         public int cod_rol { get; set; }
         public int cod_perfil { get; set; }
+        public string buscar { get; set; }
 
     }
 }
