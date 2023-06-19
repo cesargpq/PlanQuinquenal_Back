@@ -25,13 +25,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     {
         private readonly PlanQuinquenalContext _context;
         private readonly IRepositoryMantenedores _repositoryMantenedores;
+        private readonly IBaremoRepository _baremoRepository;
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
         private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
 
-        public ProyectoRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores)
+        public ProyectoRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores, IBaremoRepository baremoRepository)
         {
             _context = context;
             this._repositoryMantenedores = repositoryMantenedores;
+            this._baremoRepository = baremoRepository;
         }
 
         public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto, int idUser)
@@ -223,12 +225,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         cod_etapa = int.Parse(desEtapa),
                                         cod_material = int.Parse(codMater),
                                         //constructor = codConst,
-                                        tipo_reg = tipoReg,
+                                        //tipo_reg = tipoReg,
                                         cod_dist = int.Parse(codDist),
                                         long_aprob = int.Parse(longAprob),
                                         tipo_pry = int.Parse(codTipoPry),
                                         cod_malla = codMalla,
-                                        cod_vnr = codVNR
+                                        //cod_vnr = codVNR
                                     };
                                     _context.Proyectos.Add(entidad);
                                     _context.SaveChanges();
@@ -764,21 +766,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             return camposModificados;
         }
-        public async Task<ImportResponseDto<ExportMasivoDTO>> ProyectoImport(RequestMasivo data)
+        public async Task<ImportResponseDto<Proyectos>> ProyectoImport(RequestMasivo data)
         {
-            ImportResponseDto<ExportMasivoDTO> dto = new ImportResponseDto<ExportMasivoDTO>();
+            ImportResponseDto<Proyectos> dto = new ImportResponseDto<Proyectos>();
             var Material = await _repositoryMantenedores.GetAllByAttribute(Constantes.Material);
             var Constructor = await _repositoryMantenedores.GetAllByAttribute(Constantes.Constructor);
             var TipoProyecto = await _repositoryMantenedores.GetAllByAttribute(Constantes.TipoProyecto);
             var Distrito = await _repositoryMantenedores.GetAllByAttribute(Constantes.Distrito);
+            var TipoRegistroPY = await _repositoryMantenedores.GetAllByAttribute(Constantes.TipoRegistroPY);
+            
+
 
             var base64Content = data.base64;
             var bytes = Convert.FromBase64String(base64Content);
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             List<Proyectos> lista = new List<Proyectos>();
-            List<ExportMasivoDTO> listaError = new List<ExportMasivoDTO>();
-            List<ExportMasivoDTO> listaRepetidos = new List<ExportMasivoDTO>();
-            List<ExportMasivoDTO> listaInsert = new List<ExportMasivoDTO>();
+            List<Proyectos> listaError = new List<Proyectos>();
+            List<Proyectos> listaRepetidos = new List<Proyectos>();
+            List<Proyectos> listaInsert = new List<Proyectos>();
 
             try
             {
@@ -814,11 +819,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var dConstructor = Constructor.Where(x => x.Descripcion == constructor).FirstOrDefault();
                             var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion == tipoProyecto).FirstOrDefault();
                             var dDistrito = Distrito.Where(x => x.Descripcion == distrito).FirstOrDefault();
-                            if (dPQ == null || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion == tipoRegistro).FirstOrDefault();
+                            var dCodigoVNR = await _baremoRepository.GetByCodigo(codVNR);
+                            int codigoVNR = 0;
+                            if(dCodigoVNR != null)
                             {
-                                var entidadError = new ExportMasivoDTO
+                                codigoVNR = dCodigoVNR.Id;
+                            }
+                           
+                            
+                            if (dPQ == null || codigoVNR ==0 || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            {
+                                var entidadError = new Proyectos
                                 {
-                                    Codigo = codPry,
+                                    cod_pry = codPry,
 
                                 };
                                 listaError.Add(entidadError);
@@ -835,15 +849,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     cod_anioPA = Convert.ToInt32(anioPA),
                                     cod_etapa = Convert.ToInt32(etapa),
                                     cod_material = dMaterial.IdTablaLogicaDatos,
-                                    constructor = dConstructor.IdTablaLogicaDatos
+                                    constructor = dConstructor.IdTablaLogicaDatos,
+                                    tipo_reg = dTipoRegistroPY.IdTablaLogicaDatos,
+                                    cod_dist = dDistrito.IdTablaLogicaDatos,
+                                    tipo_pry = dTipoProyecto.IdTablaLogicaDatos,
+                                    long_aprob = Decimal.Parse(longAproPa),
+                                    long_realHabi = Decimal.Parse(longRealHab),
+                                    long_realPend = Decimal.Parse(longRealPend),
+                                    long_impedimento = Decimal.Parse(longImpedimentos),
+                                    long_reemplazada = Decimal.Parse(longReemplazada),
+                                    cod_malla = codMalla,
+                                    cod_vnr = codigoVNR
+
                                 };
                                 lista.Add(entidad);
                             }
                             catch (Exception e)
                             {
-                                var entidadError = new ExportMasivoDTO
+                                var entidadError = new Proyectos
                                 {
-                                    Codigo = codPry
+                                    cod_pry = codPry,
+
                                 };
                                 listaError.Add(entidadError);
 
@@ -853,39 +879,49 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             try
                             {
-                                var existe = await _context.Proyectos.Where(x => x.cod_pry.Equals(item.cod_pry)).FirstAsync();
+                                var existe = await _context.Proyectos.FirstOrDefaultAsync(x => x.cod_pry.Equals(item.cod_pry));
                                 if (existe != null)
                                 {
-                                    var repetidos = new ExportMasivoDTO
+                                    var repetidos = new Proyectos
                                     {
-                                        Codigo = existe.cod_pry
+                                        cod_pry = existe.cod_pry
                                     };
                                     listaRepetidos.Add(repetidos);
                                     existe.cod_pry = item.cod_pry;
                                     existe.cod_PQ = item.cod_PQ;
+                                    existe.anioPQ = item.anioPQ;
+                                    existe.cod_anioPA = item.cod_anioPA;
+                                    existe.cod_etapa = item.cod_etapa;
+                                    existe.cod_material = item.cod_material;
+                                    existe.constructor = item.constructor;
+                                    existe.tipo_reg = item.tipo_reg;
+                                    existe.cod_dist = item.cod_dist;
+                                    existe.tipo_pry = item.tipo_pry;
+                                    existe.long_aprob = item.long_aprob;
+                                    existe.long_realHabi = item.long_realHabi;
+                                    existe.long_realPend = item.long_realPend;
+                                    existe.long_impedimento = item.long_impedimento;
+                                    existe.long_reemplazada = item.long_reemplazada;
+                                    existe.cod_malla = item.cod_malla;
+                                    existe.cod_vnr = item.cod_vnr;
                                     //existe.Precio = item.Precio;
                                     //existe.Descripcion = item.Descripcion;
                                     //existe.Estado = item.Estado;
                                     //existe.PlanQuinquenalId = item.PlanQuinquenalId;
-                                    //_context.Baremo.Update(existe);
+                                    _context.Proyectos.Update(existe);
                                     await _context.SaveChangesAsync();
                                 }
                                 else
                                 {
-                                    var insertlista = new ExportMasivoDTO
-                                    {
-                                        Codigo = existe.cod_pry
-                                    };
-                                    listaInsert.Add(insertlista);
-                                    lista.Add(item);
+                                    listaInsert.Add(item);
                                 }
                             }
                             catch (Exception e)
                             {
 
-                                var entidadError = new ExportMasivoDTO
+                                var entidadError = new Proyectos
                                 {
-                                    Codigo = item.cod_pry
+                                    cod_pry = item.cod_pry
                                 };
                                 listaError.Add(entidadError);
                             }

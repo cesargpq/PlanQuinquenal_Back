@@ -11,7 +11,8 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IBaremoRepository
     {
-        Task<Baremo> GetById(int id);  
+        Task<Baremo> GetById(int id);
+        Task<Baremo> GetByCodigo(string codigo);
         Task<ImportResponseDto<Baremo>> BaremoImport(RequestMasivo data);
         Task<ResponseDTO> Editarbaremo(BaremoRequestDto data, int id);
         Task<ResponseDTO> CrearBaremo(BaremoRequestDto data);
