@@ -13,6 +13,7 @@ namespace PlanQuinquenal.Core.Utilities
         public const string Constructor = "Constructor";
         public const string TipoProyecto = "TipoProyecto";
         public const string Distrito = "Distrito";
+        public const string TipoRegistroPY = "TipoRegistroPY";
         public const string PathFinanciamientoTemplate = "\\\\Content\\";
         public const string DobleFactor = "\\doble.html";
         public const string ErrorImport = "Hubo un error en la carga del archivo";

@@ -15,7 +15,7 @@ namespace PlanQuinquenal.Core.Entities
         public int id { get; set; }
 
         [Description("Descripción del proyecto")]
-        public string des_pry { get; set; }
+        public string? des_pry { get; set; }
 
         [Description("Código del proyecto")]
         public string cod_pry { get; set; }
@@ -33,25 +33,30 @@ namespace PlanQuinquenal.Core.Entities
         public int cod_material { get; set; }
 
         [Description("Constructor")]
-        public string constructor { get; set; }
+        public int constructor { get; set; }
 
         [Description("Tipo de registro")]
-        public string tipo_reg { get; set; }
+        public int tipo_reg { get; set; }
 
         [Description("Código del distrito")]
         public int cod_dist { get; set; }
 
         [Description("Longitud aprobada")]
-        public float long_aprob { get; set; }
+        public Decimal long_aprob { get; set; }
 
         [Description("Longitud real pendiente")]
-        public float long_realPend { get; set; }
+        public Decimal long_realPend { get; set; }
 
         [Description("Longitud real habilitada")]
-        public float long_realHabi { get; set; }
+        public Decimal long_realHabi { get; set; }
+
+        [Description("Longitud de Impedimento")]
+        public Decimal long_impedimento { get; set; }
+        [Description("Longitud reemplazada")]
+        public Decimal long_reemplazada { get; set; }
 
         [Description("Longitud de proyectos")]
-        public float long_proyectos { get; set; }
+        public Decimal long_proyectos { get; set; }
 
         [Description("Tipo de proyecto")]
         public int tipo_pry { get; set; }
@@ -63,10 +68,10 @@ namespace PlanQuinquenal.Core.Entities
         public string cod_malla { get; set; }
 
         [Description("Ingeniero responasble")]
-        public string ingRespon { get; set; }
+        public int ingRespon { get; set; }
 
         [Description("Usuario de registro")]
-        public string user_reg { get; set; }
+        public int user_reg { get; set; }
 
         [Description("Fecha de gasificacion")]
         public DateTime fecha_gas { get; set; }
@@ -75,6 +80,6 @@ namespace PlanQuinquenal.Core.Entities
         public int cod_pryReemp { get; set; }
 
         [Description("Código de VNR")]
-        public string cod_vnr { get; set; }
+        public int cod_vnr { get; set; }
     }
 }

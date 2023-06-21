@@ -31,6 +31,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var baremo = await _context.Baremo.Where(x=>x.Id == id).FirstOrDefaultAsync();
             return baremo;
         }
+
+        public async Task<Baremo> GetByCodigo(string codigo)
+        {
+            var baremo = await _context.Baremo.Where(x => x.CodigoBaremo == codigo).FirstOrDefaultAsync();
+            return baremo;
+        }
         public async Task<ImportResponseDto<Baremo>> BaremoImport(RequestMasivo data)
         {
             ImportResponseDto<Baremo> dto = new ImportResponseDto<Baremo>();
