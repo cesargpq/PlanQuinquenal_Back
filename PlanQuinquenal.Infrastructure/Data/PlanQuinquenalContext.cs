@@ -63,6 +63,8 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<CamposDinam_Acta> CamposDinam_Acta { get; set; }
         public virtual DbSet<Email_modificacion> Email_modificacion { get; set; }
         public virtual DbSet<CorreoTabla> CorreoTabla { get; set; }
+        public virtual DbSet<PQComentarios> PQComentarios { get; set; }
+        public virtual DbSet<PQDocumentos> PQDocumentos { get; set; }
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
         //    modelBuilder.Entity<Usuario>().ToTable("usuario").
