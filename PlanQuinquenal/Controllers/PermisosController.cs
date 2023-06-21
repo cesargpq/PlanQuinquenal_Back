@@ -28,8 +28,17 @@ namespace PlanQuinquenal.Controllers
 
             if (identity?.Claims.ElementAt(1) != null)
             {
-                var correo = identity.Claims.ElementAt(1).Value;
-                var resultado = await _repositoryPermisos.VisColumnTabla(correo, tabla);
+                var identityCl = HttpContext.User.Identity as ClaimsIdentity;
+                var idUser = 0;
+                foreach (var item in identityCl.Claims)
+                {
+                    if (item.Type.Equals("$I$Us$@I@D"))
+                    {
+                        idUser = Convert.ToInt16(item.Value);
+
+                    }
+                }
+                var resultado = await _repositoryPermisos.VisColumnTabla(idUser, tabla);
                 return Ok(resultado);
             }
             else
@@ -75,6 +84,23 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> ActConfRolesPerm(List<ConfRolesPerm> conRolesPerm)
         {
             var resultado = await _repositoryPermisos.ActConfRolesPerm(conRolesPerm);
+            return Ok(resultado);
+        }
+
+        [HttpPost("ModPermisoColumnTabla")]
+        public async Task<IActionResult> ModPermisoColumnTabla(ColumTablaUsu columna)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+
+                }
+            }
+            var resultado = await _repositoryPermisos.ModPermisoColumnTabla(columna, idUser);
             return Ok(resultado);
         }
     }

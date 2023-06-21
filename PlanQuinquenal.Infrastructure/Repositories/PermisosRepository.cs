@@ -20,8 +20,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<ColumsTablaPerResponse> VisColumnTabla(string correo, string tabla)
+        public async Task<ColumsTablaPerResponse> VisColumnTabla(int idUser, string tabla)
         {
+            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+            string correo = Usuario[0].correo_usu.ToString();
             ColumsTablaPerResponse respMod = new ColumsTablaPerResponse();
 
             var queryable = await _context.ColumTablaUsu
@@ -44,6 +46,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
             return respMod;
+        }
+
+        public async Task<Object> ModPermisoColumnTabla(ColumTablaUsu columna, int idUser)
+        {
+            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+            string correo = Usuario[0].correo_usu.ToString();
+            var modperTabla = _context.ColumTablaUsu.FirstOrDefault(p => p.id == columna.id);
+            modperTabla.seleccion = columna.seleccion;
+            _context.SaveChanges();
+            var resp = new
+            {
+                idMensaje = "1",
+                mensaje = "Se modifico el permiso de la columna correctamente"
+            };
+
+            var json = JsonConvert.SerializeObject(resp);
+            return json;
         }
 
         public  async Task<ModulosResponse> ActualizarPermisosMod(TablaPerm_viz_modulo reqModulos)
