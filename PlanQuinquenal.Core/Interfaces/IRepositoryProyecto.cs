@@ -18,7 +18,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<Object> NuevosProyectosMasivo(ProyectoRequest reqMasivo);
 
         Task<ImportResponseDto<Proyectos>> ProyectoImport(RequestMasivo data);
-        Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filterProyectos);
+        Task<PaginacionResponseDto<ResponseProyectoPDTO>> ObtenerProyectos(FiltersProyectos filterProyectos);
         Task<Object> ObtenerProyectoxNro(int nroProy, int cod_usu);
         Task<Object> CrearComentario(Comentarios_proyecDTO comentario, int idUser, string modulo);
         Task<Object> EliminarComentario(int codigo, string modulo);

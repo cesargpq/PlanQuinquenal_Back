@@ -45,27 +45,17 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("ProyectoImport")]
         public async Task<IActionResult> ProyectoImport(RequestMasivo data)
         {
-
             var resultado = await _repositoryProyecto.ProyectoImport(data);
-
-
             return Ok(resultado);
         }
         [HttpPost("ObtenerProyectos")]
         public async Task<IActionResult> ObtenerProyectos(FiltersProyectos filterProyectos)
         {
-
             var resultado = await _repositoryProyecto.ObtenerProyectos(filterProyectos);
             return Ok(resultado);
         }
 
-        [HttpPost("NuevosProyectosMasivo")]
-        public async Task<IActionResult> NuevosProyectosMasivo(ProyectoRequest reqMasivo)
-        {
-
-            var resultado = await _repositoryProyecto.NuevosProyectosMasivo(reqMasivo);
-            return Ok(resultado);
-        }
+        
 
         [HttpPost("ActualizarProyecto")]
         public async Task<IActionResult> ActualizarProyecto(ProyectoRequest nvoProyecto)

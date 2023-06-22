@@ -31,9 +31,12 @@ namespace PlanQuinquenal.Core.Entities
 
         [Description("Código del material")]
         public int cod_material { get; set; }
+       
 
         [Description("Constructor")]
         public int constructor { get; set; }
+        [Description("Estado General")]
+        public int EstadoGeneralId { get; set; }
 
         [Description("Tipo de registro")]
         public int tipo_reg { get; set; }
@@ -68,16 +71,13 @@ namespace PlanQuinquenal.Core.Entities
         public string cod_malla { get; set; }
 
         [Description("Ingeniero responasble")]
-        public int ingRespon { get; set; }
+        public string ingRespon { get; set; }
 
         [Description("Usuario de registro")]
         public int user_reg { get; set; }
 
         [Description("Fecha de gasificacion")]
         public DateTime fecha_gas { get; set; }
-
-        [Description("Código de proyecto de reemplazo")]
-        public int cod_pryReemp { get; set; }
 
         [Description("Código de VNR")]
         public int cod_vnr { get; set; }

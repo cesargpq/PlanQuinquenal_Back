@@ -39,8 +39,6 @@ namespace PlanQuinquenal.Controllers
                 resp.mensaje = "Hubo un error al momento de obtener su informacion";
                 return Ok(resp);
             }
-
-            
         }
 
         [HttpPost("ActualizarPermisosMod")]

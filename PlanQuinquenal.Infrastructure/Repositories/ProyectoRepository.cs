@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OfficeOpenXml;
 using LicenseContext = OfficeOpenXml.LicenseContext;
+using ApiDavis.Core.Utilidades;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -296,34 +297,87 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filterProyectos)
+        public async Task<PaginacionResponseDto<ResponseProyectoPDTO>> ObtenerProyectos(FiltersProyectos filterProyectos)
         {
-            List<Proyectos> lstPro = new List<Proyectos>();
-            var queryable = _context.Proyectos
-                                     .Where(x => filterProyectos.des_pry != "" ? x.des_pry == filterProyectos.des_pry : true)
-                                     .Where(x => filterProyectos.cod_pry != "" ? x.cod_pry == filterProyectos.cod_pry : true)
-                                     //.Where(x => filterProyectos.nro_exp != null ? x.nro_exp == filterProyectos.nro_exp : true)
-                                     //.Where(x => filterProyectos.estado_pry != "" ? x.estado_pry == filterProyectos.estado_pry : true)
-                                     .Where(x => filterProyectos.cod_etapa != null ? x.cod_etapa == filterProyectos.cod_etapa : true)
-                                     //.Where(x => filterProyectos.por_avance != null ? x.por_avance == filterProyectos.por_avance : true)
-                                     .Where(x => filterProyectos.cod_material != null ? x.cod_material == filterProyectos.cod_material : true)
-                                     .Where(x => filterProyectos.cod_dist != null ? x.cod_dist == filterProyectos.cod_dist : true)
-                                     .Where(x => filterProyectos.tipo_pry != null ? x.tipo_pry == filterProyectos.tipo_pry : true)
-                                     .Where(x => filterProyectos.cod_PQ != null ? x.cod_PQ == filterProyectos.cod_PQ : true)
-                                     .Where(x => filterProyectos.anioPQ != null ? x.anioPQ == filterProyectos.anioPQ : true)
-                                     .Where(x => filterProyectos.cod_anioPA != null ? x.cod_anioPA == filterProyectos.cod_anioPA : true)
-                                     .Where(x => filterProyectos.cod_malla != null ? x.cod_malla == filterProyectos.cod_malla : true)
-                                     .Where(x => filterProyectos.constructor != null ? x.constructor == filterProyectos.constructor : true)
-                                     .Where(x => filterProyectos.ingRespon != null ? x.ingRespon == filterProyectos.ingRespon : true)
-                                     .Where(x => filterProyectos.user_reg != null ? x.user_reg == filterProyectos.user_reg : true)
-                                     .Where(x => filterProyectos.fecha_gas != "" ? x.fecha_gas == DateTime.Parse(filterProyectos.fecha_gas) : true)
-                                     .Where(x => filterProyectos.cod_pryReemp != null ? x.cod_pryReemp == filterProyectos.cod_pryReemp : true)
-                                     .AsQueryable();
+            var joinedData = from proyectos in _context.Proyectos
+                             join material in _context.TablaLogicaDatos on proyectos.cod_material equals material.IdTablaLogicaDatos
+                             join tipoproy in _context.TablaLogicaDatos on proyectos.tipo_pry equals tipoproy.IdTablaLogicaDatos
+                             join quinquenal in _context.PlanQuinquenal on proyectos.cod_PQ equals quinquenal.Id
+                             join constructor in _context.TablaLogicaDatos on proyectos.constructor equals constructor.IdTablaLogicaDatos
+                             join tiporeg in _context.TablaLogicaDatos on proyectos.tipo_reg equals tiporeg.IdTablaLogicaDatos
+                             join distritos in _context.TablaLogicaDatos on proyectos.cod_dist equals distritos.IdTablaLogicaDatos
+                             join estadoGeneral in _context.TablaLogicaDatos on proyectos.EstadoGeneralId equals estadoGeneral.IdTablaLogicaDatos
+                             join usuario in _context.Usuario on proyectos.user_reg equals usuario.cod_usu
+                             join baremo in _context.Baremo on proyectos.cod_vnr equals baremo.Id
+                             join expediente in _context.Permisos_proyec on proyectos.id equals expediente.id_pry
+                             join impedimento in _context.Impedimentos on proyectos.id equals impedimento.id_pry
+                             where filterProyectos.cod_pry != "" ? proyectos.cod_pry.Contains(filterProyectos.cod_pry) : true
+                             where filterProyectos.nro_exp != "" ? expediente.num_exp.Contains(filterProyectos.nro_exp) : true
+                             where filterProyectos.estado_pry !=0 ? estadoGeneral.IdTablaLogicaDatos == filterProyectos.estado_pry : true
+                             where filterProyectos.cod_etapa != 0 ? proyectos.cod_etapa == filterProyectos.cod_etapa : true
+                             where filterProyectos.des_pry != "" ? proyectos.des_pry.Contains(filterProyectos.des_pry) : true
+                             where filterProyectos.cod_material != 0 ? proyectos.cod_material == filterProyectos.cod_material : true
+                             where filterProyectos.cod_dist != 0 ? proyectos.cod_dist == filterProyectos.cod_dist : true
+                             where filterProyectos.tipo_pry != 0 ? proyectos.tipo_pry == filterProyectos.tipo_pry : true
+                             where filterProyectos.cod_PQ != 0 ? proyectos.cod_PQ == filterProyectos.cod_PQ : true
+                             where filterProyectos.anioPQ != "" ? proyectos.anioPQ == filterProyectos.anioPQ : true
+                             where filterProyectos.cod_anioPA != 0 ? proyectos.cod_anioPA == filterProyectos.cod_anioPA : true
+                             where filterProyectos.cod_malla != "" ? proyectos.cod_malla == filterProyectos.cod_malla : true
+                             where filterProyectos.constructor != 0 ? proyectos.constructor == filterProyectos.constructor : true
+                             where filterProyectos.ingRespon != "" ? proyectos.ingRespon == filterProyectos.ingRespon : true
+                             where filterProyectos.problematica_real != 0 ? impedimento.cod_pbReal == filterProyectos.problematica_real : true
+                             where filterProyectos.usuario_reg != 0 ? proyectos.user_reg == filterProyectos.usuario_reg : true
+                             where filterProyectos.fecha_gas != "" ? proyectos.fecha_gas.Equals(filterProyectos.fecha_gas) : true
+                             where filterProyectos.usuario_reg != 0 ? proyectos.user_reg == filterProyectos.usuario_reg : true
+                             select new ResponseProyectoPDTO
+                             {
+                                 Id = proyectos.id,
+                                 des_pry = proyectos.des_pry,
+                                 cod_pry = proyectos.cod_pry,
+                                 cod_PQ = proyectos.cod_PQ,
+                                 pq_desc = quinquenal.Pq,
+                                 anioPQ = proyectos.anioPQ,
+                                 cod_anioPA = proyectos.cod_anioPA,
+                                 cod_material = proyectos.cod_material,
+                                 material_desc = material.Descripcion,
+                                 constructor = proyectos.constructor,
+                                 constructor_desc = constructor.Descripcion,
+                                 tipo_reg = proyectos.tipo_reg,
+                                 tipo_reg_desc = tiporeg.Descripcion,
+                                 cod_dist = proyectos.cod_dist,
+                                 cod_dist_desc = distritos.Descripcion,
+                                 long_aprob = proyectos.long_aprob,
+                                 long_realPend = proyectos.long_realPend,
+                                 long_realHabi = proyectos.long_realHabi,
+                                 long_impedimento = proyectos.long_impedimento,
+                                 long_reemplazada = proyectos.long_reemplazada,
+                                 long_proyectos = proyectos.long_proyectos,
+                                 tipo_pry = proyectos.tipo_pry,
+                                 tipo_pry_desc = tipoproy.Descripcion,
+                                 cod_etapa = proyectos.cod_etapa,
+                                 cod_malla = proyectos.cod_malla,
+                                 ingRespon = proyectos.ingRespon,
+                                 user_reg = proyectos.user_reg,
+                                 user_reg_desc = usuario.nombre_usu + " " + usuario.apellido_usu,
+                                 fecha_gas = proyectos.fecha_gas,
+                                 cod_vnr = proyectos.cod_vnr,
+                                 cod_vnr_desc = baremo.CodigoBaremo,
+                                 EstadoGeneralId = proyectos.EstadoGeneralId,
+                                 estado_general = estadoGeneral.Descripcion
+                             };
 
-            var entidades = await queryable.ToListAsync();
-            lstPro = entidades;
-            return lstPro;
+            var entidades = await joinedData.OrderBy(e => e.des_pry).Paginar(filterProyectos)
+                                      .ToListAsync();
+            int cantidad = joinedData.Count();
+            var objeto = new PaginacionResponseDto<ResponseProyectoPDTO>
+            {
+                Cantidad = cantidad,
+                Model = entidades
 
+            };
+
+
+            return objeto;
         }
 
         public async Task<Object> ActualizarProyecto(ProyectoRequest nvoProyecto, int idUser)
