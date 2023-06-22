@@ -18,6 +18,8 @@ namespace PlanQuinquenal.Core.Entities
         public string nom_campo { get; set; }
         public bool visib_campo { get; set; }
         public bool edit_campo { get; set; }
+        public string des_campo { get; set; }
+        public int cod_campo { get; set; }
 
         [ForeignKey("cod_seccion")]
         public Secc_modulos seccionModulo { get; set; }

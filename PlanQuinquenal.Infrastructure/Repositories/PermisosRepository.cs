@@ -5,7 +5,9 @@ using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -180,29 +182,64 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<ConfRolesPerm>> ObtenerConfRolesPerm()
+        public async Task<Object> ObtenerConfRolesPerm(int modulo)
         {
+            List<dynamic> listaPermisos = new List<dynamic>();
+            var QuerylistaCampos = _context.CamposModulo_Permisos.Where(x => x.modulo == modulo).AsQueryable();
+            var listaPerfiles = await _context.Perfil.OrderBy(e => e.cod_perfil).ToListAsync();
+            int cantRegist = QuerylistaCampos.Count();
+            var listaCampos = await QuerylistaCampos.ToListAsync();
+
+
             List<ConfRolesPerm> lstresp = new List<ConfRolesPerm>();
-            var queryable = await _context.Permisos_viz_seccion.Include(p => p.seccionModulo)
-                                     .ToListAsync();
-
-            foreach (var permRol in queryable)
+            foreach (var campo in listaCampos)
             {
-                ConfRolesPerm objPerRol = new ConfRolesPerm();
-                objPerRol.cod_perm_campo = permRol.cod_perm_campo;
-                objPerRol.codSec_permViz = permRol.codSec_permViz;
-                objPerRol.cod_seccion = permRol.cod_seccion;
-                objPerRol.nom_seccion = permRol.seccionModulo.seccion;
-                objPerRol.modulo = permRol.seccionModulo.modulo;
-                objPerRol.nom_campo = permRol.nom_campo;
-                objPerRol.visib_campo = permRol.visib_campo;
-                objPerRol.edit_campo = permRol.edit_campo;
+                dynamic obj = new ExpandoObject();
+                obj.nom_seccion = campo.nombre_campo;
+                foreach (var perfilItem in listaPerfiles)
+                {
+                    int perfil_sec = perfilItem.Permisos_viz_seccioncodSec_permViz;
+                    var listapermisos = await _context.Permisos_viz_seccion.Where(x => x.codSec_permViz == perfil_sec)
+                        .Where(x => x.cod_campo == campo.id).ToListAsync();
+                    dynamic perfil = new ExpandoObject();
+                    perfil.id = listapermisos[0].cod_perm_campo;
+                    perfil.edit_campo = listapermisos[0].edit_campo;
+                    string perfilNombre = "Perfil" + perfilItem.cod_perfil;
+                    ((IDictionary<string, object>)obj)[perfilNombre] = perfil;
+                }
 
-                lstresp.Add(objPerRol);
-
+                listaPermisos.Add(obj);
             }
 
-            return lstresp;
+
+            var resp = new
+            {
+                cantidad = cantRegist,
+                listaPerfiles = listaPermisos
+            };
+
+            var json = JsonConvert.SerializeObject(resp);
+            return json;
+
+            //var queryable = await _context.Permisos_viz_seccion.Include(p => p.seccionModulo).ToListAsync();
+
+            //foreach (var permRol in queryable)
+            //{
+            //    ConfRolesPerm objPerRol = new ConfRolesPerm();
+            //    objPerRol.cod_perm_campo = permRol.cod_perm_campo;
+            //    objPerRol.codSec_permViz = permRol.codSec_permViz;
+            //    objPerRol.cod_seccion = permRol.cod_seccion;
+            //    objPerRol.nom_seccion = permRol.seccionModulo.seccion;
+            //    objPerRol.modulo = permRol.seccionModulo.modulo;
+            //    objPerRol.nom_campo = permRol.nom_campo;
+            //    objPerRol.visib_campo = permRol.visib_campo;
+            //    objPerRol.edit_campo = permRol.edit_campo;
+
+            //    lstresp.Add(objPerRol);
+
+            //}
+
+            //return lstresp;
 
         }
 

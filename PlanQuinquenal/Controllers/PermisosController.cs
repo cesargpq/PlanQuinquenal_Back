@@ -74,9 +74,9 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpGet("ObtenerConfRolesPerm")]
-        public async Task<IActionResult> ObtenerConfRolesPerm()
+        public async Task<IActionResult> ObtenerConfRolesPerm(int modulo)
         {
-            var resultado = await _repositoryPermisos.ObtenerConfRolesPerm();
+            var resultado = await _repositoryPermisos.ObtenerConfRolesPerm(modulo);
             return Ok(resultado);
         }
 

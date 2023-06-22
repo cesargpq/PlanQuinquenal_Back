@@ -14,7 +14,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ModulosResponse> ActualizarPermisosMod(TablaPerm_viz_modulo reqModulos);
         Task<Object> ActAccionesPerfil(List<Acciones_Rol> reqAccRol);
         Task<List<Acciones_Rol>> ConsAccionesPerfil();
-        Task<List<ConfRolesPerm>> ObtenerConfRolesPerm();
+        Task<Object> ObtenerConfRolesPerm(int modulo);
         Task<Object> ActConfRolesPerm(List<ConfRolesPerm> conRolesPerm);
         Task<Object> ModPermisoColumnTabla(ColumTablaUsu columna, int idUser);
     }
