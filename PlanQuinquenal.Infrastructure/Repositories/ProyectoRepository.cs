@@ -386,7 +386,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             string nomPerfil = Usuario[0].Perfil.nombre_perfil;
             string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
             string fechaHoraActual = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var ProyectoOriginal = await _context.Informes.Where(x => x.id == nvoProyecto.proyecto.id).ToListAsync();
+            var ProyectoOriginal = await _context.Proyectos.Where(x => x.id == nvoProyecto.proyecto.id).ToListAsync();
             try
             {
                 var modPry = _context.Proyectos.FirstOrDefault(p => p.id == nvoProyecto.proyecto.id);
@@ -456,7 +456,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 foreach (var listaUsuInters in nvoProyecto.lstUsuaInter_Inicial)
                 {
                     int cod_usu = listaUsuInters.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
                     var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
                     string correo = UsuarioInt[0].correo_usu.ToString();
                     if (lstpermisos.Count() == 1)
@@ -725,6 +725,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<object> CrearDocumento(Docum_proyectoDTO requestDoc, int idUser, string modulo)
         {
             var obj = await _repositoryMetodosRehusables.CrearDocumento(requestDoc, idUser, modulo);
+            DocumentoProyRequest archivo = new DocumentoProyRequest { 
+                NombreArchivo = requestDoc.NombreArchivo,
+                Base64 = requestDoc.Base64
+            };
+            await CrearDocumentoPr(archivo,  modulo);
             return obj;
         }
 

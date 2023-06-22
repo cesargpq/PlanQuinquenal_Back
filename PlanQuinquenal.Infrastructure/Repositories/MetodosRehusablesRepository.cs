@@ -150,6 +150,129 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     return json;
                 }
             }
+            else if (modulo == "PQ")
+            {
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                try
+                {
+                    #region creacion del acta
+                    var entidadActas = new Actas
+                    {
+                        fecha_reu = requestDoc.fecha_reu,
+                        agenda = requestDoc.agenda,
+                        acuerdos = requestDoc.acuerdos,
+                        obj_reu = requestDoc.obj_reu,
+                        compromisos = requestDoc.compromisos,
+                        fecha_limComp = requestDoc.fecha_limComp,
+                        cod_resp = requestDoc.cod_resp,
+                        aprobacion = requestDoc.aprobacion,
+                        cod_tipoSeg = requestDoc.cod_tipoSeg,
+                        cod_seg = requestDoc.cod_seg,
+                        fecha_emis = DateTime.Now
+                    };
+                    _context.Actas.Add(entidadActas);
+                    _context.SaveChanges();
+
+                    int idGeneradoActa = entidadActas.id;
+                    foreach (var listaUsuAsistActa in requestDoc.lstAsistActas)
+                    {
+                        var entidad2 = new UsuAsisten_Acta
+                        {
+                            id_acta = idGeneradoActa,
+                            cod_usu = listaUsuAsistActa.cod_usu
+                        };
+                        _context.UsuAsisten_Acta.Add(entidad2);
+                    }
+
+                    foreach (var listaUsuParticActa in requestDoc.lstPartActas)
+                    {
+                        var entidad2 = new UsuParticip_Acta
+                        {
+                            id_acta = idGeneradoActa,
+                            cod_usu = listaUsuParticActa.cod_usu
+                        };
+                        _context.UsuParticip_Acta.Add(entidad2);
+                    }
+
+                    foreach (var listaCamposDinam in requestDoc.lstCamposDinamic)
+                    {
+                        var entidad2 = new CamposDinam_Acta
+                        {
+                            id_acta = idGeneradoActa,
+                            nom_campo = listaCamposDinam.nom_campo,
+                            valor_campo = listaCamposDinam.valor_campo
+                        };
+                        _context.CamposDinam_Acta.Add(entidad2);
+                    }
+                    _context.SaveChanges();
+                    #endregion
+
+                    #region Comparacion de estructuras y agregacion de cambios
+
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = idGeneradoActa.ToString()
+                    };
+
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+
+                    var PlanQuinquenal = await _context.PlanQuinquenal.Where(x => x.Id == requestDoc.cod_seg).ToListAsync();
+                    string des_pq = PlanQuinquenal[0].Descripcion;
+
+                    foreach (var listaUsuParticActa in requestDoc.lstPartActas)
+                    {
+                        int cod_usu = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "C";
+                            notifInfoActas.mensaje = $"Se creó el acta {idGeneradoActa} para el plan quinquenal {des_pq}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "PQ";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Acta");
+                        }
+                    }
+
+                    #endregion
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se creó el acta correctamente"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                catch (Exception ex)
+                {
+                    var resp = new
+                    {
+                        idMensaje = "0",
+                        mensaje = "Hubo un error al crear el acta"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+            }
             else
             {
                 var resp = new
@@ -237,6 +360,76 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var json = JsonConvert.SerializeObject(resp);
                 return json;
             }
+            else if (modulo == "PQ")
+            {
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                var entidad = new PQComentarios
+                {
+                    PlanQuinquenalId = comentario.codigo,
+                    Comentario = comentario.comentario,
+                    TipoComentario = comentario.tipo_coment,
+                    UsuarioId = comentario.cod_usu,
+                    Area = nomPerfil,
+                    Fecha = DateTime.Now,
+                    estado = true
+                };
+                _context.PQComentarios.Add(entidad);
+                _context.SaveChanges();
+
+                #region Comparacion de estructuras y agregacion de cambios
+
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = entidad.Id.ToString()
+                };
+
+                composCorreo.Add(correoDatos);
+                #endregion
+
+                #region Envio de notificacion
+                var lstUsuInteresados = await _context.PQUsuariosInteresados.Where(x => x.PlanQuinquenalId == comentario.codigo).ToListAsync();
+                var PlanQuinquenal = await _context.PlanQuinquenal.Where(x => x.Id == comentario.codigo).ToListAsync();
+                string des_pq = PlanQuinquenal[0].Descripcion;
+
+                foreach (var listaUsuInterPQ in lstUsuInteresados)
+                {
+                    int cod_usu = listaUsuInterPQ.UsuarioId;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    string correo = UsuarioInt[0].correo_usu.ToString();
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifComentarios = new Notificaciones();
+                        notifComentarios.cod_usu = cod_usu;
+                        notifComentarios.seccion = "COMENTARIOS";
+                        notifComentarios.nombreComp_usu = NomCompleto;
+                        notifComentarios.cod_reg = comentario.codigo.ToString();
+                        notifComentarios.area = nomPerfil;
+                        notifComentarios.fechora_not = DateTime.Now;
+                        notifComentarios.flag_visto = false;
+                        notifComentarios.tipo_accion = "C";
+                        notifComentarios.mensaje = $"Se creó el comentario {entidad.Id} para el plan quinquenal {des_pq}";
+                        notifComentarios.codigo = comentario.codigo;
+                        notifComentarios.modulo = "PQ";
+
+                        await _repositoryNotificaciones.CrearNotificacion(notifComentarios);
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Comentarios");
+                    }
+                }
+                #endregion
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se creó el comentario correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
             else
             {
                 var resp = new
@@ -278,6 +471,33 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var json = JsonConvert.SerializeObject(resp);
                 return json;
             }
+            else if (modulo == "PQ")
+            {
+                string fechaHoraActual = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string NombreArch = requestDoc.nom_doc;
+                string nombreFinal = NombreArch.Replace(".", $"_{fechaHoraActual}.");
+                var entidad = new PQDocumentos
+                {
+                    PlanQuinquenalId = requestDoc.codigo,
+                    Nombre = nombreFinal,
+                    Fecha = DateTime.Now,
+                    TipoDocumento = requestDoc.mime_type,
+                    estado = true,
+                    CodDocumento = requestDoc.codigo_doc
+                };
+                _context.PQDocumentos.Add(entidad);
+                _context.SaveChanges();
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se creó el comentario correctamente",
+                    nombreDoc = nombreFinal
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
             else
             {
                 var resp = new
@@ -294,7 +514,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<object> CrearInforme(InformeRequestDTO requestDoc, int idUser, string modulo)
         {
-            if (modulo == "C")
+            if (modulo == "P")
             {
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
@@ -367,6 +587,102 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                     }
                     
+                    #endregion
+
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se creó el informe correctamente"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                catch (Exception ex)
+                {
+                    var resp = new
+                    {
+                        idMensaje = "0",
+                        mensaje = "Hubo un error al crear el informe"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+            }
+            else if (modulo == "P")
+            {
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                try
+                {
+                    var entidad = new Informes
+                    {
+                        fecha_inf = requestDoc.fecha_inf,
+                        res_general = requestDoc.res_general,
+                        prox_pasos = requestDoc.prox_pasos,
+                        act_realiz = requestDoc.act_realiz,
+                        cod_tipoSeg = requestDoc.cod_tipoSeg,
+                        cod_seg = requestDoc.cod_seg,
+                        fecha_emis = DateTime.Now
+                    };
+                    _context.Informes.Add(entidad);
+                    _context.SaveChanges();
+
+                    int idGenerado = entidad.id;
+                    foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
+                    {
+                        var entidad2 = new UsuariosIntersados_Inf
+                        {
+                            id_inf = idGenerado,
+                            cod_usu = listaUsuInterInfo.cod_usu
+                        };
+                        _context.UsuariosIntersados_Inf.Add(entidad2);
+                        _context.SaveChanges();
+                    }
+
+                    #region Comparacion de estructuras y agregacion de cambios
+
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = idGenerado.ToString()
+                    };
+
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+                    var PlanQuinquenal = await _context.PlanQuinquenal.Where(x => x.Id == requestDoc.cod_seg).ToListAsync();
+                    string des_pq = PlanQuinquenal[0].Descripcion;
+
+                    foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
+                    {
+                        int cod_usu = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "C";
+                            notifInfoActas.mensaje = $"Se creó el informe {entidad.id} para el plan quinquenal {des_pq}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "P";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Informes");
+                        }
+                    }
+
                     #endregion
 
                     var resp = new
@@ -498,7 +814,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<object> EliminarActa(int codigo, string modulo)
         {
-            if (modulo == "P")
+            if (modulo == "P" || modulo == "PQ")
             {
                 #region Eliminacion de Acta
                 var regEliminar = _context.Actas.Find(codigo);
@@ -555,6 +871,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var json = JsonConvert.SerializeObject(resp);
                 return json;
             }
+            else if (modulo == "PQ")
+            {
+                var codComentEliminar = _context.PQComentarios.Find(codigo);
+                _context.PQComentarios.Remove(codComentEliminar);
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se eliminó el comentario correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
             else
             {
                 var resp = new
@@ -584,6 +913,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var json = JsonConvert.SerializeObject(resp);
                 return json;
             }
+            else if (modulo == "PQ")
+            {
+                var codDocElim = _context.PQDocumentos.Find(codigo);
+                _context.PQDocumentos.Remove(codDocElim);
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se eliminó el documento correctamente"
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
             else
             {
                 var resp = new
@@ -600,7 +942,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<object> EliminarInforme(int codigo, string modulo)
         {
-            if (modulo == "P")
+            if (modulo == "P" || modulo == "PQ")
             {
                 #region Eliminacion de informe
                 var regEliminar = _context.Informes.Find(codigo);
@@ -840,6 +1182,182 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     return json;
                 }
             }
+            else if (modulo == "PQ")
+            {
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                var ActaOriginal = await _context.Actas.Where(x => x.id == requestDoc.id).ToListAsync();
+                try
+                {
+                    #region Modificacion de acta
+                    var modActa = _context.Actas.FirstOrDefault(p => p.id == requestDoc.id);
+                    modActa.fecha_reu = requestDoc.fecha_reu;
+                    modActa.agenda = requestDoc.agenda;
+                    modActa.acuerdos = requestDoc.acuerdos;
+                    modActa.obj_reu = requestDoc.obj_reu;
+                    modActa.compromisos = requestDoc.compromisos;
+                    modActa.fecha_limComp = requestDoc.fecha_limComp;
+                    modActa.cod_resp = requestDoc.cod_resp;
+                    modActa.aprobacion = requestDoc.aprobacion;
+                    modActa.cod_tipoSeg = requestDoc.cod_tipoSeg;
+                    modActa.cod_seg = requestDoc.cod_seg;
+                    modActa.fecha_emis = requestDoc.fecha_emis;
+                    _context.SaveChanges();
+
+                    foreach (var listaUsuAsisActa in requestDoc.lstAsistActas)
+                    {
+                        if (listaUsuAsisActa.tipoAccion == "C" && requestDoc.id == listaUsuAsisActa.id_acta)
+                        {
+                            var entidad2 = new UsuAsisten_Acta
+                            {
+                                id_acta = requestDoc.id,
+                                cod_usu = listaUsuAsisActa.cod_usu
+                            };
+                            _context.UsuAsisten_Acta.Add(entidad2);
+                            _context.SaveChanges();
+                        }
+                        else if (listaUsuAsisActa.tipoAccion == "E")
+                        {
+                            var regEliminar = _context.UsuAsisten_Acta.Find(listaUsuAsisActa.id);
+                            _context.UsuAsisten_Acta.Remove(regEliminar);
+                            _context.SaveChanges();
+                        }
+
+                    }
+
+                    foreach (var listaUsuParticActa in requestDoc.lstPartActas)
+                    {
+                        if (listaUsuParticActa.tipoAccion == "C" && requestDoc.id == listaUsuParticActa.id_acta)
+                        {
+                            var entidad2 = new UsuParticip_Acta
+                            {
+                                id_acta = requestDoc.id,
+                                cod_usu = listaUsuParticActa.cod_usu
+                            };
+                            _context.UsuParticip_Acta.Add(entidad2);
+                            _context.SaveChanges();
+                        }
+                        else if (listaUsuParticActa.tipoAccion == "E")
+                        {
+                            var regEliminar = _context.UsuParticip_Acta.Find(listaUsuParticActa.id);
+                            _context.UsuParticip_Acta.Remove(regEliminar);
+                            _context.SaveChanges();
+                        }
+
+                    }
+
+                    foreach (var listaCamposDinam in requestDoc.lstCamposDinamic)
+                    {
+                        if (listaCamposDinam.tipoAccion == "C" && requestDoc.id == listaCamposDinam.id_acta)
+                        {
+                            var entidad2 = new CamposDinam_Acta
+                            {
+                                id_acta = requestDoc.id,
+                                nom_campo = listaCamposDinam.nom_campo,
+                                valor_campo = listaCamposDinam.valor_campo
+                            };
+                            _context.CamposDinam_Acta.Add(entidad2);
+                            _context.SaveChanges();
+                        }
+                        else if (listaCamposDinam.tipoAccion == "M")
+                        {
+                            var modCampoDin = _context.CamposDinam_Acta.FirstOrDefault(p => p.id == listaCamposDinam.id);
+                            modCampoDin.nom_campo = listaCamposDinam.nom_campo;
+                            modCampoDin.valor_campo = listaCamposDinam.valor_campo;
+                            _context.SaveChanges();
+                        }
+                        else if (listaCamposDinam.tipoAccion == "E")
+                        {
+                            var regEliminar = _context.CamposDinam_Acta.Find(listaCamposDinam.id);
+                            _context.CamposDinam_Acta.Remove(regEliminar);
+                            _context.SaveChanges();
+                        }
+
+                    }
+                    #endregion
+
+                    #region Comparacion de estructuras y agregacion de cambios
+                    Actas actaModificada = new Actas
+                    {
+                        id = requestDoc.id,
+                        fecha_reu = requestDoc.fecha_reu,
+                        agenda = requestDoc.agenda,
+                        acuerdos = requestDoc.acuerdos,
+                        obj_reu = requestDoc.obj_reu,
+                        compromisos = requestDoc.compromisos,
+                        fecha_limComp = requestDoc.fecha_limComp,
+                        cod_resp = requestDoc.cod_resp,
+                        fecha_emis = requestDoc.fecha_emis,
+                        aprobacion = requestDoc.aprobacion,
+                        cod_tipoSeg = requestDoc.cod_tipoSeg,
+                        cod_seg = requestDoc.cod_seg
+                    };
+
+                    List<CorreoTabla> camposModificados = CompararPropiedades(ActaOriginal[0], actaModificada, requestDoc.cod_seg.ToString(), NomCompleto);
+                    #endregion
+
+                    #region Envio de notificacion 
+
+                    var PlanQuinquenal = await _context.PlanQuinquenal.Where(x => x.Id == requestDoc.cod_seg).ToListAsync();
+                    string des_pq = PlanQuinquenal[0].Descripcion;
+
+                    foreach (var listaUsuParticActa in requestDoc.lstPartActas)
+                    {
+                        int cod_usu = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "M";
+                            notifInfoActas.mensaje = $"Se modificó el acta {requestDoc.id} para el plan quinquenal {des_pq}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "PQ";
+
+                            var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                            int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Actas");
+                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            _context.CorreoTabla.AddRange(camposModificados);
+                            _context.SaveChanges();
+
+
+                        }
+                    }
+
+                    #endregion
+
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se modificó el acta correctamente"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                catch (Exception ex)
+                {
+                    var resp = new
+                    {
+                        idMensaje = "0",
+                        mensaje = "Hubo un error al modificar el acta"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+            }
             else
             {
                 var resp = new
@@ -950,6 +1468,122 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                     }
                     
+                    #endregion
+
+                    var resp = new
+                    {
+                        idMensaje = "1",
+                        mensaje = "Se modificó el informe correctamente"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+                catch (Exception ex)
+                {
+                    var resp = new
+                    {
+                        idMensaje = "0",
+                        mensaje = "Hubo un error al modificar el informe"
+                    };
+
+                    var json = JsonConvert.SerializeObject(resp);
+                    return json;
+                }
+            }
+            else if (modulo == "PQ")
+            {
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                var InformeOriginal = await _context.Informes.Where(x => x.id == requestDoc.id).ToListAsync();
+                try
+                {
+                    var modInforme = _context.Informes.FirstOrDefault(p => p.id == requestDoc.id);
+                    modInforme.fecha_inf = requestDoc.fecha_inf;
+                    modInforme.res_general = requestDoc.res_general;
+                    modInforme.prox_pasos = requestDoc.prox_pasos;
+                    modInforme.act_realiz = requestDoc.act_realiz;
+                    modInforme.cod_tipoSeg = requestDoc.cod_tipoSeg;
+                    modInforme.cod_seg = requestDoc.cod_seg;
+                    modInforme.fecha_emis = requestDoc.fecha_emis;
+                    _context.SaveChanges();
+                    foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
+                    {
+                        if (listaUsuInterInfo.tipoAccion == "C")
+                        {
+                            if (requestDoc.id == listaUsuInterInfo.id_inf)
+                            {
+                                var entidad2 = new UsuariosIntersados_Inf
+                                {
+                                    id_inf = requestDoc.id,
+                                    cod_usu = listaUsuInterInfo.cod_usu
+                                };
+                                _context.UsuariosIntersados_Inf.Add(entidad2);
+                                _context.SaveChanges();
+                            }
+                        }
+                        else if (listaUsuInterInfo.tipoAccion == "E")
+                        {
+                            var regEliminar = _context.UsuariosIntersados_Inf.Find(listaUsuInterInfo.id);
+                            _context.UsuariosIntersados_Inf.Remove(regEliminar);
+                            _context.SaveChanges();
+                        }
+
+                    }
+
+                    #region Comparacion de estructuras y agregacion de cambios
+                    Informes informeModificado = new Informes
+                    {
+                        id = requestDoc.id,
+                        fecha_inf = requestDoc.fecha_inf,
+                        res_general = requestDoc.res_general,
+                        prox_pasos = requestDoc.prox_pasos,
+                        act_realiz = requestDoc.act_realiz,
+                        fecha_emis = requestDoc.fecha_emis,
+                        cod_tipoSeg = requestDoc.cod_tipoSeg,
+                        cod_seg = requestDoc.cod_seg
+                    };
+
+                    List<CorreoTabla> camposModificados = CompararPropiedades(InformeOriginal[0], informeModificado, requestDoc.cod_seg.ToString(), NomCompleto);
+                    #endregion
+
+                    #region Envio de notificacion
+
+                    var PlanQuinquenal = await _context.PlanQuinquenal.Where(x => x.Id == requestDoc.cod_seg).ToListAsync();
+                    string des_pq = PlanQuinquenal[0].Descripcion;
+
+                    foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
+                    {
+                        int cod_usu = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifInfoActas = new Notificaciones();
+                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.seccion = "INFORMES Y ACTAS";
+                            notifInfoActas.nombreComp_usu = NomCompleto;
+                            notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
+                            notifInfoActas.area = nomPerfil;
+                            notifInfoActas.fechora_not = DateTime.Now;
+                            notifInfoActas.flag_visto = false;
+                            notifInfoActas.tipo_accion = "M";
+                            notifInfoActas.mensaje = $"Se modificó el informe {requestDoc.id} para el plan quinquenal {des_pq}";
+                            notifInfoActas.codigo = requestDoc.cod_seg;
+                            notifInfoActas.modulo = "PQ";
+
+                            var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifInfoActas);
+                            dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                            int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Informe");
+                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            _context.CorreoTabla.AddRange(camposModificados);
+                            _context.SaveChanges();
+                        }
+                    }
+
                     #endregion
 
                     var resp = new

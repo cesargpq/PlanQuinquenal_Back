@@ -14,5 +14,8 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public DateTime fecha_reg { get; set; }
         public string mime_type { get; set; }
         public string tipoAccion { get; set; }
+        public string codigo_doc { get; set; }
+        public string Base64 { get; set; }
+        public string NombreArchivo { get; set; }
     }
 }
