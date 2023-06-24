@@ -21,7 +21,16 @@ namespace PlanQuinquenal.Infrastructure.Data
 
        
         public virtual DbSet<Logs> Logs { get; set; }
+        public virtual DbSet<Material> Material { get; set; }
+        public virtual DbSet<PQuinquenal> PQuinquenal { get; set; }
+        public virtual DbSet<PlanAnual> PlanAnual { get; set; }
+        public virtual DbSet<Distrito> Distrito { get; set; }
+        public virtual DbSet<TipoProyecto> TipoProyecto { get; set; }
+        public virtual DbSet<TipoRegistro> TipoRegistro { get; set; }
+        public virtual DbSet<Constructor> Constructor { get; set; }
+        public virtual DbSet<EstadoGeneral> EstadoGeneral { get; set; }
         public virtual DbSet<ProyectosP> ProyectosP { get; set; }
+        public virtual DbSet<Proyecto> Proyecto { get; set; }
         public virtual DbSet<TablaLogicaDatos> TablaLogicaDatos { get; set; }
         public virtual DbSet<TablaLogica> TablaLogica { get; set; }
         public virtual DbSet<TablaPerm_viz_modulo> Perm_viz_modulo { get; set; }

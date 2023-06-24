@@ -9,24 +9,31 @@ namespace PlanQuinquenal.Core.Entities
 {
     public class FiltersProyectos : PaginacionDTO
     {
-        public string des_pry { get; set; }
-        public string cod_pry { get; set; }
-        public string nro_exp { get; set; }
-        public int estado_pry { get; set; }
-        public int cod_etapa { get; set; }
-        public int por_avance { get; set; }
-        public int cod_material { get; set; }
-        public int cod_dist { get; set; }
-        public int tipo_pry { get; set; }
-        public int cod_PQ { get; set; }
-        public string anioPQ { get; set; }
-        public int cod_anioPA { get; set; }
-        public string cod_malla { get; set; }
-        public int constructor { get; set; }
-        public string ingRespon { get; set; }
-        public int user_reg { get; set; }
-        public string fecha_gas { get; set; }
-        public int problematica_real { get; set; }
-        public int usuario_reg { get; set; }
+        public string CodigoProyecto { get; set; }
+        //falta
+        public string NroExpediente { get; set; }
+        //falta
+        public int EstadoGeneral { get; set; }
+        public int Etapa { get; set; }
+        //falta
+        public int Porcentaje { get; set; }
+        //falta
+        public int ValorPorcentaje { get; set; }
+        public string NombreProyecto { get; set; }
+        public int MaterialId { get; set; }
+        public int DistritoId { get; set; }
+        public int TipoProyectoId { get; set; }
+        public int PQuinquenalId { get; set; }
+        public string AñoPq { get; set; }
+        public int PAnualId { get; set; }
+        public string CodigoMalla { get; set; }
+        public int ConstructorId { get; set; }
+        public int IngenieroId { get; set; }
+        //Falta
+        public string ProblematicaReal { get; set; }
+        public int UsuarioRegisterId { get; set; }
+        public string FechaGasificacion { get; set; }
+
+
     }
 }

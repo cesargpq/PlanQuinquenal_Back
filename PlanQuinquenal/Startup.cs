@@ -43,6 +43,9 @@ namespace PlanQuinquenal
             services.AddTransient<IRepositoryProyecto, ProyectoRepository>();
             services.AddTransient<IBaremoRepository, BaremoRepository>();
             services.AddTransient<IRepositoryNotificaciones, NotificacionesRepository>();
+            services.AddTransient<IProyectoRepository, ProyectoRepositorio>();
+
+
             services.AddTransient<HashService>();
             services.AddTransient<Constantes>();
 

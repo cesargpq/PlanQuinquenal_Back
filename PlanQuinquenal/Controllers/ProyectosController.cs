@@ -34,10 +34,8 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-                    
                 }
             }
-
             var resultado = await _repositoryProyecto.NuevoProyecto(nvoProyecto, idUser);
             return Ok(resultado);
         }
@@ -55,8 +53,6 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
-        
-
         [HttpPost("ActualizarProyecto")]
         public async Task<IActionResult> ActualizarProyecto(ProyectoRequest nvoProyecto)
         {
@@ -67,7 +63,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.ActualizarProyecto(nvoProyecto, idUser);
@@ -84,7 +79,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
 
@@ -103,7 +97,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.CrearComentario(comentario, idUser , "P");
@@ -113,7 +106,6 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("EliminarComentario")]
         public async Task<IActionResult> EliminarComentario(int codigo)
         {
-
             var resultado = await _repositoryProyecto.EliminarComentario(codigo, "P");
             return Ok(resultado);
         }
@@ -128,7 +120,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.CrearDocumento(requestDoc, idUser, "P");
@@ -138,7 +129,6 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("EliminarDocumento")]
         public async Task<IActionResult> EliminarDocumento(int codigo)
         {
-
             var resultado = await _repositoryProyecto.EliminarDocumento(codigo, "P");
             return Ok(resultado);
         }
@@ -153,7 +143,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.CrearPermiso(requestDoc, idUser, "P");
@@ -163,7 +152,6 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("EliminarPermiso")]
         public async Task<IActionResult> EliminarPermiso(int codigo)
         {
-
             var resultado = await _repositoryProyecto.EliminarPermiso(codigo, "P");
             return Ok(resultado);
         }
@@ -178,7 +166,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.CrearInforme(requestDoc, idUser, "P");
@@ -195,7 +182,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.ModificarInforme(requestDoc, idUser, "P");
@@ -204,7 +190,6 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("EliminarInforme")]
         public async Task<IActionResult> EliminarInforme(int codigo)
         {
-
             var resultado = await _repositoryProyecto.EliminarInforme(codigo, "P");
             return Ok(resultado);
         }
@@ -219,7 +204,6 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
             var resultado = await _repositoryProyecto.CrearActa(requestDoc,idUser, "P");
@@ -236,16 +220,14 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
-            var resultado = await _repositoryProyecto.ModificarActa(requestDoc, idUser, "P"); 
+            var resultado = await _repositoryProyecto.ModificarActa(requestDoc, idUser, "P");
             return Ok(resultado);
         }
         [HttpPost("EliminarActa")]
         public async Task<IActionResult> EliminarActa(int codigo)
         {
-
             var resultado = await _repositoryProyecto.EliminarInforme(codigo, "P");
             return Ok(resultado);
         }
@@ -253,7 +235,6 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("CrearDocumentoPr")]
         public async Task<IActionResult> CrearDocumentoPr(DocumentoProyRequest requestDoc)
         {
-
             var resultado = await _repositoryProyecto.CrearDocumentoPr(requestDoc, "P");
             return Ok(resultado);
         }

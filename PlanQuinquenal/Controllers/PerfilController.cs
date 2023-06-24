@@ -22,7 +22,6 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("NuevoPerfil")]
         public async Task<IActionResult> NuevoPerfil(PerfilResponse nvoPerfil)
         {
-
             var resultado = await _repositoryPerfil.NuevoPerfil(nvoPerfil);
             return Ok(resultado);
         }
@@ -46,9 +45,7 @@ namespace PlanQuinquenal.Controllers
         [HttpPut("ActualizarPerfil")]
         public async Task<IActionResult> ActualizarPerfil(PerfilResponse nvoPerfil)
         {
-
             var resultado = await _repositoryPerfil.ActualizarPerfil(nvoPerfil);
-
             return Ok(resultado);
         }
     }

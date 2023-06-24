@@ -11,6 +11,11 @@ namespace PlanQuinquenal.Core.Utilities
         public  int CANTIDAD_INTENTOS = 3;
         public const string Material = "Material";
         public const string Constructor = "Constructor";
+        public const string PARCIALMENTEEJECUTADO = "Parcialmente ejecutado";
+        public const string NOEJECUTADO = "No ejecutado";
+        public const string EJECUTADO = "Ejecutado";
+        public const string EJECUTADOREEMPLAZO = "Ejecutado con reemplazo";
+        public const string NOOPTION = "";
         public const string TipoProyecto = "TipoProyecto";
         public const string Distrito = "Distrito";
         public const string TipoRegistroPY = "TipoRegistroPY";
