@@ -54,8 +54,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var nPerfil = new Perfil
                     {
                         cod_rol = queryCons[0].cod_rol,
-                        Perm_viz_modulocodMod_permiso = 1,
-                        Permisos_viz_seccioncodSec_permViz = 1,
+                        Perm_viz_modulocodMod_permiso = queryCons[0].cod_rol,
+                        Permisos_viz_seccioncodSec_permViz = queryCons[0].cod_rol,
                         nombre_perfil = nvoPerfil.nombre_perfil,
                         estado_perfil = nvoPerfil.estado_perfil,
                         cod_unidadNeg = nvoPerfil.cod_unidadNeg

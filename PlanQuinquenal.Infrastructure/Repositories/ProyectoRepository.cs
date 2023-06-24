@@ -29,11 +29,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
         private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
 
-        public ProyectoRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores, IBaremoRepository baremoRepository)
+        public ProyectoRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores, IBaremoRepository baremoRepository, IRepositoryNotificaciones repositoryNotificaciones, IRepositoryMetodosRehusables repositoryMetodosRehusables)
         {
             _context = context;
             this._repositoryMantenedores = repositoryMantenedores;
             this._baremoRepository = baremoRepository;
+            this._repositoryNotificaciones = repositoryNotificaciones;
+            this._repositoryMetodosRehusables = repositoryMetodosRehusables;
         }
 
         public async Task<Object> NuevoProyecto(ProyectoRequest nvoProyecto, int idUser)
@@ -115,14 +117,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuInters in nvoProyecto.lstUsuaInter_Inicial)
                     {
-                        int cod_usu = listaUsuInters.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regPry == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifProyecto = new Notificaciones();
-                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.cod_usu = cod_usuReg;
                             notifProyecto.seccion = "PROYECTOS";
                             notifProyecto.nombreComp_usu = NomCompleto;
                             notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
@@ -135,7 +137,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.modulo = "P";
 
                             await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
+                            //await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
                         }
                     }
 
@@ -296,31 +298,30 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filterProyectos)
+        public async Task<List<Proyectos>> ObtenerProyectos(FiltersProyectos filtro)
         {
             List<Proyectos> lstPro = new List<Proyectos>();
-            var queryable = _context.Proyectos
-                                     .Where(x => filterProyectos.des_pry != "" ? x.des_pry == filterProyectos.des_pry : true)
-                                     .Where(x => filterProyectos.cod_pry != "" ? x.cod_pry == filterProyectos.cod_pry : true)
-                                     //.Where(x => filterProyectos.nro_exp != null ? x.nro_exp == filterProyectos.nro_exp : true)
-                                     //.Where(x => filterProyectos.estado_pry != "" ? x.estado_pry == filterProyectos.estado_pry : true)
-                                     .Where(x => filterProyectos.cod_etapa != null ? x.cod_etapa == filterProyectos.cod_etapa : true)
-                                     //.Where(x => filterProyectos.por_avance != null ? x.por_avance == filterProyectos.por_avance : true)
-                                     .Where(x => filterProyectos.cod_material != null ? x.cod_material == filterProyectos.cod_material : true)
-                                     .Where(x => filterProyectos.cod_dist != null ? x.cod_dist == filterProyectos.cod_dist : true)
-                                     .Where(x => filterProyectos.tipo_pry != null ? x.tipo_pry == filterProyectos.tipo_pry : true)
-                                     .Where(x => filterProyectos.cod_PQ != null ? x.cod_PQ == filterProyectos.cod_PQ : true)
-                                     .Where(x => filterProyectos.anioPQ != null ? x.anioPQ == filterProyectos.anioPQ : true)
-                                     .Where(x => filterProyectos.cod_anioPA != null ? x.cod_anioPA == filterProyectos.cod_anioPA : true)
-                                     .Where(x => filterProyectos.cod_malla != null ? x.cod_malla == filterProyectos.cod_malla : true)
-                                     .Where(x => filterProyectos.constructor != null ? x.constructor == filterProyectos.constructor : true)
-                                     .Where(x => filterProyectos.ingRespon != null ? x.ingRespon == filterProyectos.ingRespon : true)
-                                     .Where(x => filterProyectos.user_reg != null ? x.user_reg == filterProyectos.user_reg : true)
-                                     .Where(x => filterProyectos.fecha_gas != "" ? x.fecha_gas == DateTime.Parse(filterProyectos.fecha_gas) : true)
-                                     .Where(x => filterProyectos.cod_pryReemp != null ? x.cod_pryReemp == filterProyectos.cod_pryReemp : true)
-                                     .AsQueryable();
+            var query = _context.Proyectos.AsQueryable();
+            if (!string.IsNullOrEmpty(filtro.des_pry)) query = query.Where(p => p.des_pry == filtro.des_pry);
+            if (!string.IsNullOrEmpty(filtro.cod_pry)) query = query.Where(p => p.cod_pry == filtro.cod_pry);
+            if (filtro.cod_etapa != 0) query = query.Where(p => p.cod_etapa == filtro.cod_etapa);
+            if (filtro.cod_material != 0) query = query.Where(p => p.cod_material == filtro.cod_material);
+            if (filtro.cod_dist != 0) query = query.Where(p => p.cod_dist == filtro.cod_dist);
+            if (filtro.tipo_pry != 0) query = query.Where(p => p.tipo_pry == filtro.tipo_pry);
+            if (filtro.cod_PQ != 0) query = query.Where(p => p.cod_PQ == filtro.cod_PQ);
+            if (!string.IsNullOrEmpty(filtro.anioPQ)) query = query.Where(p => p.anioPQ == filtro.anioPQ);
+            if (filtro.cod_anioPA != 0) query = query.Where(p => p.cod_anioPA == filtro.cod_anioPA);
+            if (!string.IsNullOrEmpty(filtro.cod_malla)) if (!string.IsNullOrEmpty(filtro.cod_malla));
+            if (filtro.constructor != 0) query = query.Where(p => p.constructor == filtro.constructor);
+            if (filtro.ingRespon != 0) query = query.Where(p => p.ingRespon == filtro.ingRespon);
+            if (filtro.user_reg != 0) query = query.Where(p => p.user_reg == filtro.user_reg);
+            if (!string.IsNullOrEmpty(filtro.fecha_gas)) query = query.Where(p => p.fecha_gas == DateTime.Parse(filtro.fecha_gas));
+            if (filtro.cod_pryReemp != 0) query = query.Where(p => p.cod_pryReemp == filtro.cod_pryReemp);
+            //.Where(x => filterProyectos.nro_exp != null ? x.nro_exp == filterProyectos.nro_exp : true)
+            //.Where(x => filterProyectos.estado_pry != "" ? x.estado_pry == filterProyectos.estado_pry : true)
+            //.Where(x => filterProyectos.por_avance != null ? x.por_avance == filterProyectos.por_avance : true)
 
-            var entidades = await queryable.ToListAsync();
+            var entidades = await query.ToListAsync();
             lstPro = entidades;
             return lstPro;
 
@@ -349,6 +350,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 modPry.cod_etapa = nvoProyecto.proyecto.cod_etapa;
                 modPry.cod_vnr = nvoProyecto.proyecto.cod_vnr;
 
+                _context.SaveChanges();
+
                 #region MODULO DE USUARIOS INTERESADOS
 
                 foreach (var listaUsuInter in nvoProyecto.lstUsuaInter_Inicial)
@@ -362,6 +365,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             cod_usu = listaUsuInter.cod_usu
                         };
                         _context.UsuariosIntersados_pry.Add(entidad);
+                        _context.SaveChanges();
                         #endregion
                     }
                     else if (listaUsuInter.tipoAccion == "E")
@@ -369,12 +373,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         #region Eliminacion de usuario interesado
                         var codUsuInterEliminar = _context.UsuariosIntersados_pry.Find(listaUsuInter.id);
                         _context.UsuariosIntersados_pry.Remove(codUsuInterEliminar);
+                        _context.SaveChanges();
                         #endregion
                     }
                 }
                 #endregion
-
-                _context.SaveChanges();
 
                 #region Comparacion de estructuras y agregacion de cambios
                 Proyectos proyectoModificado = new Proyectos
@@ -401,14 +404,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var listaUsuInters in nvoProyecto.lstUsuaInter_Inicial)
                 {
-                    int cod_usu = listaUsuInters.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    int cod_usuReg = listaUsuInters.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.modPry == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                     string correo = UsuarioInt[0].correo_usu.ToString();
                     if (lstpermisos.Count() == 1)
                     {
                         Notificaciones notifProyecto = new Notificaciones();
-                        notifProyecto.cod_usu = cod_usu;
+                        notifProyecto.cod_usu = cod_usuReg;
                         notifProyecto.seccion = "PROYECTOS";
                         notifProyecto.nombreComp_usu = NomCompleto;
                         notifProyecto.cod_reg = nvoProyecto.proyecto.cod_pry;
@@ -423,7 +426,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                         dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                         int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                        await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
+                        //await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
                         camposModificados.ForEach(item => item.id = codigoNotifCreada);
                         _context.CorreoTabla.AddRange(camposModificados);
                         _context.SaveChanges();

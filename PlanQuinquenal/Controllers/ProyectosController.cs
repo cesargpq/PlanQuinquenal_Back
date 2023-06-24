@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
 {
-    //S[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class ProyectosController : ControllerBase

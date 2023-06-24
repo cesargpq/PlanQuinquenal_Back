@@ -34,7 +34,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resp = new
             {
                 idMensaje = "1",
-                mensaje = "Se modifico el proyecto correctamente"
+                mensaje = "Se realizo la consulta correctamente"
             };
 
             var json = JsonConvert.SerializeObject(resp);
@@ -54,7 +54,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 cantidad = cantidad,
                 idMensaje = "1",
-                mensaje = "Se modifico el proyecto correctamente"
+                mensaje = "Se realizo la consulta correctamente correctamente"
             };
 
             var json = JsonConvert.SerializeObject(resp);
@@ -125,7 +125,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     fechora_not = notificacion.fechora_not,
                     flag_visto = notificacion.flag_visto,
                     tipo_accion = notificacion.tipo_accion,
-                    mensaje = notificacion.mensaje
+                    mensaje = notificacion.mensaje,
+                    codigo= notificacion.codigo,
+                    modulo= notificacion.modulo
                 };
 
                 // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos

@@ -104,14 +104,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuParticActa in requestDoc.lstPartActas)
                     {
-                        int cod_usu = listaUsuParticActa.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -227,14 +227,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuParticActa in requestDoc.lstPartActas)
                     {
-                        int cod_usu = listaUsuParticActa.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -326,14 +326,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var listaUsuInterPry in lstUsuInteresados)
                 {
-                    int cod_usu = listaUsuInterPry.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    int cod_usuReg = listaUsuInterPry.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regCom == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                     string correo = UsuarioInt[0].correo_usu.ToString();
                     if (lstpermisos.Count() == 1)
                     {
                         Notificaciones notifComentarios = new Notificaciones();
-                        notifComentarios.cod_usu = cod_usu;
+                        notifComentarios.cod_usu = cod_usuReg;
                         notifComentarios.seccion = "COMENTARIOS";
                         notifComentarios.nombreComp_usu = NomCompleto;
                         notifComentarios.cod_reg = comentario.codigo.ToString();
@@ -396,14 +396,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var listaUsuInterPQ in lstUsuInteresados)
                 {
-                    int cod_usu = listaUsuInterPQ.UsuarioId;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    int cod_usuReg = listaUsuInterPQ.UsuarioId;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regCom == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                     string correo = UsuarioInt[0].correo_usu.ToString();
                     if (lstpermisos.Count() == 1)
                     {
                         Notificaciones notifComentarios = new Notificaciones();
-                        notifComentarios.cod_usu = cod_usu;
+                        notifComentarios.cod_usu = cod_usuReg;
                         notifComentarios.seccion = "COMENTARIOS";
                         notifComentarios.nombreComp_usu = NomCompleto;
                         notifComentarios.cod_reg = comentario.codigo.ToString();
@@ -563,14 +563,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
                     {
-                        int cod_usu = listaUsuInterInfo.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -659,14 +659,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
                     {
-                        int cod_usu = listaUsuInterInfo.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -762,14 +762,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var listaUsuInterPry in lstUsuInteresados)
                 {
-                    int cod_usu = listaUsuInterPry.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPer == true).ToListAsync();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    int cod_usuReg = listaUsuInterPry.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regPer == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                     string correo = UsuarioInt[0].correo_usu.ToString();
                     if (lstpermisos.Count() == 1)
                     {
                         Notificaciones notifPermisos = new Notificaciones();
-                        notifPermisos.cod_usu = cod_usu;
+                        notifPermisos.cod_usu = cod_usuReg;
                         notifPermisos.seccion = "PERMISOS";
                         notifPermisos.nombreComp_usu = NomCompleto;
                         notifPermisos.cod_reg = requestDoc.codigo.ToString();
@@ -1128,14 +1128,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuParticActa in requestDoc.lstPartActas)
                     {
-                        int cod_usu = listaUsuParticActa.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -1304,14 +1304,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuParticActa in requestDoc.lstPartActas)
                     {
-                        int cod_usu = listaUsuParticActa.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuParticActa.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -1439,14 +1439,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
                     {
-                        int cod_usu = listaUsuInterInfo.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
@@ -1555,14 +1555,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     foreach (var listaUsuInterInfo in requestDoc.lstUsuInterInformes)
                     {
-                        int cod_usu = listaUsuInterInfo.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        int cod_usuReg = listaUsuInterInfo.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.modInfActas == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifInfoActas = new Notificaciones();
-                            notifInfoActas.cod_usu = cod_usu;
+                            notifInfoActas.cod_usu = cod_usuReg;
                             notifInfoActas.seccion = "INFORMES Y ACTAS";
                             notifInfoActas.nombreComp_usu = NomCompleto;
                             notifInfoActas.cod_reg = requestDoc.cod_seg.ToString();
