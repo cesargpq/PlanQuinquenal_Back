@@ -15,7 +15,7 @@ namespace PlanQuinquenal.Core.Entities
         public string title { get; set; }
         public string campo { get; set; }
         public string tipo { get; set; }
-        public string correo { get; set; }
+        public int iduser { get; set; }
         public string tabla { get; set; }
     }
 }

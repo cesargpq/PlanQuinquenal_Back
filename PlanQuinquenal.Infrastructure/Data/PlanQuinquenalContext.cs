@@ -17,10 +17,20 @@ namespace PlanQuinquenal.Infrastructure.Data
         public PlanQuinquenalContext(DbContextOptions<PlanQuinquenalContext> options)
             : base(options)
         {
+
         }
 
        
         public virtual DbSet<Logs> Logs { get; set; }
+        public virtual DbSet<ProblematicaReal> ProblematicaReal { get; set; }
+        public virtual DbSet<TipoUsuario> TipoUsuario { get; set; }
+        public virtual DbSet<UsuariosInteresadosPy> UsuariosInteresadosPy { get; set; }
+        public virtual DbSet<DocumentosPy> DocumentosPy { get; set; }
+        public virtual DbSet<DocumentosPQ> DocumentosPQ { get; set; }
+        public virtual DbSet<DocumentosPA> DocumentosPA { get; set; }
+
+        public virtual DbSet<EstadoPQ> EstadoPQ { get; set; }
+        public virtual DbSet<TipoImpedimento> TipoImpedimento { get; set; }
         public virtual DbSet<Material> Material { get; set; }
         public virtual DbSet<PQuinquenal> PQuinquenal { get; set; }
         public virtual DbSet<PlanAnual> PlanAnual { get; set; }
@@ -76,10 +86,11 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<PQComentarios> PQComentarios { get; set; }
         public virtual DbSet<PQDocumentos> PQDocumentos { get; set; }
         public virtual DbSet<CamposModulo_Permisos> CamposModulo_Permisos { get; set; }
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //protected override void onmodelcreating(modelbuilder modelbuilder)
         //{
-        //    modelBuilder.Entity<Usuario>().ToTable("usuario").
-        //        HasKey(x => new { x.cod_usu, x.cod_perfil }).HasRequired(x => x.PersonOne).WithMany().HasForeignKey(x => x.Person1Id);
+        //    modelbuilder.entity<proyecto>()
+        //        .property(f => f.fecharegistro)
+        //        .hascolumntype("datetime2");
         //}
 
 

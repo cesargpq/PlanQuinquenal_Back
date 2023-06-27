@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
 {
@@ -22,7 +24,26 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _proyectoRepository.GetById(id);
             return Ok(resultado);
         }
+        
         [HttpPost]
+        public async Task<IActionResult> Add(ProyectoRequestDto proyectoRequestDto)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            var resultado = await _proyectoRepository.Add(proyectoRequestDto, idUser);
+
+            return Ok(resultado);
+        }
+
+
+        [HttpPost("Listar")]
         public async Task<IActionResult> GetAll(FiltersProyectos filterProyectos)
         {
             var resultado = await _proyectoRepository.GetAll(filterProyectos);

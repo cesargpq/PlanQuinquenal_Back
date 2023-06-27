@@ -1,4 +1,5 @@
 ﻿using ApiDavis.Core.Utilidades;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
@@ -16,73 +17,476 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     public class MantenedoresRepository : IRepositoryMantenedores
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IMapper mapper;
 
-        public MantenedoresRepository(PlanQuinquenalContext context) 
+        public MantenedoresRepository(PlanQuinquenalContext context, IMapper mapper) 
         {
             _context = context;
+            this.mapper = mapper;
         }
-        public async Task<IEnumerable<TablaLogicaDatos>> GetAllByAttribute(string attribute)
+        public async Task<IEnumerable<MaestroResponseDto>> GetAllByAttribute(string attribute)
         {
-            var dato = await _context.TablaLogica.Where(x => x.Descripcion == attribute).ToListAsync();
-            var datoFinal = await _context.TablaLogicaDatos.Where(x => x.TablaLogicaId == dato.ElementAt(0).Id).ToListAsync();
-            return datoFinal;
-        }
-        public async Task<PaginacionResponseDto<TablaLogicaDatos>> GetAll(ListEntidadDTO entidad)
-        {
+            List<MaestroResponseDto> dto = new List<MaestroResponseDto>();
 
-            
-            var dato  = await _context.TablaLogica.Where(x => x.Descripcion== entidad.Entidad).ToListAsync();
-          
-
-            var queryable = _context.TablaLogicaDatos
-                                     .Where(x => x.TablaLogicaId == dato.ElementAt(0).Id)
-                                     .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
-                                     .Where(x => entidad.Valor != "" ? x.Descripcion == entidad.Valor : true)
-                                     .Where(x => entidad.Codigo != "" ? x.Descripcion == entidad.Codigo : true)
-                                     .AsQueryable();
-
-            int cantidad = await queryable.CountAsync();
-            var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
-                                   .ToListAsync();
-
-            var objeto = new PaginacionResponseDto<TablaLogicaDatos>
+            if (attribute.Equals("Material"))
             {
-                Cantidad = cantidad,
-                Model = entidades
-            };
+                var dato = await _context.Material.Where(x=>x.Estado == true).ToListAsync();
 
-            return objeto;
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("TipoUsuario"))
+            {
+                var dato = await _context.TipoUsuario.Where(x => x.Estado == true).ToListAsync();
 
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("ProblematicaReal"))
+            {
+                var dato = await _context.ProblematicaReal.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+
+            if (attribute.Equals("EstadoPQ"))
+            {
+                var dato = await _context.EstadoPQ.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+
+            if (attribute.Equals("TipoImpedimento"))
+            {
+                var dato = await _context.TipoImpedimento.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+
+            if (attribute.Equals("Distrito"))
+            {
+                var dato = await _context.Distrito.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("PlanAnual"))
+            {
+                var dato = await _context.PlanAnual.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("PlanQuinquenal"))
+            {
+                var dato = await _context.PQuinquenal.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("TipoProyecto"))
+            {
+                var dato = await _context.TipoProyecto.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("TipoRegistro"))
+            {
+                var dato = await _context.TipoRegistro.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("Constructor"))
+            {
+                var dato = await _context.Constructor.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            if (attribute.Equals("EstadoGeneral"))
+            {
+                var dato = await _context.EstadoGeneral.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+
+
+            return dto;
+           
         }
-        public async Task<TablaLogicaDatos> GetById(int id)
+        public async Task<PaginacionResponseDto<MaestroResponseDto>> GetAll(ListEntidadDTO entidad)
         {
 
-            var dato = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id).FirstOrDefaultAsync();
+            PaginacionResponseDto<MaestroResponseDto> obj = new PaginacionResponseDto<MaestroResponseDto>();
+
+            if (entidad.Entidad.Equals("Material"))
+            {
+                var queryable = _context.Material
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+               
+            }
+            if (entidad.Entidad.Equals("TipoUsuario"))
+            {
+                var queryable = _context.TipoUsuario
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+
+            }
+            if (entidad.Entidad.Equals("EstadoPQ"))
+            {
+                var queryable = _context.EstadoPQ
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+
+            }
+            if (entidad.Entidad.Equals("ProblematicaReal"))
+            {
+                var queryable = _context.ProblematicaReal
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+
+            }
+            if (entidad.Entidad.Equals("TipoImpedimento"))
+            {
+                var queryable = _context.TipoImpedimento
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+
+            }
+            if (entidad.Entidad.Equals("Distrito"))
+            {
+                var queryable = _context.Distrito
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+            }
+          
+            if (entidad.Entidad.Equals("TipoProyecto"))
+            {
+                var queryable = _context.TipoProyecto
+                                 .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+            }
+            if (entidad.Entidad.Equals("TipoRegistro"))
+            {
+                var queryable = _context.TipoRegistro
+                                .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+            }
+            if (entidad.Entidad.Equals("Constructor"))
+            {
+                var queryable = _context.Constructor
+                                .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+            }
+            if (entidad.Entidad.Equals("EstadoGeneral"))
+            {
+                var queryable = _context.EstadoGeneral
+                                .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
+                                .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+
+                int cantidad = await queryable.CountAsync();
+                var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
+                                       .ToListAsync();
+
+                var mapEntidad = mapper.Map<List<MaestroResponseDto>>(entidades);
+                obj.Cantidad = cantidad;
+                obj.Model = mapEntidad;
+            }
+
+            return obj;
+           
+           
             
-        
-            return dato;
 
         }
+        public async Task<MaestroResponseDto> GetById(int id, string maestro)
+        {
+            MaestroResponseDto dto = new MaestroResponseDto();
 
-        public async Task<bool> DeleteById(int id)
+            if (maestro.Equals("Material"))
+            {
+                var dato = await _context.Material.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+                
+            }
+            if (maestro.Equals("TipoUsuario"))
+            {
+                var dato = await _context.TipoUsuario.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+
+            }
+            if (maestro.Equals("TipoImpedimento"))
+            {
+                var dato = await _context.TipoImpedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+
+            }
+            if (maestro.Equals("ProblematicaReal"))
+            {
+                var dato = await _context.ProblematicaReal.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+
+            }
+            if (maestro.Equals("EstadoPQ"))
+            {
+                var dato = await _context.EstadoPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+
+            }
+            if (maestro.Equals("Distrito"))
+            {
+                var dato = await _context.Distrito.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+            if (maestro.Equals("PlanAnual"))
+            {
+                var dato = await _context.PlanAnual.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+            if (maestro.Equals("PlanQuinquenal"))
+            {
+                var dato = await _context.PQuinquenal.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+            if (maestro.Equals("TipoProyecto"))
+            {
+                var dato = await _context.TipoProyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+            if (maestro.Equals("TipoRegistro"))
+            {
+                var dato = await _context.TipoRegistro.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+            if (maestro.Equals("Constructor"))
+            {
+                var dato = await _context.Constructor.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+            if (maestro.Equals("EstadoGeneral"))
+            {
+                var dato = await _context.EstadoGeneral.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                dto.Id = dato.Id;
+                dto.Descripcion = dato.Descripcion;
+            }
+
+
+            return dto;
+        }
+
+        public async Task<bool> DeleteById(int id,string maestro)
         {
 
-            var existe = await _context.TablaLogicaDatos.AnyAsync(x => x.IdTablaLogicaDatos == id);
+            //var existe = await _context.TablaLogicaDatos.AnyAsync(x => x.IdTablaLogicaDatos == id);
             try
             {
-                if (!existe)
-                {
 
-                    return false;
-                }
-                else
+
+                if (maestro.Equals("Material"))
                 {
-                    var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id ).FirstOrDefaultAsync();
-                    resultado.Estado = resultado.Estado == true ? false: true;
+                    var resultado = await _context.Material.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+
+                }
+                if (maestro.Equals("TipoUsuario"))
+                {
+                    var resultado = await _context.TipoUsuario.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+
+                }
+                if (maestro.Equals("EstadoPQ"))
+                {
+                    var resultado = await _context.EstadoPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+
+                }
+                if (maestro.Equals("ProblematicaReal"))
+                {
+                    var resultado = await _context.ProblematicaReal.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+
+                }
+                if (maestro.Equals("TipoImpedimento"))
+                {
+                    var resultado = await _context.TipoImpedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+
+                }
+                if (maestro.Equals("Distrito"))
+                {
+                    var resultado = await _context.Distrito.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
                     _context.Update(resultado);
                     await _context.SaveChangesAsync();
                     return true;
                 }
+                if (maestro.Equals("PlanAnual"))
+                {
+                    var resultado = await _context.PlanAnual.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (maestro.Equals("PlanQuinquenal"))
+                {
+                    var resultado = await _context.PQuinquenal.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (maestro.Equals("TipoProyecto"))
+                {
+                    var resultado = await _context.TipoProyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (maestro.Equals("TipoRegistro"))
+                {
+                    var resultado = await _context.TipoRegistro.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (maestro.Equals("Constructor"))
+                {
+                    var resultado = await _context.Constructor.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (maestro.Equals("EstadoGeneral"))
+                {
+                    var resultado = await _context.EstadoGeneral.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    resultado.Estado = resultado.Estado == true ? false : true;
+                    _context.Update(resultado);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                return true;
+
             }
             catch (Exception)
             {
@@ -96,21 +500,145 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         }
         public async Task<bool> Post(PostEntityReqDTO postEntityReqDTO)
         {
-            var dato = await _context.TablaLogica.Where(x => x.Descripcion == postEntityReqDTO.Entidad).ToListAsync();
 
             try
             {
-                TablaLogicaDatos data = new TablaLogicaDatos();
+                if (postEntityReqDTO.Entidad.Equals("Material"))
+                {
+                    Material data = new Material();
 
-                data.TablaLogicaId = dato.ElementAt(0).Id;
-                data.Descripcion = postEntityReqDTO.Descripcion;
-                data.Codigo = postEntityReqDTO.Codigo;
-                data.Valor = postEntityReqDTO.Valor;
-                data.Estado = true;
-                _context.Add(data);
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoUsuario"))
+                {
+                    TipoUsuario data = new TipoUsuario();
 
-                await _context.SaveChangesAsync();
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoImpedimento"))
+                {
+                    TipoImpedimento data = new TipoImpedimento();
+
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("EstadoPQ"))
+                {
+                    EstadoPQ data = new EstadoPQ();
+
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("ProblematicaReal"))
+                {
+                    ProblematicaReal data = new ProblematicaReal();
+
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("Distrito"))
+                {
+                    Distrito data = new Distrito();
+
+              
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("PlanAnual"))
+                {
+                    Material data = new Material();
+
+                    
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("PlanQuinquenal"))
+                {
+                    Material data = new Material();
+
+                    
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoProyecto"))
+                {
+                    TipoProyecto data = new TipoProyecto();
+
+                    
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoRegistro"))
+                {
+                    TipoRegistro data = new TipoRegistro();
+
+                    
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("Constructor"))
+                {
+                    Constructor data = new Constructor();
+
+                    
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("EstadoGeneral"))
+                {
+                    EstadoGeneral data = new EstadoGeneral();
+
+                    
+                    data.Descripcion = postEntityReqDTO.Descripcion;
+                    data.Estado = true;
+                    _context.Add(data);
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
                 return true;
+
             }
             catch (Exception)
             {
@@ -124,35 +652,118 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<bool> Update(PostUpdateEntityDTO postEntityReqDTO, int id)
         {
-            var dato = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id).ToListAsync();
+            try
+            {
+                if (postEntityReqDTO.Entidad.Equals("Material"))
+                {
+                    var entidad = await _context.Material.Where(x => x.Id == id).FirstOrDefaultAsync();
 
-            if (dato == null)
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("EstadoPQ"))
+                {
+                    var entidad = await _context.EstadoPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoImpedimento"))
+                {
+                    var entidad = await _context.TipoImpedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("ProblematicaReal"))
+                {
+                    var entidad = await _context.ProblematicaReal.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoUsuario"))
+                {
+                    var entidad = await _context.TipoUsuario.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("Distrito"))
+                {
+                    var entidad = await _context.Distrito.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoProyecto"))
+                {
+                    var entidad = await _context.TipoProyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("TipoRegistro"))
+                {
+                    var entidad = await _context.TipoRegistro.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("Constructor"))
+                {
+                    var entidad = await _context.Constructor.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                if (postEntityReqDTO.Entidad.Equals("EstadoGeneral"))
+                {
+                    var entidad = await _context.EstadoGeneral.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    entidad.Descripcion = postEntityReqDTO.Descripcion;
+                    entidad.Estado = true;
+                    _context.Update(entidad);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+
+
+                return true;
+            }
+            catch (Exception)
             {
 
                 return false;
             }
-            else
-            {
-                TablaLogicaDatos data = new TablaLogicaDatos();
-                var resultado = await _context.TablaLogicaDatos.Where(x => x.IdTablaLogicaDatos == id ).FirstOrDefaultAsync();
-                if(resultado != null)
-                {
-              
-                    resultado.Descripcion = postEntityReqDTO.Descripcion;
-                    resultado.Estado = postEntityReqDTO.Estado;
-                    resultado.Codigo = postEntityReqDTO.Codigo;
-                    resultado.Valor = postEntityReqDTO.Valor;
-                    _context.Update(resultado);
-
-                    await _context.SaveChangesAsync();
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            
            
         }
     }

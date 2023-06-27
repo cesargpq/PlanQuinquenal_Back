@@ -11,10 +11,10 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IRepositoryMantenedores
     {
-        Task<PaginacionResponseDto<TablaLogicaDatos>> GetAll(ListEntidadDTO entidad);
-        Task<TablaLogicaDatos> GetById(int id);
-        Task<IEnumerable<TablaLogicaDatos>> GetAllByAttribute(string attribute);
-        Task<bool> DeleteById(int id);
+        Task<PaginacionResponseDto<MaestroResponseDto>> GetAll(ListEntidadDTO entidad);
+        Task<MaestroResponseDto> GetById(int id, string maestro);
+        Task<IEnumerable<MaestroResponseDto>> GetAllByAttribute(string attribute);
+        Task<bool> DeleteById(int id, string maestro);
         Task<bool> Post(PostEntityReqDTO postEntityReqDTO);
         Task<bool> Update(PostUpdateEntityDTO postEntityReqDTO,int id);
     }

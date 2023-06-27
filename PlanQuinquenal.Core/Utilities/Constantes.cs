@@ -15,6 +15,7 @@ namespace PlanQuinquenal.Core.Utilities
         public const string NOEJECUTADO = "No ejecutado";
         public const string EJECUTADO = "Ejecutado";
         public const string EJECUTADOREEMPLAZO = "Ejecutado con reemplazo";
+        public const string NOEXISTEDOCUMENTO = "El documento no existe";
         public const string NOOPTION = "";
         public const string TipoProyecto = "TipoProyecto";
         public const string Distrito = "Distrito";

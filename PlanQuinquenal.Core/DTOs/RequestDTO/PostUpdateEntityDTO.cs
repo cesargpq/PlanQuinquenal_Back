@@ -9,8 +9,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class PostUpdateEntityDTO
     {
         public string Descripcion { get; set; }
-        public string Codigo { get; set; }
-        public string Valor { get; set; }
+        public string Entidad { get; set; }
         public bool Estado { get; set; }
     }
 }

@@ -20,11 +20,56 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<UsuarioRequestDto, Usuario>();
             CreateMap<ProyectoResponseDto, Proyecto>();
 
+            CreateMap<MaestroResponseDto, Material>();
+            CreateMap<Material, MaestroResponseDto>();
 
+            CreateMap<MaestroResponseDto, Distrito>();
+            CreateMap<Distrito, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, PlanAnual>();
+            CreateMap<PlanAnual, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, PQuinquenal>();
+            CreateMap<PQuinquenal, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, TipoProyecto>();
+            CreateMap<TipoProyecto, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, TipoRegistro>();
+            CreateMap<TipoRegistro, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, Constructor>();
+            CreateMap<Constructor, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, EstadoGeneral>();
             
+            CreateMap<EstadoGeneral, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, EstadoPQ>();
+            CreateMap<EstadoPQ, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, TipoImpedimento>();
+            CreateMap<TipoImpedimento, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, ProblematicaReal>();
+            CreateMap<ProblematicaReal, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, TipoUsuario>();
+            CreateMap<TipoUsuario, MaestroResponseDto>();
+            CreateMap<DocumentoRequestDto, DocumentosPy>();
+            CreateMap<DocumentoRequestDto, DocumentosPQ>();
+            CreateMap<DocumentoRequestDto, DocumentosPA>();
+
+
+            CreateMap<UsuariosInteresadosPy, UsuariosInteresadosPyResponseDto>();
+            CreateMap<UsuariosInteresadosPyResponseDto, UsuariosInteresadosPy > ();
+
             CreateMap<Usuario, UsuarioResponseDto>()
                .ForMember(x => x.Nombre, y => y.MapFrom(src => src.nombre_usu +" "+ src.apellido_usu))
                .ForMember(x => x.Id, y => y.MapFrom(src => src.cod_usu));
+            
+
+            
 
             CreateMap<PQuinquenal, PQuinquenalResponseDto>()
               .ForMember(x => x.AnioPlan, y => y.MapFrom(src => src.AnioPlan))
@@ -34,6 +79,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
               .ForMember(x => x.AnioPlan, y => y.MapFrom(src => src.AnioPlan))
               .ForMember(x => x.Id, y => y.MapFrom(src => src.Id));
 
+
+            CreateMap<ProyectoRequestDto, Proyecto>();
+            CreateMap<Proyecto, ProyectoRequestDto>();
             CreateMap<Proyecto, ProyectoResponseDto>()
                 .ForMember(
                     dest => dest.IngenieroResponsables,
@@ -50,7 +98,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     src.LongImpedimentos))).ForMember(
                     dest => dest.longPendienteEjecución,
                     opt => opt.MapFrom(src => src.LongRealPend - src.LongReemplazada));
-
 
 
             CreateMap<Usuario, UsuarioRequestDto>();

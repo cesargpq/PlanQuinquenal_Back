@@ -15,7 +15,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string descripcion { get; set; }
         public int PQuinquenalId { get; set; }
         public string AñosPQ { get; set; }
-        public int PlanAnualId { get; set; }
+        public int? PlanAnualId { get; set; }
         public int MaterialId { get; set; }
         public int DistritoId { get; set; }
         public Material Material { get; set; }
@@ -23,10 +23,10 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public Constructor Constructor { get; set; }
         public TipoProyecto TipoProyecto { get; set; }
         public TipoRegistro TipoRegistro { get; set; }
-        public EstadoGeneral EstadoGeneral { get; set; }
         public UsuarioResponseDto IngenieroResponsables { get; set; }
         public PQuinquenalResponseDto PQuinquenalResponseDto { get; set; }
         public PlanAnualResponseDto PlanAnualResponseDto { get; set; }
+        public List<UsuariosInteresadosPyResponseDto> UsuariosInteresados { get; set; }
         public int TipoProyectoId { get; set; }
         public int Etapa { get; set; }
 
@@ -34,7 +34,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int TipoRegistroId { get; set; }
         public int IngenieroResponsableId { get; set; }
         public int ConstructorId { get; set; }
-        public int EstadoGeneralId { get; set; }
+        
         public string EstadoGeneralDesc { get; set; }
         public int BaremoId { get; set; }
 
@@ -44,6 +44,12 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public Decimal LongImpedimentos { get; set; }
         public Decimal LongReemplazada { get; set; }
         public Decimal longPendienteEjecución { get; set; }
+        public Decimal LongProyectos { get; set; }
+        public DateTime? FechaRegistro { get; set; }
+        public DateTime? fechamodifica { get; set; }
+        public DateTime? FechaGasificacion { get; set; }
         public Baremo Baremo { get; set; }
+
+       
     }
 }

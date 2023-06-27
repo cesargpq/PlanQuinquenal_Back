@@ -30,19 +30,26 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _repositoryMantenedores.GetAll(entidad);
             return Ok(resultado);
         }
-        
-        [HttpGet("id")]
-        public async Task<IActionResult> GetById(int id)
+
+        [HttpGet("ObtenerCombo")]
+        public async Task<IActionResult> GetAllByAttribute(string entidad)
         {
 
-            var resultado = await _repositoryMantenedores.GetById(id);
+            var resultado = await _repositoryMantenedores.GetAllByAttribute(entidad);
+            return Ok(resultado);
+        }
+        [HttpGet("id")]
+        public async Task<IActionResult> GetById(int id,string maestro)
+        {
+
+            var resultado = await _repositoryMantenedores.GetById(id,maestro);
             return Ok(resultado);
         }
 
         [HttpDelete("id")]
-        public async Task<IActionResult> DeleteById(int id)
+        public async Task<IActionResult> DeleteById(int id, string maestro)
         {
-            var resultado = await _repositoryMantenedores.DeleteById(id);
+            var resultado = await _repositoryMantenedores.DeleteById(id,maestro);
             ResponseDTO dto = new ResponseDTO();
             if (resultado)
             {

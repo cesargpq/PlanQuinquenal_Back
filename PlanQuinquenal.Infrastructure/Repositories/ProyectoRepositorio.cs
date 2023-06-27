@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PlanQuinquenal.Core.Utilities;
 using ApiDavis.Core.Utilidades;
+using System.Data.SqlTypes;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -42,7 +43,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                              .Include(x => x.TipoProyecto)
                                              .Include(x => x.EstadoGeneral)
                                              .Include(x => x.TipoRegistro)
+                                             .Include(x => x.Baremo)
                                              .Include(x => x.IngenieroResponsable)
+                                             .Include(x => x.UsuariosInteresados)
+                                             .ThenInclude(x=> x.Usuario)
                                              .Where(x => x.Id == id).FirstOrDefaultAsync();
 
                 var proyectoDto = mapper.Map<ProyectoResponseDto>(proyecto);
@@ -50,7 +54,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
          
              //verificar  si no existe
         }
-        public async Task<List<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos)
+        public async Task<PaginacionResponseDto<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos)
         {
            
             var queryable =  _context.Proyecto
@@ -78,13 +82,83 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                          .Where(x => filterProyectos.IngenieroId != 0 ? x.IngenieroResponsable.cod_usu == filterProyectos.IngenieroId : true)
                                          .Where(x => filterProyectos.UsuarioRegisterId != 0 ? x.UsuarioRegisterId == filterProyectos.UsuarioRegisterId : true)
                                          .AsQueryable();
+            int cantidad = queryable.Count();
             var listaPaginada = await queryable.OrderBy(e => e.descripcion).Paginar(filterProyectos).ToListAsync();
             var proyectoDto = mapper.Map<List<ProyectoResponseDto>>(listaPaginada);
 
-          
-                               
-            return proyectoDto;
+            var objeto = new PaginacionResponseDto<ProyectoResponseDto>
+            {
+                Cantidad = cantidad,
+                Model = proyectoDto
+            };
+            return objeto;
+
+           
         }
 
+        public async Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto, int idUser)
+        {
+            var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto).FirstOrDefaultAsync();
+
+            if (existe != null)
+            {
+                return new ResponseDTO
+                {
+                    Valid = false,
+                    Message = Constantes.ExisteRegistro
+                };
+            }
+            else
+            {
+                var proyecto = mapper.Map<Proyecto>(proyectoRequestDto);
+                proyecto.descripcion = "";
+                proyecto.Etapa = 0;
+                proyecto.IngenieroResponsableId = null;
+                proyecto.EstadoGeneralId = 2;
+                proyecto.UsuarioRegisterId = idUser;
+                proyecto.UsuarioModificaId = idUser;
+                proyecto.FechaGasificacion= null;
+                proyecto.FechaRegistro = DateTime.Now;
+                proyecto.fechamodifica = DateTime.Now;
+                proyecto.LongImpedimentos = 0;
+                proyecto.LongRealHab = 0;
+                proyecto.LongRealPend = 0;
+                proyecto.LongReemplazada = 0;
+                _context.Add(proyecto);
+                await _context.SaveChangesAsync();
+
+                if (proyectoRequestDto.UsuariosInteresados.Count > 0)
+                {
+                    List<UsuariosInteresadosPy> listPqUser = new List<UsuariosInteresadosPy>();
+                    foreach (var item in proyectoRequestDto.UsuariosInteresados)
+                    {
+                        var existeUsu = await _context.Usuario.Where(x => x.cod_usu == item).FirstOrDefaultAsync();
+                        if(existeUsu != null)
+                        {
+                            UsuariosInteresadosPy pqUser = new UsuariosInteresadosPy();
+                            pqUser.ProyectoId = proyecto.Id;
+                            pqUser.UsuarioId = item;
+                            pqUser.Estado = true;
+                            listPqUser.Add(pqUser);
+                        }
+                       
+                    }
+                    _context.AddRange(listPqUser);
+                    await _context.SaveChangesAsync();
+
+                }
+
+                return new ResponseDTO
+                {
+                    Valid = false,
+                    Message = Constantes.CreacionExistosa
+                };
+
+                
+
+            }
+        }
+
+        
     }
 }

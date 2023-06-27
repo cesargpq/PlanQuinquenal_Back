@@ -24,12 +24,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         }
         public async Task<ColumsTablaPerResponse> VisColumnTabla(int idUser, string tabla)
         {
-            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
-            string correo = Usuario[0].correo_usu.ToString();
+            
             ColumsTablaPerResponse respMod = new ColumsTablaPerResponse();
 
             var queryable = await _context.ColumTablaUsu
-                                     .Where(x => x.correo == correo)
+                                     .Where(x => x.iduser == idUser)
                                      .Where(x => x.tabla == tabla)
                                      .ToListAsync();
 
@@ -52,8 +51,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<Object> ModPermisoColumnTabla(ColumTablaUsu columna, int idUser)
         {
-            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
-            string correo = Usuario[0].correo_usu.ToString();
             var modperTabla = _context.ColumTablaUsu.FirstOrDefault(p => p.id == columna.id);
             modperTabla.seleccion = columna.seleccion;
             _context.SaveChanges();
