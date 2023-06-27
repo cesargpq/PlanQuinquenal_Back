@@ -15,6 +15,7 @@ namespace PlanQuinquenal.Core.Entities
         public DateTime FechaEmision { get; set; }
         public string TipoDocumento { get; set; }
         public string Ruta { get; set; }
+        public string rutafisica { get; set; }
         public bool Estado { get; set; }
     }
 }

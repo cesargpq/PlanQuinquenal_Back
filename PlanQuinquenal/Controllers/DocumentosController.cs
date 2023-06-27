@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
@@ -32,24 +33,11 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> Descargar(int id, string modulo)
         {
             var resultado = await _documentosRepository.Download(id, modulo);
-            if(resultado!= null)
-            {
-                var net = new System.Net.WebClient();
-                var data = net.DownloadData(resultado.ruta);
-                var content = new System.IO.MemoryStream(data);
-                var contentType = "APPLICATION/octet-stream";
-                var fileName = resultado.nombreArchivo;
-                return File(content, contentType, fileName);
-            }
-            else
-            {
-                return Ok(new ResponseDTO
-                {
-                    Valid = true,
-                    Message =Constantes.ErrorSistema
-                });
-            }
-            
+            string nombrearchivo = Path.GetFileName(resultado.nombreArchivo).Trim();
+            byte[] fl = System.IO.File.ReadAllBytes(resultado.ruta);
+            return File(fl, System.Net.Mime.MediaTypeNames.Application.Octet, nombrearchivo);
+          
+
         }
         [HttpPost]
         public async Task<IActionResult> Add(DocumentoRequestDto documentoRequestDto)
