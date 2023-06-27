@@ -137,7 +137,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.modulo = "P";
 
                             await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            //await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
                         }
                     }
 
@@ -426,7 +426,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                         dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                         int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                        //await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
+                        await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
                         camposModificados.ForEach(item => item.id = codigoNotifCreada);
                         _context.CorreoTabla.AddRange(camposModificados);
                         _context.SaveChanges();
@@ -674,8 +674,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<object> CrearDocumento(Docum_proyectoDTO requestDoc, int idUser, string modulo)
         {
             var obj = await _repositoryMetodosRehusables.CrearDocumento(requestDoc, idUser, modulo);
+            dynamic objetoDoc = JsonConvert.DeserializeObject(obj.ToString());
             DocumentoProyRequest archivo = new DocumentoProyRequest { 
-                NombreArchivo = requestDoc.NombreArchivo,
+                NombreArchivo = objetoDoc.nombreFinal.ToString(),
                 Base64 = requestDoc.Base64
             };
             await CrearDocumentoPr(archivo,  modulo);

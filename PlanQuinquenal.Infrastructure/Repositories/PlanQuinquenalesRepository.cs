@@ -68,14 +68,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             foreach (var item in pQuinquenalReqDTO.IdUsuario)
             {
-                int cod_usu = item;
-                var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPQ == true).ToListAsync();
-                var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                int cod_usuReg = item;
+                var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.regPQ == true).ToListAsync();
+                var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                 string correo = UsuarioInt[0].correo_usu.ToString();
                 if (lstpermisos.Count() == 1)
                 {
                     Notificaciones notifPQ = new Notificaciones();
-                    notifPQ.cod_usu = cod_usu;
+                    notifPQ.cod_usu = cod_usuReg;
                     notifPQ.seccion = "PLANQUINQUENAL";
                     notifPQ.nombreComp_usu = NomCompleto;
                     notifPQ.cod_reg = pqFirst.Id.ToString();
@@ -157,14 +157,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var listaUsuInters in planquinquenalReq.lstUsuaInter) 
                 {
-                    int cod_usu = listaUsuInters.UsuarioId;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPQ == true).ToListAsync();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    int cod_usuReg = listaUsuInters.UsuarioId;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usuReg).Where(x => x.modPQ == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(y => y.Perfil).Where(y => y.cod_usu == cod_usuReg).ToListAsync();
                     string correo = UsuarioInt[0].correo_usu.ToString();
                     if (lstpermisos.Count() == 1)
                     {
                         Notificaciones notifProyecto = new Notificaciones();
-                        notifProyecto.cod_usu = cod_usu;
+                        notifProyecto.cod_usu = cod_usuReg;
                         notifProyecto.seccion = "PLANQUINQUENAL";
                         notifProyecto.nombreComp_usu = NomCompleto;
                         notifProyecto.cod_reg = planquinquenalReq.Id.ToString();
@@ -232,9 +232,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<object> CrearDocumento(Docum_proyectoDTO requestDoc, int idUser, string modulo)
         {
             var obj = await _repositoryMetodosRehusables.CrearDocumento(requestDoc, idUser, modulo);
+            dynamic objetoDoc = JsonConvert.DeserializeObject(obj.ToString());
             DocumentoProyRequest archivo = new DocumentoProyRequest
             {
-                NombreArchivo = requestDoc.NombreArchivo,
+                NombreArchivo = objetoDoc.nombreFinal.ToString(),
                 Base64 = requestDoc.Base64
             };
             await CrearDocumentoPr(archivo, modulo);
