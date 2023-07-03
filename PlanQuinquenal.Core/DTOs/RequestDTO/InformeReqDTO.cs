@@ -34,6 +34,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 
         public List<int>? Participantes { get; set; }
         public List<int>? Asistentes { get; set; }
-        public List<ActaDinamicaRequest> ActaDinamicaRequest { get; set; }
+        public List<ActaDinamicaRequest>? ActaDinamicaRequest { get; set; }
     }
 }

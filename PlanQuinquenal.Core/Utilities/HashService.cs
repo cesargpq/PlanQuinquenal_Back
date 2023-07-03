@@ -171,7 +171,8 @@ namespace PlanQuinquenal.Core.Utilities
         }
         public  void Titulo(iTextSharp.text.Document doc)
         {
-            iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance(@"C:\prueba\logo.png");
+            string ruta = configuration["LOGO"];
+            iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance(ruta);
             logo.ScaleAbsolute(120, 45);
             doc.Add(logo);
 
