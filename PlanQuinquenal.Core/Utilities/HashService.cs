@@ -16,6 +16,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
+using System.Xml.Linq;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 
 namespace PlanQuinquenal.Core.Utilities
 {
@@ -146,6 +150,73 @@ namespace PlanQuinquenal.Core.Utilities
             jwt.ExpireIn = expiracion;
             return jwt;
           
+        }
+
+        public  void Parrafo(iTextSharp.text.Document doc, string tit, iTextSharp.text.Font _standardFont, bool align)
+        {
+
+            Paragraph titulo = new Paragraph($"{tit}", _standardFont);
+            if (align)
+            {
+                titulo.Alignment = Element.ALIGN_CENTER;
+            }
+            else
+            {
+                titulo.IndentationLeft = 53;
+                titulo.IndentationRight = 53;
+            }
+
+            doc.Add(titulo);
+            doc.Add(Chunk.SPACETABBING);
+        }
+        public  void Titulo(iTextSharp.text.Document doc)
+        {
+            iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance(@"C:\prueba\logo.png");
+            logo.ScaleAbsolute(120, 45);
+            doc.Add(logo);
+
+        }
+        public  void GenerarTextAreaLista(string texto, iTextSharp.text.Document doc)
+        {
+            iTextSharp.text.Font _standardFont = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.HELVETICA, 12, iTextSharp.text.Font.NORMAL, BaseColor.BLACK);
+
+            Paragraph actividadesG = new Paragraph(texto, _standardFont);
+
+            actividadesG.IndentationLeft = 50;
+            actividadesG.IndentationRight = 50;
+            actividadesG.Alignment = Element.ALIGN_JUSTIFIED;
+            PdfPCell cellAc = new PdfPCell(actividadesG);
+            cellAc.BorderWidth = 1f;
+            cellAc.BorderColor = BaseColor.GRAY;
+            cellAc.HorizontalAlignment = Element.ALIGN_JUSTIFIED;
+            cellAc.PaddingBottom = 6;
+            cellAc.PaddingLeft = 12;
+            cellAc.PaddingRight = 12;
+
+            // Add the cell to a PdfPTable
+            PdfPTable tableAC = new PdfPTable(1);
+            tableAC.AddCell(cellAc);
+
+            // Add the table to the document
+            doc.Add(tableAC);
+        }
+        public  void GenerarLista(List<string> lista, iTextSharp.text.Document doc)
+        {
+            iTextSharp.text.Font _standardFont = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.HELVETICA, 12, iTextSharp.text.Font.NORMAL, BaseColor.BLACK);
+
+            string pasosConcatena = "";
+            int contador = 0;
+            foreach (var item in lista)
+            {
+                contador++;
+                pasosConcatena += contador + ".- " + item + "\n";
+            }
+            Paragraph proximos_pasos = new Paragraph($"{pasosConcatena}", _standardFont);
+            proximos_pasos.IndentationLeft = 53;
+            proximos_pasos.IndentationRight = 53;
+            proximos_pasos.Alignment = Element.ALIGN_JUSTIFIED;
+            doc.Add(proximos_pasos);
+            doc.Add(Chunk.NEWLINE);
         }
     }
 }

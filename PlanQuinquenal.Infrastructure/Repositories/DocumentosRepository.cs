@@ -7,6 +7,7 @@ using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
+using ApiDavis.Core.Utilidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,8 +91,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
                     var map = mapper.Map<DocumentosPA>(documentoRequestDto);
                     map.PlanAnualId = resultado.Id;
-                    map.CodigoDocumento = "";
+                    map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
+                    map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
                     map.rutafisica = configuration["RUTA_ARCHIVOS"] +"\\"+"PlanAnual\\"+ documentoRequestDto.CodigoProyecto+"\\"+guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = documentoRequestDto.NombreDocumento.Split(".")[1];
@@ -124,8 +126,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
                     var map = mapper.Map<DocumentosPQ>(documentoRequestDto);
                     map.PQuinquenalId = resultado.Id;
-                    map.CodigoDocumento = "";
+                    map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
+                    map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
                     map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + documentoRequestDto.CodigoProyecto + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = documentoRequestDto.NombreDocumento.Split(".")[1];
@@ -157,8 +160,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
                     var map = mapper.Map<DocumentosPy>(documentoRequestDto);
                     map.ProyectoId = resultado.Id;
-                    map.CodigoDocumento = "";
+                    map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
+                    map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
                     map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\"+ documentoRequestDto.CodigoProyecto + "_" + documentoRequestDto.Etapa +  "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = documentoRequestDto.NombreDocumento.Split(".")[1];
@@ -176,7 +180,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return false;
             }
@@ -366,6 +370,107 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             
             
+        }
+
+        public async Task<PaginacionResponseDto<DocumentoResponseDto>> Listar(ListDocumentosRequestDto listDocumentosRequestDto)
+        {
+            if (listDocumentosRequestDto.Modulo == "PY")
+            {
+                try
+                {
+                    var queryable = _context.DocumentosPy
+                                    .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
+                                    .AsQueryable();
+
+                    var entidades = await queryable.Paginar(listDocumentosRequestDto)
+                                       .ToListAsync();
+
+                    var map = mapper.Map<List<DocumentoResponseDto  >>(entidades);
+                    int cantidad = queryable.Count();
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = cantidad,
+                        Model = map
+                    };
+                    return objeto;
+                }
+                catch (Exception e )
+                {
+
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = 0,
+                        Model = null
+                    };
+                    return objeto;
+                }
+               
+            }
+            else if (listDocumentosRequestDto.Modulo == "PQ")
+            {
+                try
+                {
+                    var queryable = _context.DocumentosPQ
+                            .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
+                        .AsQueryable();
+
+                    var entidades = await queryable.Paginar(listDocumentosRequestDto)
+                                       .ToListAsync();
+
+                    var map = mapper.Map<List<DocumentoResponseDto>>(entidades);
+                    int cantidad = queryable.Count();
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = cantidad,
+                        Model = map
+                    };
+                    return objeto;
+                }
+                catch (Exception e)
+                {
+
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = 0,
+                        Model = null
+                    };
+                    return objeto;
+                }
+
+            }
+            else if (listDocumentosRequestDto.Modulo == "PA")
+            {
+                try
+                {
+                    var queryable = _context.DocumentosPA
+                        .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true).AsQueryable();
+
+                    var entidades = await queryable.Paginar(listDocumentosRequestDto)
+                                       .ToListAsync();
+
+                    var map = mapper.Map<List<DocumentoResponseDto>>(entidades);
+                    int cantidad = queryable.Count();
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = cantidad,
+                        Model = map
+                    };
+                    return objeto;
+                }
+                catch (Exception e)
+                {
+
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = 0,
+                        Model = null
+                    };
+                    return objeto;
+                }
+
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

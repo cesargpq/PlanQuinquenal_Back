@@ -110,9 +110,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else
             {
-                var proyecto = mapper.Map<Proyecto>(proyectoRequestDto);
+                Proyecto proyecto = new Proyecto();
+                proyecto.CodigoProyecto = proyectoRequestDto.CodigoProyecto;
+                proyecto.PQuinquenalId = proyectoRequestDto.PQuinquenalId==0? null: proyectoRequestDto.PQuinquenalId;
+                proyecto.AñosPQ = proyectoRequestDto.AñosPQ;
+                proyecto.PlanAnualId = proyectoRequestDto.PlanAnualId == 0? null: proyectoRequestDto.PlanAnualId;
+                proyecto.MaterialId = proyectoRequestDto.MaterialId == 0 ? null : proyectoRequestDto.MaterialId;
+                proyecto.ConstructorId = proyectoRequestDto.ConstructorId == 0?null : proyectoRequestDto.ConstructorId;
+                proyecto.TipoRegistroId = proyectoRequestDto.TipoRegistroId ==0 ? null: proyectoRequestDto.TipoRegistroId;
+                proyecto.LongAprobPa = proyectoRequestDto.LongAprobPa;
+                proyecto.TipoProyectoId = proyectoRequestDto.TipoProyectoId == 0 ? null : proyectoRequestDto.TipoProyectoId;
+                proyecto.BaremoId = proyectoRequestDto.BaremoId == 0 ? null : proyectoRequestDto.BaremoId;
                 proyecto.descripcion = "";
-                proyecto.Etapa = 0;
+                proyecto.Etapa = proyecto.Etapa;
                 proyecto.IngenieroResponsableId = null;
                 proyecto.EstadoGeneralId = 2;
                 proyecto.UsuarioRegisterId = idUser;
@@ -123,7 +133,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 proyecto.LongImpedimentos = 0;
                 proyecto.LongRealHab = 0;
                 proyecto.LongRealPend = 0;
-                proyecto.LongReemplazada = 0;
+                proyecto.LongProyectos = 0;
                 _context.Add(proyecto);
                 await _context.SaveChangesAsync();
 
@@ -145,7 +155,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                     _context.AddRange(listPqUser);
                     await _context.SaveChangesAsync();
-
                 }
 
                 return new ResponseDTO
@@ -153,9 +162,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     Valid = false,
                     Message = Constantes.CreacionExistosa
                 };
-
-                
-
             }
         }
 

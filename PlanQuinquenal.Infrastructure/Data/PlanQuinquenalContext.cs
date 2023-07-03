@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -21,14 +22,24 @@ namespace PlanQuinquenal.Infrastructure.Data
         }
 
        
+        public virtual DbSet<Informe> Informe { get; set; }
+        public virtual DbSet<ActaDinamica> ActaDinamica { get; set; }
+        
         public virtual DbSet<Logs> Logs { get; set; }
         public virtual DbSet<ProblematicaReal> ProblematicaReal { get; set; }
+        public virtual DbSet<ActaParticipantes> ActaParticipantes { get; set; }
+        public virtual DbSet<ActaAsistentes> ActaAsistentes { get; set; }
+        public virtual DbSet<EstadoPermisos> EstadoPermisos { get; set; }
+        public virtual DbSet<PermisosProyecto> PermisosProyecto { get; set; }
+        public virtual DbSet<TipoPermisosProyecto> TipoPermisosProyecto { get; set; }
+        public virtual DbSet<DocumentosPermisos> DocumentosPermisos { get; set; }
         public virtual DbSet<TipoUsuario> TipoUsuario { get; set; }
         public virtual DbSet<UsuariosInteresadosPy> UsuariosInteresadosPy { get; set; }
         public virtual DbSet<DocumentosPy> DocumentosPy { get; set; }
         public virtual DbSet<DocumentosPQ> DocumentosPQ { get; set; }
         public virtual DbSet<DocumentosPA> DocumentosPA { get; set; }
-
+        public virtual DbSet<UsuariosInteresadosInformes> UsuariosInteresadosInformes { get; set; }
+        
         public virtual DbSet<EstadoPQ> EstadoPQ { get; set; }
         public virtual DbSet<TipoImpedimento> TipoImpedimento { get; set; }
         public virtual DbSet<Material> Material { get; set; }

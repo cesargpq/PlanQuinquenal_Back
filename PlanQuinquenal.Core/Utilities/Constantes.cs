@@ -32,5 +32,7 @@ namespace PlanQuinquenal.Core.Utilities
         public const string ErrorSistema = "Hubo un error en el sistema";
         public const string ExisteRegistro = "Ya existe el registro en el sistema";
         public const string CreacionExistosa = "Se creó el registro satisfactoriamente";
+        public const string BusquedaExitosa = "Se encontró el registro satisfactoriamente";
+        public const string BusquedaNoExitosa = "No se encontró el registro";
     }
 }

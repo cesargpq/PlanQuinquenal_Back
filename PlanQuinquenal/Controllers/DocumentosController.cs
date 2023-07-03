@@ -55,6 +55,13 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _documentosRepository.Add(documentoRequestDto, idUser);
             return Ok(resultado);
         }
+        [HttpPost("Listar")]
+        public async Task<IActionResult> Listar(ListDocumentosRequestDto listDocumentosRequestDto)
+        {
+            var resultado = await _documentosRepository.Listar(listDocumentosRequestDto);
+            return Ok(resultado);
+        }
+        
         [HttpDelete]
         public async Task<IActionResult> Delete(int id, string modulo)
         {

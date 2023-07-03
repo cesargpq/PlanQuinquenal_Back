@@ -17,6 +17,8 @@ namespace PlanQuinquenal.Core.Entities
         public string Ruta { get; set; }
         public bool Estado { get; set; }
         public string rutafisica { get; set; }
+        public DateTime Aprobaciones { get; set; }
+
     }
 
 }

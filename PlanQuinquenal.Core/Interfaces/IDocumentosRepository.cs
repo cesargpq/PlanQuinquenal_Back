@@ -14,6 +14,8 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ResponseDTO> GetUrl(int id, string modulo);
         Task<DocumentoResponseDto> Download(int id, string modulo);
         Task<ResponseDTO> Add(DocumentoRequestDto documentoRequestDto, int idUser);
+
+        Task<PaginacionResponseDto<DocumentoResponseDto>> Listar(ListDocumentosRequestDto listDocumentosRequestDto);
         Task<ResponseDTO> Delete(int id, string modulo, int idUser);
     }
 }

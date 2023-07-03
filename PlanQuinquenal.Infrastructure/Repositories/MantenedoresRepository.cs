@@ -35,14 +35,35 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("TipoUsuario"))
+            else if (attribute.Equals("TipoPermisosProyecto"))
+            {
+                var dato = await _context.TipoPermisosProyecto.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            else if (attribute.Equals("EstadoPermisos"))
+            {
+                var dato = await _context.EstadoPermisos.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            else if (attribute.Equals("EstadoPermisos"))
+            {
+                var dato = await _context.EstadoPermisos.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            else if (attribute.Equals("TipoUsuario"))
             {
                 var dato = await _context.TipoUsuario.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("ProblematicaReal"))
+            else if (attribute.Equals("ProblematicaReal"))
             {
                 var dato = await _context.ProblematicaReal.Where(x => x.Estado == true).ToListAsync();
 
@@ -50,7 +71,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 dto = resultadoMap;
             }
 
-            if (attribute.Equals("EstadoPQ"))
+            else if (attribute.Equals("EstadoPQ"))
             {
                 var dato = await _context.EstadoPQ.Where(x => x.Estado == true).ToListAsync();
 
@@ -58,7 +79,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 dto = resultadoMap;
             }
 
-            if (attribute.Equals("TipoImpedimento"))
+            else if (attribute.Equals("TipoImpedimento"))
             {
                 var dato = await _context.TipoImpedimento.Where(x => x.Estado == true).ToListAsync();
 
@@ -66,49 +87,49 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 dto = resultadoMap;
             }
 
-            if (attribute.Equals("Distrito"))
+            else if (attribute.Equals("Distrito"))
             {
                 var dato = await _context.Distrito.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("PlanAnual"))
+            else if (attribute.Equals("PlanAnual"))
             {
                 var dato = await _context.PlanAnual.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("PlanQuinquenal"))
+            else if (attribute.Equals("PlanQuinquenal"))
             {
                 var dato = await _context.PQuinquenal.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("TipoProyecto"))
+            else if (attribute.Equals("TipoProyecto"))
             {
                 var dato = await _context.TipoProyecto.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("TipoRegistro"))
+            else if (attribute.Equals("TipoRegistro"))
             {
                 var dato = await _context.TipoRegistro.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("Constructor"))
+            else if (attribute.Equals("Constructor"))
             {
                 var dato = await _context.Constructor.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
-            if (attribute.Equals("EstadoGeneral"))
+            else if (attribute.Equals("EstadoGeneral"))
             {
                 var dato = await _context.EstadoGeneral.Where(x => x.Estado == true).ToListAsync();
 

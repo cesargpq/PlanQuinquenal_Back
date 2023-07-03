@@ -23,8 +23,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<MaestroResponseDto, Material>();
             CreateMap<Material, MaestroResponseDto>();
 
+
+
+            CreateMap<MaestroResponseDto, TipoPermisosProyecto>();
+            CreateMap<TipoPermisosProyecto, MaestroResponseDto>();
+            
+
             CreateMap<MaestroResponseDto, Distrito>();
             CreateMap<Distrito, MaestroResponseDto>();
+
+            CreateMap<PermisoByIdResponseDto, PermisosProyecto>();
+            CreateMap<PermisosProyecto, PermisoByIdResponseDto>();
+
+
+            CreateMap<MaestroResponseDto, EstadoPermisos>();
+            CreateMap<EstadoPermisos, MaestroResponseDto>();
+            
 
             CreateMap<MaestroResponseDto, PlanAnual>();
             CreateMap<PlanAnual, MaestroResponseDto>();
@@ -61,15 +75,56 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<DocumentoRequestDto, DocumentosPA>();
 
 
+            CreateMap<InformeReqDTO, Informe>()
+                .ForMember(x => x.UserInteresados, c => c.Ignore())
+                .ForMember(x => x.Participantes, c => c.Ignore())
+                .ForMember(x => x.Asistentes, c => c.Ignore())
+                .ForMember(x => x.FechaInforme, c => c.Ignore())
+                .ForMember(x => x.FechaCompromiso, c => c.Ignore())
+                .ForMember(x => x.FechaReunion, c => c.Ignore());
+            CreateMap<Informe, InformeReqDTO>();
+
+            CreateMap<DocumentoResponseDto, DocumentosPy>();
+                
+            CreateMap<DocumentoResponseDto, DocumentosPQ>();
+            CreateMap<DocumentoResponseDto, DocumentosPA>();
+            CreateMap<DocumentoPermisosResponseDTO, DocumentosPermisos>();
+            CreateMap<DocumentosPermisos, DocumentoPermisosResponseDTO>()
+                .ForMember(X => X.Fecha, y => y.MapFrom(src => DateOnly(src.Fecha)));
+
+
+
+            CreateMap<DocumentosPy, DocumentoResponseDto>()
+                .ForMember(x => x.nombreArchivo, y => y.MapFrom(src => src.CodigoDocumento))
+                .ForMember(x => x.codigoDocumento, y => y.MapFrom(src => Separa(src.NombreDocumento)))
+                .ForMember(x => x.Aprobaciones, y => y.MapFrom(src => DateOnly(src.Aprobaciones)));
+
+
+            CreateMap<DocumentosPQ, DocumentoResponseDto>()
+                .ForMember(x => x.nombreArchivo, y => y.MapFrom(src => src.CodigoDocumento))
+                .ForMember(x => x.codigoDocumento, y => y.MapFrom(src => Separa(src.NombreDocumento)))
+                .ForMember(x => x.Aprobaciones, y => y.MapFrom(src => DateOnly(src.Aprobaciones)));
+            CreateMap<DocumentosPA, DocumentoResponseDto>()
+                .ForMember(x => x.nombreArchivo, y => y.MapFrom(src => src.CodigoDocumento))
+                .ForMember(x => x.codigoDocumento, y => y.MapFrom(src => Separa(src.NombreDocumento)))
+                .ForMember(x => x.Aprobaciones, y => y.MapFrom(src => DateOnly(src.Aprobaciones)));
+
+
             CreateMap<UsuariosInteresadosPy, UsuariosInteresadosPyResponseDto>();
             CreateMap<UsuariosInteresadosPyResponseDto, UsuariosInteresadosPy > ();
 
             CreateMap<Usuario, UsuarioResponseDto>()
                .ForMember(x => x.Nombre, y => y.MapFrom(src => src.nombre_usu +" "+ src.apellido_usu))
                .ForMember(x => x.Id, y => y.MapFrom(src => src.cod_usu));
-            
+
+
+            CreateMap<UsuariosInteresadosInformes, ParticipantesResponseDto>();
+            CreateMap<ParticipantesResponseDto, UsuariosInteresadosInformes>();
+
 
             
+
+                
 
             CreateMap<PQuinquenal, PQuinquenalResponseDto>()
               .ForMember(x => x.AnioPlan, y => y.MapFrom(src => src.AnioPlan))
@@ -80,8 +135,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
               .ForMember(x => x.Id, y => y.MapFrom(src => src.Id));
 
 
+            CreateMap<ActaParticipantes, UsuarioResponseDto>();
+            CreateMap<UsuarioResponseDto, ActaParticipantes>();
+
+            CreateMap<ActaAsistentes, UsuarioResponseDto>();
+            CreateMap<UsuarioResponseDto, ActaAsistentes>();
+
+            CreateMap<UsuariosInteresadosInformes, UsuarioResponseDto>();
+            CreateMap<UsuarioResponseDto, UsuariosInteresadosInformes>();
+
+
             CreateMap<ProyectoRequestDto, Proyecto>();
             CreateMap<Proyecto, ProyectoRequestDto>();
+
+            CreateMap<Informe, InformeResponseDto>()
+                .ForMember(
+                    dest => dest.Participantes, opt => opt.MapFrom(src => src.Participantes))
+                .ForMember(
+                    dest => dest.Asistentes, opt => opt.MapFrom(src => src.Asistentes))
+                .ForMember(
+                    dest => dest.UserInteresados, opt => opt.MapFrom(src => src.UserInteresados));
+
             CreateMap<Proyecto, ProyectoResponseDto>()
                 .ForMember(
                     dest => dest.IngenieroResponsables,
@@ -102,6 +176,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             CreateMap<Usuario, UsuarioRequestDto>();
 
+        }
+
+        private DateTime ParseDateTime(string data)
+        {
+
+            
+                return DateTime.Parse(data);
+            
+           
+            
+        }
+        private string DateOnly(DateTime data)
+        {
+            return data.ToString("dd/MM/yyyy");
+        }
+        private string Separa(string data)
+        {
+            return data.Split(".")[0];
         }
         private string GetStateGeneral(Decimal LongAprobPa, Decimal LongRealHab, Decimal LongRealPend, Decimal LongPendEjecucion, Decimal LongImpedimento)
         {
