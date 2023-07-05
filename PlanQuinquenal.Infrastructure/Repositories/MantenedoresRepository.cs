@@ -35,6 +35,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
+            else if (attribute.Equals("TipoInforme"))
+            {
+                var dato = await _context.TipoInforme.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            else if (attribute.Equals("TipoSeguimiento"))
+            {
+                var dato = await _context.TipoSeguimiento.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
             else if (attribute.Equals("TipoPermisosProyecto"))
             {
                 var dato = await _context.TipoPermisosProyecto.Where(x => x.Estado == true).ToListAsync();

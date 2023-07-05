@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
@@ -47,6 +48,22 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> GetAll(FiltersProyectos filterProyectos)
         {
             var resultado = await _proyectoRepository.GetAll(filterProyectos);
+            return Ok(resultado);
+        }
+
+        [HttpPut("id")]
+        public async Task<IActionResult> Update(ProyectoRequestUpdateDto proyecto, int id)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            var resultado = await _proyectoRepository.Update(proyecto,id,idUser);
             return Ok(resultado);
         }
     }

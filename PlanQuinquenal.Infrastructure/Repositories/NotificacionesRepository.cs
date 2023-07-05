@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
 using System.Net.Mime;
+using ApiDavis.Core.Utilidades;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -265,12 +266,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return config_Notificaciones;
         }
 
-        public async Task<List<Notificaciones>> ObtenerListaNotif(int cod_usu)
+        public async Task<List<Notificaciones>> ObtenerListaNotif(RequestNotificacionDTO r, int cod_usu)
         {
             //List<Notificaciones> lstNotificaciones = new List<Notificaciones>();
-            var queryable = await _context.Notificaciones.Where(x => x.cod_usu == cod_usu).ToListAsync();
+            var queryable =  _context.Notificaciones.Where(x => x.cod_usu == cod_usu).AsQueryable();
 
-            return queryable;
+
+            var dato = await queryable.Paginar(r).ToListAsync();
+
+            return dato;
         }
 
 

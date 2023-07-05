@@ -39,7 +39,7 @@ namespace PlanQuinquenal.Core.Entities
         public DateTime? FechaModificacion { get; set; }
         public string? TipoSeguimiento { get; set; }
         public string? Tipo { get; set; }
-        public List<UsuariosInteresadosInformes> UserInteresados { get; set; }
+        public List<UsuariosInteresadosInformes>? UserInteresados { get; set; }
 
     }
 }

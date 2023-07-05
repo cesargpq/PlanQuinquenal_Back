@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+﻿using PlanQuinquenal.Core.DTOs;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
@@ -13,7 +14,7 @@ namespace PlanQuinquenal.Core.Interfaces
     {
         Task<ProyectoResponseDto> GetById(int id);
         Task<PaginacionResponseDto<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos);
-
+        Task<ResponseDTO> Update(ProyectoRequestUpdateDto p,int id, int idUser);
         Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto,int idUser);
     }
 }

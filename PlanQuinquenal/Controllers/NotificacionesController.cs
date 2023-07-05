@@ -66,8 +66,8 @@ namespace PlanQuinquenal.Controllers
             
         }
 
-        [HttpGet("ObtenerListaNotif")]
-        public async Task<IActionResult> ObtenerListaNotif()
+        [HttpPost("ObtenerListaNotif")]
+        public async Task<IActionResult> ObtenerListaNotif(RequestNotificacionDTO r)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             foreach (var item in identity.Claims)
@@ -75,7 +75,8 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     var codUsu = int.Parse(item.Value);
-                    var resultado = await _repositoryNotificaciones.ObtenerListaNotif(codUsu);
+                    
+                    var resultado = await _repositoryNotificaciones.ObtenerListaNotif(r,codUsu);
                     return Ok(resultado);
                 }
             }

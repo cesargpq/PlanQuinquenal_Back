@@ -1,4 +1,5 @@
 ﻿using ApiDavis.Core.Utilidades;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
@@ -20,10 +21,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     public class BaremoRepository : IBaremoRepository
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IMapper mapper;
 
-        public BaremoRepository(PlanQuinquenalContext context) 
+        public BaremoRepository(PlanQuinquenalContext context, IMapper mapper) 
         {
             this._context = context;
+            this.mapper = mapper;
         }
 
         public async Task<Baremo> GetById(int id)
@@ -313,6 +316,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)
                                        .ToListAsync();
+
+
+                var map = mapper.Map<BaremoResponseDTO>(entidades);
                 int cantidad = queryable.Count();
                 var objeto = new PaginacionResponseDto<Baremo>
                 {

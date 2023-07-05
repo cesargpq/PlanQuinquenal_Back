@@ -14,6 +14,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string TipoPermisosProyecto { get; set; }
         public string NombreDocumento { get; set; }
         public string Fecha { get; set; }
+        public string Vencimiento { get; set; }
         public string Expediente { get; set; }
 
     }

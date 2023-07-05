@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PlanQuinquenal.Core.DTOs.ResponseDTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,8 +11,8 @@ namespace PlanQuinquenal.Core.Entities
     {
         public int Id { get; set; }
         public int InformeId { get; set; }
-        public Usuario Usuario { get; set; }
         public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; }
         public bool Activo { get; set; }
     }
 }

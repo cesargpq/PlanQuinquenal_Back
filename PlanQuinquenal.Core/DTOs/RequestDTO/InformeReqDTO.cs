@@ -10,9 +10,9 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class InformeReqDTO
     {
         public string CodigoProyecto { get; set; }
-        public string Modulo { get; set; }
+        public int? Modulo { get; set; }
         public int? Etapa { get; set; }
-        public string? Tipo { get; set; }
+        public int? Tipo { get; set; }
         public string? FechaInforme { get; set; }
         public string? ResumenGeneral { get; set; }
         public string? ActividadesRealizadas { get; set; }

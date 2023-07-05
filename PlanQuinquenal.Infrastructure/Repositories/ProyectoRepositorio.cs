@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using PlanQuinquenal.Core.Utilities;
 using ApiDavis.Core.Utilidades;
 using System.Data.SqlTypes;
+using PlanQuinquenal.Core.DTOs;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -98,7 +99,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto, int idUser)
         {
-            var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto).FirstOrDefaultAsync();
+            var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto && x.Etapa ==proyectoRequestDto.Etapa).FirstOrDefaultAsync();
 
             if (existe != null)
             {
@@ -165,6 +166,109 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        
+        public async Task<ResponseDTO> Update(ProyectoRequestUpdateDto p, int id, int idUser)
+        {
+            try
+            {
+                
+                var existeN = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(p.CodigoProyecto) && x.Etapa.Equals(p.Etapa) && x.Id != id).FirstOrDefaultAsync();
+
+                if (existeN == null)
+                {
+                    var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    if (existeN == null)
+                    {
+                        existe.descripcion = p.Descripcion;
+                        existe.PQuinquenalId = p.PQuinquenalId;
+                        existe.AñosPQ = p.AñosPQ;
+                        existe.PlanAnualId=p.PlanAnualId==null || p.PlanAnualId==0 ? null : p.PlanAnualId;
+                        existe.MaterialId = p.MaterialId == null || p.MaterialId == 0 ? null : p.MaterialId;
+                        existe.DistritoId = p.DistritoId == null || p.DistritoId == 0 ? null : p.DistritoId;
+                        existe.TipoProyectoId = p.TipoProyectoId == null || p.TipoProyectoId == 0 ? null : p.TipoProyectoId;
+                        existe.Etapa = p.Etapa;
+                        existe.CodigoMalla = p.CodigoMalla;
+                        existe.TipoRegistroId = p.TipoRegistroId == null || p.TipoRegistroId == 0 ? null : p.TipoRegistroId;
+                        existe.IngenieroResponsableId = p.IngenieroResponsableId == null || p.IngenieroResponsableId == 0 ? null: p.IngenieroResponsableId;
+                        existe.ConstructorId = p.ConstructorId == null || p.ConstructorId == 0 ? null : p.ConstructorId;
+                        existe.BaremoId = p.BaremoId == null || p.BaremoId == 0 ? null : p.BaremoId;
+                        existe.FechaGasificacion = p.FechaGacificacion != null || p.FechaGacificacion == "" ? DateTime.Parse(p.FechaGacificacion):null;
+                        existe.LongAprobPa = p.LongAprobPa;
+                        existe.LongRealHab = p.LongRealHab;
+                        existe.LongProyectos = p.LongProyectos;
+                        existe.UsuarioModificaId = idUser;
+                        existe.fechamodifica = DateTime.Now;
+                        _context.Update(existe);
+                        await _context.SaveChangesAsync();
+
+                        if (p.UsuariosInteresados.Count > 0)
+                        {
+                            var userInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == id).ToListAsync();
+
+                            foreach (var item in userInt)
+                            {
+                                _context.Remove(item);
+                                await _context.SaveChangesAsync();
+                            }
+                            List<UsuariosInteresadosPy> listPqUser = new List<UsuariosInteresadosPy>();
+                            foreach (var item in p.UsuariosInteresados)
+                            {
+                                var existeUsu = await _context.Usuario.Where(x => x.cod_usu == item).FirstOrDefaultAsync();
+                                if (existeUsu != null)
+                                {
+                                    UsuariosInteresadosPy pqUser = new UsuariosInteresadosPy();
+                                    pqUser.ProyectoId = id;
+                                    pqUser.UsuarioId = item;
+                                    pqUser.Estado = true;
+                                    listPqUser.Add(pqUser);
+                                }
+                            }
+                            foreach (var item in listPqUser)
+                            {
+                                _context.Add(item);
+                                await _context.SaveChangesAsync();
+                            }
+
+                        }
+                        var objeto = new ResponseDTO
+                        {
+                            Message = Constantes.ActualizacionSatisfactoria,
+                            Valid = true
+                        };
+                        return objeto;
+                    }
+                    else
+                    {
+                        var objeto = new ResponseDTO
+                        {
+                            Message = Constantes.BusquedaNoExitosa,
+                            Valid = true
+                        };
+                        return objeto;
+                    }
+                    
+                }
+                else
+                {
+                    var objeto = new ResponseDTO
+                    {
+                        Message = "Ya existe el proyecto con esa etapa",
+                        Valid = false
+                    };
+                    return objeto;
+                }
+                
+            }
+            catch (Exception e)
+            {
+
+                var objeto = new ResponseDTO
+                {
+                    Message = Constantes.ErrorSistema,
+                    Valid = false
+                };
+                return objeto;
+            }
+        }
     }
 }

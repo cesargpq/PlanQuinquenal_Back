@@ -23,6 +23,8 @@ namespace PlanQuinquenal.Infrastructure.Data
 
        
         public virtual DbSet<Informe> Informe { get; set; }
+        public virtual DbSet<TipoInforme> TipoInforme { get; set; }
+        public virtual DbSet<TipoSeguimiento> TipoSeguimiento { get; set; }
         public virtual DbSet<ActaDinamica> ActaDinamica { get; set; }
         
         public virtual DbSet<Logs> Logs { get; set; }

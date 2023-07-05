@@ -17,7 +17,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<Object> EnvioCorreoNotif(List<CorreoTabla> lstModif, string correoUsu, string tipoOperacion, string modulo);
         Task<Object> ModificarConfigNotif(Config_notificaciones config);
         Task<Config_notificaciones> ObtenerConfigNotif(int cod_usu);
-        Task<List<Notificaciones>> ObtenerListaNotif(int cod_usu);
+        Task<List<Notificaciones>> ObtenerListaNotif(RequestNotificacionDTO r,int cod_usu);
         Task<List<CorreoTabla>> ObtenerListaModif(int codNot);
     }
 }

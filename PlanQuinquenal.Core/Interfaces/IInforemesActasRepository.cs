@@ -12,6 +12,12 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IInforemesActasRepository
     {
         Task<ResponseDTO> Crear(InformeReqDTO informeReqDTO,int id);
-        Task<ResponseEntidadDto<Informe>> GetById(int id);
+
+        Task<ResponseDTO> Update(InformeReqDTO informeReqDTO, int id, int idUser);
+        Task<ResponseEntidadDto<InformeResponseDto>> GetById(int id);
+        Task<PaginacionResponseDto<InformeResponseDto>> GetAll(PaginationFilterActaDto pag);
+        Task<DocumentoResponseDto> Download(int id);
+
+        Task<ResponseDTO> AprobarActa(AprobarActaDto a, int idUser);
     }
 }

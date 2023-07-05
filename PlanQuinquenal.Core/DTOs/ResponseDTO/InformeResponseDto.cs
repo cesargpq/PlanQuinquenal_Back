@@ -12,7 +12,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public int Id { get; set; }
         public string? CodigoProyecto { get; set; }
         public int? Etapa { get; set; }
-        public DateTime? FechaInforme { get; set; }
+        public string? FechaInforme { get; set; }
         public string? ResumenGeneral { get; set; }
         public string? RutaFisica { get; set; }
         public string? Ruta { get; set; }
@@ -22,26 +22,26 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 
         //Acta
 
-        public DateTime? FechaReunion { get; set; }
+        public string? FechaReunion { get; set; }
         public string? Agenda { get; set; }
         public string? Objetivos { get; set; }
         public string? Acuerdos { get; set; }
         public string? Compromisos { get; set; }
-        public DateTime? FechaCompromiso { get; set; }
+        public string? FechaCompromiso { get; set; }
         public int? Responsable { get; set; }
 
  
-        public List<UsuarioResponseDto> Participantes { get; set; }
-        public List<UsuarioResponseDto> Asistentes { get; set; }
+        public List<UsuariosInteresadosInformesResponseDto> Participantes { get; set; }
+        public List<UsuariosInteresadosInformesResponseDto> Asistentes { get; set; }
   
         //Acta
 
         public int? UsuarioRegister { get; set; }
         public int? UsuarioModifica { get; set; }
-        public DateTime? FechaCreacion { get; set; }
-        public DateTime? FechaModificacion { get; set; }
+        public string? FechaCreacion { get; set; }
+        public string? FechaModificacion { get; set; }
         public string? TipoSeguimiento { get; set; }
         public string? Tipo { get; set; }
-        public List<UsuariosInteresadosInformes> UserInteresados { get; set; }
+        public List<UsuariosInteresadosInformesResponseDto> UserInteresados { get; set; }
     }
 }

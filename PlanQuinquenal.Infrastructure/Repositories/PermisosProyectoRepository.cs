@@ -148,6 +148,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 documentos.FechaModificacion = DateTime.Now;
                 documentos.UsuarioCreacion = idUser;
                 documentos.UsuarioModifca = idUser;
+                documentos.Vencimiento = documentosPermisosRequestDTO.Vencimiento!="" || documentosPermisosRequestDTO.Vencimiento != null ? DateTime.Parse(documentosPermisosRequestDTO.Vencimiento):null;
                 _context.Add(documentos);
                 await _context.SaveChangesAsync();
 
