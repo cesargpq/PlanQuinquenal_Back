@@ -112,7 +112,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         .AsQueryable();
 
                 var entidades = await queryable.OrderBy(e => e.nombre_perfil).Paginar(entidad).ToListAsync();
-
+                var unidad_negocio = await _context.Unidad_negocio.ToListAsync();
                 foreach (var perfil in entidades)
                 {
                     PerfilResponse objPerfil = new PerfilResponse();
@@ -123,7 +123,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     objPerfil.nombre_perfil = perfil.nombre_perfil;
                     objPerfil.estado_perfil = perfil.estado_perfil;
                     objPerfil.cod_unidadNeg = perfil.cod_unidadNeg;
-
+                    objPerfil.unidad_negocio = unidad_negocio.Where(x => x.cod_und == perfil.cod_unidadNeg).Select(x => x.nom_und).FirstOrDefault();
                     lstPerfil.Add(objPerfil);
 
                 }

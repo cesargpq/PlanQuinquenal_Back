@@ -14,5 +14,6 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public Decimal Precio { get; set; }
         public bool Estado { get; set; }
         public string PlanQuinquenalId { get; set; }
+        public string PlanQuinquenal { get; set; }
     }
 }

@@ -33,5 +33,7 @@ namespace PlanQuinquenal.Core.Entities
         public DateTime? FechaModifica { get; set; }
         public DateTime? FechaCreacion { get; set; }
 
+        
+
     }
 }

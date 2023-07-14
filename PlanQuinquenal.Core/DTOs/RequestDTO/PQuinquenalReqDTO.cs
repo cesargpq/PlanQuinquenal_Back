@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
-    public class PQuinquenalReqDTO : PlanQuinquenal.Core.Entities.PlanQuinquenal
+    public class PQuinquenalReqDTO
     {
-        public List<int> IdUsuario { get; set; }
-        public List<PQUsuariosInteresadosDTO> lstUsuaInter { get; set; }
+        public string AnioPlan { get; set; }
+        public int EstadoAprobacionId { get; set; }
+        public string FechaAprobacion { get; set; }
+        public string Descripcion { get; set; }
+        public List<int> UsuariosInteresados { get; set; }
     }
 }

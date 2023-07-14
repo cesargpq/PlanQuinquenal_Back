@@ -67,7 +67,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var valor3 = worksheet.Cells[row, 3].Value?.ToString();
                             var valor4 = worksheet.Cells[row, 4].Value?.ToString();
                             
-                            var dato =await _context.PlanQuinquenal.Where(x => x.Pq == valor4).FirstOrDefaultAsync();
+                            var dato =await _context.PQuinquenal.Where(x => x.AnioPlan == valor4).FirstOrDefaultAsync();
                             if(dato == null)
                             {
                                 var entidadError = new Baremo
@@ -88,7 +88,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     Descripcion = valor2,
                                     Precio = Convert.ToDecimal(valor3),
                                     Estado = true,
-                                    PlanQuinquenalId = dato.Id
+                                    PQuinquenalId = dato.Id
                                 };
                                 listaBaremo.Add(entidad);
                             }
@@ -115,7 +115,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     existe.Precio = item.Precio;
                                     existe.Descripcion = item.Descripcion;
                                     existe.Estado = item.Estado;
-                                    existe.PlanQuinquenalId = item.PlanQuinquenalId;
+                                    existe.PQuinquenalId = item.PQuinquenalId;
                                     _context.Baremo.Update(existe);
                                     await _context.SaveChangesAsync();
                                 }
@@ -190,7 +190,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     baremoExiste.Precio = data.Precio;
                     baremoExiste.CodigoBaremo = data.CodigoBaremo;
                     baremoExiste.Estado = data.Estado;
-                    baremoExiste.PlanQuinquenalId = data.PlanQuinquenalId;
+                    baremoExiste.PQuinquenalId = data.PlanQuinquenalId;
                     _context.Update(baremoExiste);
                     await _context.SaveChangesAsync();
                     dto.Message = Constantes.ActualizacionSatisfactoria;
@@ -216,7 +216,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<bool> ExisteQuinquenal(int data)
         {
 
-            var existQnq = await _context.PlanQuinquenal.Where(x => x.Id.Equals(data)).FirstOrDefaultAsync();
+            var existQnq = await _context.PQuinquenal.Where(x => x.Id.Equals(data)).FirstOrDefaultAsync();
             if(existQnq != null)
             {
                 return true;
@@ -240,7 +240,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     baremoExiste.Estado = baremoExiste.Estado == true ? false : true;
                     _context.Update(baremoExiste);
                     await _context.SaveChangesAsync();
-                    dto.Message = Constantes.ActualizacionSatisfactoria;
+                    dto.Message = Constantes.EliminacionSatisfactoria;
                     dto.Valid = true;
 
                 }
@@ -309,6 +309,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var buscar = int.TryParse(entidad.Buscar, out n);
 
                 var queryable = _context.Baremo
+                                                        .Include(x => x.PQuinquenal)
                                     .Where( x => x.CodigoBaremo.Contains(entidad.Buscar) || x.Descripcion.Contains(entidad.Buscar) ||
                                      (x.Precio.ToString()).Contains(entidad.Buscar) )
                                      .AsQueryable();
@@ -318,7 +319,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                        .ToListAsync();
 
 
-                var map = mapper.Map<BaremoResponseDTO>(entidades);
+                
                 int cantidad = queryable.Count();
                 var objeto = new PaginacionResponseDto<Baremo>
                 {
@@ -331,11 +332,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             else
             {
                 var queryable = _context.Baremo
+                                    .Include(x=>x.PQuinquenal)
                                     .Where(x => entidad.CodigoBaremo != "" ? x.CodigoBaremo == entidad.CodigoBaremo : true)
                                     .Where(x => entidad.Estado != false ? x.Estado == entidad.Estado : true)
                                     .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
                                     .Where(x => entidad.Precio > 0 ? x.Precio == entidad.Precio : true)
-                                    .Where(x => entidad.Precio != 0 ? x.PlanQuinquenalId == entidad.PlanQuinquenalId : true)
+                                    .Where(x => entidad.PlanQuinquenalId != 0 ? x.PQuinquenalId == entidad.PlanQuinquenalId : true)
                                      .AsQueryable();
 
 

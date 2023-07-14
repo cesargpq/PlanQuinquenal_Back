@@ -18,5 +18,7 @@ namespace PlanQuinquenal.Core.Entities
         public int UsuarioRegisterId { get; set; }
         public bool Estado { get; set; }
         public int UsuarioModifica { get; set; }
+        public EstadoAprobacion EstadoAprobacion { get; set; }
+        public List<Proyecto> Proyecto { get; set; }
     }
 }

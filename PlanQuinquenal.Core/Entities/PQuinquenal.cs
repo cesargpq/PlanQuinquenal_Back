@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,8 +17,14 @@ namespace PlanQuinquenal.Core.Entities
         public string Descripcion { get; set; }
         public DateTime FechaRegistro { get; set; }
         public DateTime FechaModifica { get; set; }
+   
         public int UsuarioRegisterId { get; set; }
         public bool Estado { get; set; }
+        
         public int UsuarioModifica { get; set; }
+        public EstadoAprobacion EstadoAprobacion { get; set; }
+        public List<Proyecto> Proyecto { get; set; }
+        
+
     }
 }

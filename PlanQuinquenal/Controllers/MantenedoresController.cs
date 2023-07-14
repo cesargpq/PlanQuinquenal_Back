@@ -6,6 +6,7 @@ using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 
 namespace PlanQuinquenal.Controllers
@@ -54,12 +55,12 @@ namespace PlanQuinquenal.Controllers
             if (resultado)
             {
                 dto.Valid = true;
-                dto.Message = $"Se actualizó la entidad correctamente";
+                dto.Message = Constantes.EliminacionSatisfactoria;
             }
             else
             {
                 dto.Valid = false;
-                dto.Message = $"Hubo un error al eliminar";
+                dto.Message = Constantes.ErrorSistema;
             }
 
             return Ok(dto);
@@ -93,12 +94,12 @@ namespace PlanQuinquenal.Controllers
             if (resultado)
             {
                 dto.Valid = true;
-                dto.Message = $"Se actualizó la entidad correctamente";
+                dto.Message = Constantes.ActualizacionSatisfactoria;
             }
             else
             {
                 dto.Valid = false;
-                dto.Message = $"Hubo un error al actualizar";
+                dto.Message = Constantes.ErrorSistema;
             }
 
             return Ok(dto);

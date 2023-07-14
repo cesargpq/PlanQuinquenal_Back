@@ -150,7 +150,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 resultado.passw_user = hashService.Desencriptar(resultado.passw_user);
                 _context.Update(resultado);
                 await _context.SaveChangesAsync();
-                resp.Message = Constantes.ActualizacionSatisfactoria;
+                resp.Message = Constantes.EliminacionSatisfactoria;
                 resp.Valid = true;
                 return resp;
             }
@@ -183,6 +183,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             usuarioDto.Estado = true;
             usuarioDto.Intentos = 0;
             usuarioDto.LastSesion = null;
+            usuarioDto.Interno = usuario.Interno;
             usuarioDto.Conectado = false;
             usuarioDto.Unidad_negociocod_und = perfil.cod_unidadNeg;
             usuarioDto.FechaCreacion = DateTime.Now;

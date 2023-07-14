@@ -9,10 +9,10 @@ namespace PlanQuinquenal.Core.Entities
     public class Proyecto
     {
         public int Id { get; set; }
-        public string CodigoProyecto { get; set; }
-        public string descripcion { get; set; }
+        public string? CodigoProyecto { get; set; }
+        public string? descripcion { get; set; }
         public int? PQuinquenalId { get; set; }
-        public string AñosPQ { get; set; }
+        public string? AñosPQ { get; set; }
         public int? PlanAnualId { get; set; }
         public int? MaterialId { get; set; }
         public int? DistritoId { get; set; }
@@ -27,7 +27,7 @@ namespace PlanQuinquenal.Core.Entities
         public Usuario? IngenieroResponsable { get; set; }
         public List<UsuariosInteresadosPy> UsuariosInteresados { get; set;}
         public int? TipoProyectoId { get; set; }
-        public int Etapa { get; set; }
+        public int? Etapa { get; set; }
 
         public string? CodigoMalla { get; set; }
         public int? TipoRegistroId { get; set; }
@@ -35,17 +35,17 @@ namespace PlanQuinquenal.Core.Entities
         public int? ConstructorId { get; set; }
         public int? EstadoGeneralId { get; set; }
         public int? BaremoId { get; set; }
-        public int UsuarioRegisterId { get; set; }
-        public int UsuarioModificaId { get; set; }
+        public int? UsuarioRegisterId { get; set; }
+        public int? UsuarioModificaId { get; set; }
         public DateTime? FechaRegistro { get; set; }
         public DateTime? fechamodifica { get; set; }
         public DateTime? FechaGasificacion { get; set; }
-        public Decimal LongAprobPa { get; set; }
-        public Decimal LongRealHab { get; set; }
-        public Decimal LongRealPend { get; set; }
-        public Decimal LongImpedimentos { get; set; }
-        public Decimal LongReemplazada { get; set; }
-        public Decimal LongProyectos { get; set; }
+        public Decimal? LongAprobPa { get; set; }
+        public Decimal? LongRealHab { get; set; }
+        public Decimal? LongRealPend { get; set; }
+        public Decimal? LongImpedimentos { get; set; }
+        public Decimal? LongReemplazada { get; set; }
+        public Decimal? LongProyectos { get; set; }
         public Baremo? Baremo { get; set; }
 
         //Impedimentos unificado

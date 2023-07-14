@@ -35,13 +35,14 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public List<UsuariosInteresadosInformesResponseDto> Asistentes { get; set; }
   
         //Acta
-
+        public List<ActaDinamica> ActaDinamica { get; set; }
         public int? UsuarioRegister { get; set; }
         public int? UsuarioModifica { get; set; }
         public string? FechaCreacion { get; set; }
         public string? FechaModificacion { get; set; }
         public string? TipoSeguimiento { get; set; }
         public string? Tipo { get; set; }
+        public int TipoInformeId { get; set; }
         public List<UsuariosInteresadosInformesResponseDto> UserInteresados { get; set; }
     }
 }

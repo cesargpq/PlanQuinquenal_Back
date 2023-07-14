@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
@@ -43,14 +44,24 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
-
-        [HttpPost("Listar")]
-        public async Task<IActionResult> GetAll(FiltersProyectos filterProyectos)
+        [HttpPost("ProyectoImport")]
+        public async Task<IActionResult> ProyectoImport(RequestMasivo data)
         {
-            var resultado = await _proyectoRepository.GetAll(filterProyectos);
+            var resultado = await _proyectoRepository.ProyectoImport(data);
             return Ok(resultado);
         }
-
+        //[HttpPost("Listar")]
+        //public async Task<IActionResult> GetAll(FiltersProyectos filterProyectos)
+        //{
+        //    var resultado = await _proyectoRepository.GetAll(filterProyectos);
+        //    return Ok(resultado);
+        //}
+        [HttpPost("Listar")]
+        public async Task<IActionResult> GetAll2(FiltersProyectos filterProyectos)
+        {
+            var resultado = await _proyectoRepository.GetAll2(filterProyectos);
+            return Ok(resultado);
+        }
         [HttpPut("id")]
         public async Task<IActionResult> Update(ProyectoRequestUpdateDto proyecto, int id)
         {

@@ -96,7 +96,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
                     map.rutafisica = configuration["RUTA_ARCHIVOS"] +"\\"+"PlanAnual\\"+ documentoRequestDto.CodigoProyecto+"\\"+guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.TipoDocumento = documentoRequestDto.NombreDocumento.Split(".")[1];
+                    map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Ruta = configuration["DNS"]+ "PlanAnual"+ "/" + documentoRequestDto.CodigoProyecto+ "/" + guidId+ Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
@@ -131,7 +131,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
                     map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + documentoRequestDto.CodigoProyecto + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.TipoDocumento = documentoRequestDto.NombreDocumento.Split(".")[1];
+                    map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Ruta = configuration["DNS"] + "Quinquenal"+"/" + documentoRequestDto.CodigoProyecto + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
@@ -165,7 +165,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
                     map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\"+ documentoRequestDto.CodigoProyecto + "_" + documentoRequestDto.Etapa +  "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.TipoDocumento = documentoRequestDto.NombreDocumento.Split(".")[1];
+                    map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Ruta = configuration["DNS"] + "Proyectos" + "/" + documentoRequestDto.CodigoProyecto+"_"+ documentoRequestDto.Etapa + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
@@ -335,31 +335,53 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             ResponseDTO obj = new ResponseDTO();
             try
             {
-                if (modulo.Equals("PA"))
+                try
                 {
-                    var dato = await _context.DocumentosPA.Where(x => x.Id == id).FirstOrDefaultAsync();
-                    dato.Estado = false;
-                    _context.Update(dato);
-                    await _context.SaveChangesAsync();
+                    if (modulo.Equals("PA"))
+                    {
+                        var dato = await _context.DocumentosPA.Where(x => x.Id == id).FirstOrDefaultAsync();
+                        dato.Estado = false;
+                        _context.Update(dato);
+                        await _context.SaveChangesAsync();
+                        obj.Valid = true;
+                        obj.Message = Constantes.EliminacionSatisfactoria;
+                        return obj;
 
+                    }
+                    else if (modulo.Equals("PY"))
+                    {
+                        var dato = await _context.DocumentosPy.Where(x => x.Id == id).FirstOrDefaultAsync();
+                        dato.Estado = false;
+                        _context.Update(dato);
+                        await _context.SaveChangesAsync();
+                        obj.Valid = true;
+                        obj.Message = Constantes.EliminacionSatisfactoria;
+                        return obj;
+                    }
+                    else if (modulo.Equals("PQ"))
+                    {
+                        var dato = await _context.DocumentosPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+                        dato.Estado = false;
+                        _context.Update(dato);
+                        await _context.SaveChangesAsync();
+                        obj.Valid = true;
+                        obj.Message = Constantes.EliminacionSatisfactoria;
+
+                        return obj;
+                    }
+                    obj.Valid = true;
+                    obj.Message = Constantes.ErrorSistema;
+                    return obj;
                 }
-                else if (modulo.Equals("PY"))
+                catch (Exception e)
                 {
-                    var dato = await _context.DocumentosPy.Where(x => x.Id == id).FirstOrDefaultAsync();
-                    dato.Estado = false;
-                    _context.Update(dato);
-                    await _context.SaveChangesAsync();
+
+                    obj.Valid = true;
+                    obj.Message = Constantes.ErrorSistema;
+                    return obj;
                 }
-                else if (modulo.Equals("PQ"))
-                {
-                    var dato = await _context.DocumentosPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
-                    dato.Estado = false;
-                    _context.Update(dato);
-                    await _context.SaveChangesAsync();
-                }
-                obj.Valid = true;
-                obj.Message = Constantes.ActualizacionSatisfactoria;
-                return obj;
+               
+               
             }
             catch (Exception)
             {
@@ -380,6 +402,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var queryable = _context.DocumentosPy
                                     .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
+                                    .Where(x=> x.Estado==true)
+                                    .OrderBy(x=>x.FechaEmision)
                                     .AsQueryable();
 
                     var entidades = await queryable.Paginar(listDocumentosRequestDto)

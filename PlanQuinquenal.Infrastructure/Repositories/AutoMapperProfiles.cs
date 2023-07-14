@@ -23,14 +23,35 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<MaestroResponseDto, Material>();
             CreateMap<Material, MaestroResponseDto>();
 
+            CreateMap<ComentarioPY, ComentarioRequestDTO>();
+            CreateMap<ComentarioRequestDTO, ComentarioPY>();
+
+            CreateMap<COMENTARIOPQ, ComentarioRequestDTO>();
+            CreateMap<ComentarioRequestDTO, COMENTARIOPQ>();
+
+            CreateMap<COMENTARIOPA, ComentarioRequestDTO>();
+            CreateMap<ComentarioRequestDTO, COMENTARIOPA>();
+            
             CreateMap<MaestroResponseDto, TipoInforme>();
             CreateMap<TipoInforme, MaestroResponseDto>();
             CreateMap<MaestroResponseDto, TipoSeguimiento>();
             CreateMap<TipoSeguimiento, MaestroResponseDto>();
 
+
+
+
             CreateMap<MaestroResponseDto, TipoPermisosProyecto>();
             CreateMap<TipoPermisosProyecto, MaestroResponseDto>();
-            
+
+
+            CreateMap<PQuinquenalReqDTO, PQuinquenal>();
+            CreateMap<PQuinquenal, PQuinquenalReqDTO>()
+                .ForMember(x => x.UsuariosInteresados, c => c.Ignore());
+
+
+            CreateMap<PQuinquenalReqDTO, PlanAnual>();
+            CreateMap<PlanAnual, PQuinquenalReqDTO>()
+                .ForMember(x => x.UsuariosInteresados, c => c.Ignore());
 
             CreateMap<MaestroResponseDto, Distrito>();
             CreateMap<Distrito, MaestroResponseDto>();
@@ -68,6 +89,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<MaestroResponseDto, TipoImpedimento>();
             CreateMap<TipoImpedimento, MaestroResponseDto>();
 
+            CreateMap<ImpedimentoUpdateDto, Impedimento>();
+            CreateMap<Impedimento, ImpedimentoUpdateDto>();
+            
+
             CreateMap<MaestroResponseDto, ProblematicaReal>();
             CreateMap<ProblematicaReal, MaestroResponseDto>();
 
@@ -91,7 +116,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
             CreateMap<BaremoResponseDTO, Baremo>();
-            
+
+
+            CreateMap<PQuinquenal, PQuinquenalResponseDto>();
+            CreateMap<PQuinquenalResponseDto, PQuinquenal>();               
 
             CreateMap<DocumentoResponseDto, DocumentosPQ>();
             CreateMap<DocumentoResponseDto, DocumentosPA>();
@@ -195,13 +223,30 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     (src.LongRealPend - src.LongReemplazada),
                     src.LongImpedimentos))).ForMember(
                     dest => dest.longPendienteEjecución,
-                    opt => opt.MapFrom(src => src.LongRealPend - src.LongReemplazada));
+                    opt => opt.MapFrom(src => src.LongRealPend - src.LongReemplazada))
+                    .ForMember(
+                    dest => dest.Avance,
+                    opt => opt.MapFrom(src => ObtenerAvance(src.LongRealHab, src.LongAprobPa)))
+                    .ForMember(dest => dest.FechaGasificacion, opt => opt.MapFrom(src => DateOnly(src.FechaGasificacion)));
 
 
             CreateMap<Usuario, UsuarioRequestDto>();
 
         }
 
+        private Decimal? ObtenerAvance(Decimal? LongRealHab, Decimal? LongAprobPa)
+        {
+            decimal? dato = 0;
+            if (LongAprobPa > 0)
+            {
+                dato = LongRealHab / LongAprobPa;
+            }
+            else
+            {
+                dato = 0;
+            }
+            return dato;
+        }
         private DateTime ParseDateTime(string data)
         {
 
@@ -222,9 +267,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             return data.Split(".")[0];
         }
-        private string GetStateGeneral(Decimal LongAprobPa, Decimal LongRealHab, Decimal LongRealPend, Decimal LongPendEjecucion, Decimal LongImpedimento)
+        private string GetStateGeneral(Decimal? LongAprobPa, Decimal? LongRealHab, Decimal? LongRealPend, Decimal? LongPendEjecucion, Decimal? LongImpedimento)
         {
-            if(LongRealHab > 0 && LongRealPend > 0 && (Math.Round(LongPendEjecucion, 0) > 0))
+            
+            if(LongRealHab > 0 && LongRealPend > 0 && (Math.Round((decimal)LongPendEjecucion, 0) > 0))
             {
                 return Constantes.PARCIALMENTEEJECUTADO;
             }
@@ -232,11 +278,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 return Constantes.NOEJECUTADO;
             }
-            if((LongRealPend==0 && (LongRealHab-LongAprobPa == 0) && LongPendEjecucion==0) || ( (LongRealHab> LongAprobPa) && LongRealPend == 0 && LongImpedimento==0))
+            if( (LongRealPend==0 && (LongRealHab-LongAprobPa == 0) && LongPendEjecucion==0) || ( (LongRealHab> LongAprobPa) && LongRealPend == 0 && LongImpedimento==0))
             {
                 return Constantes.EJECUTADO;
             }
-            if( LongRealPend >0 && Math.Round(LongPendEjecucion,0)==0)
+            if( LongRealPend >0 && Math.Round((decimal)LongPendEjecucion, 0)==0)
             {
                 return Constantes.EJECUTADOREEMPLAZO;
             }

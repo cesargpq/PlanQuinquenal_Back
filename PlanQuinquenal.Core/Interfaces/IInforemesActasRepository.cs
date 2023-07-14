@@ -18,6 +18,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<PaginacionResponseDto<InformeResponseDto>> GetAll(PaginationFilterActaDto pag);
         Task<DocumentoResponseDto> Download(int id);
 
+        Task<ResponseDTO> Delete(int id);
         Task<ResponseDTO> AprobarActa(AprobarActaDto a, int idUser);
     }
 }

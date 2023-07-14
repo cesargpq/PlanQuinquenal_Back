@@ -13,8 +13,10 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IProyectoRepository
     {
         Task<ProyectoResponseDto> GetById(int id);
-        Task<PaginacionResponseDto<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos);
+        Task<PaginacionResponseDtoException<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos);
+        Task<PaginacionResponseDtoException<ProyectoDetalle>> GetAll2(FiltersProyectos filterProyectos);
         Task<ResponseDTO> Update(ProyectoRequestUpdateDto p,int id, int idUser);
         Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto,int idUser);
+        Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data);
     }
 }

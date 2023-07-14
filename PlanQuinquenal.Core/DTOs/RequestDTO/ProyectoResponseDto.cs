@@ -25,16 +25,18 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public TipoRegistro TipoRegistro { get; set; }
         public UsuarioResponseDto IngenieroResponsables { get; set; }
         public PQuinquenalResponseDto PQuinquenalResponseDto { get; set; }
+        
         public PlanAnualResponseDto PlanAnualResponseDto { get; set; }
         public List<UsuariosInteresadosPyResponseDto> UsuariosInteresados { get; set; }
         public int TipoProyectoId { get; set; }
         public int Etapa { get; set; }
 
+        public Decimal Avance { get; set; }
         public string CodigoMalla { get; set; }
         public int TipoRegistroId { get; set; }
         public int IngenieroResponsableId { get; set; }
         public int ConstructorId { get; set; }
-        
+        public int UsuarioRegisterId { get; set; }
         public string EstadoGeneralDesc { get; set; }
         public int BaremoId { get; set; }
 
@@ -47,7 +49,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public Decimal LongProyectos { get; set; }
         public DateTime? FechaRegistro { get; set; }
         public DateTime? fechamodifica { get; set; }
-        public DateTime? FechaGasificacion { get; set; }
+        public string? FechaGasificacion { get; set; }
         public Baremo Baremo { get; set; }
 
        

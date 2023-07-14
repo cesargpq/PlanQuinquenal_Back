@@ -15,5 +15,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string nombre_perfil { get; set; }
         public string estado_perfil { get; set; }
         public int cod_unidadNeg { get; set; }
+        public string unidad_negocio { get; set; }
     }
 }

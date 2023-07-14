@@ -38,6 +38,7 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> GetPermiso(int idProyecto, string TipoPermiso)
         {
             var resultado = await _permisosProyectoRepository.GetPermiso(idProyecto, TipoPermiso);
+
             return Ok(resultado);
         }
 

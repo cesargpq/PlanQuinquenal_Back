@@ -13,7 +13,8 @@ namespace PlanQuinquenal.Core.Entities
         public string Descripcion { get; set; }
         public Decimal Precio { get; set; }
         public bool Estado { get; set; }
-        public int PlanQuinquenalId { get; set; }
-        
+        public int PQuinquenalId { get; set; }
+        public PQuinquenal PQuinquenal { get; set; }
+
     }
 }

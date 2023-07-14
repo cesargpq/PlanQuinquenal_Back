@@ -34,12 +34,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             try
             {
                 var existeProyecto = await _context.Proyecto.Where(x => x.Etapa == permisoRequestDTO.Etapa && x.CodigoProyecto.Equals(permisoRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
-                
+
 
                 if (existeProyecto != null)
                 {
-                    var obtenerPermiso = await _context.TipoPermisosProyecto.Where(x =>  x.Descripcion.ToUpper().Equals(permisoRequestDTO.TipoPermisosProyecto.ToUpper())).FirstOrDefaultAsync();
-                    if(obtenerPermiso == null)
+                    var obtenerPermiso = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(permisoRequestDTO.TipoPermisosProyecto.ToUpper())).FirstOrDefaultAsync();
+                    if (obtenerPermiso == null)
                     {
                         return new ResponseDTO
                         {
@@ -47,24 +47,41 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             Message = "El permiso envíado no existe"
                         };
                     }
-                    PermisosProyecto obj = new PermisosProyecto();
-
-                    obj.ProyectoId = existeProyecto.Id;
-                    obj.TipoPermisosProyectoId = obtenerPermiso.Id;
-                    obj.Longitud = permisoRequestDTO.Longitud;
-                    obj.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
-                    obj.Estado = true;
-                    obj.FechaCreacion = DateTime.Now;
-                    obj.FechaModificacion = DateTime.Now;
-                    obj.UsuarioCreacion = idUser;
-                    obj.UsuarioModifca = idUser;
-                    _context.Add(obj);
-                    await _context.SaveChangesAsync();
-                    return new ResponseDTO
+                    var permisoExiste = await _context.PermisosProyecto.Where(x => x.ProyectoId == existeProyecto.Id).FirstOrDefaultAsync();
+                    if (permisoExiste!=null)
                     {
-                        Valid = true,
-                        Message = Constantes.CreacionExistosa
-                    };
+                        permisoExiste.Longitud = permisoRequestDTO.Longitud;
+                        permisoExiste.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
+                        _context.Update(permisoExiste);
+                        await _context.SaveChangesAsync();
+                        return new ResponseDTO
+                        {
+                            Valid = true,
+                            Message = Constantes.ActualizacionSatisfactoria
+                        };
+                    }
+                    else
+                    {
+                        PermisosProyecto obj = new PermisosProyecto();
+
+                        obj.ProyectoId = existeProyecto.Id;
+                        obj.TipoPermisosProyectoId = obtenerPermiso.Id;
+                        obj.Longitud = permisoRequestDTO.Longitud;
+                        obj.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
+                        obj.Estado = true;
+                        obj.FechaCreacion = DateTime.Now;
+                        obj.FechaModificacion = DateTime.Now;
+                        obj.UsuarioCreacion = idUser;
+                        obj.UsuarioModifca = idUser;
+                        _context.Add(obj);
+                        await _context.SaveChangesAsync();
+                        return new ResponseDTO
+                        {
+                            Valid = true,
+                            Message = Constantes.CreacionExistosa
+                        };
+                    }
+                    
                 }
                 else
                 {
@@ -93,7 +110,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return new ResponseEntidadDto<PermisoByIdResponseDto>
                 {
                     Model = null,
-                    Valid = false,
+                    Valid = true,
                     Message = "No existe al tipo de permiso envíado"
                 };
             }
@@ -106,7 +123,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     return new ResponseEntidadDto<PermisoByIdResponseDto>
                     {
                         Model = null,
-                        Valid = false,
+                        Valid = true,
                         Message = "No existe el permiso solicitado"
                     };
                 }
@@ -221,7 +238,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
 
                 obj.Valid = true;
-                obj.Message = Constantes.ActualizacionSatisfactoria;
+                obj.Message = Constantes.EliminacionSatisfactoria;
                 return obj;
             }
             catch (Exception)

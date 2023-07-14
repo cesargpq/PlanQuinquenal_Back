@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,8 +23,20 @@ namespace PlanQuinquenal.Infrastructure.Data
 
         }
 
-       
+
+        public virtual DbSet<UsuariosInteresadosPQ> UsuariosInteresadosPQ { get; set; }
+        public virtual DbSet<ProyectoDetalle> ProyectoDetalle { get; set; }
+        public virtual DbSet<ImpedimentoDetalle> ImpedimentoDetalle { get; set; }
+        public virtual DbSet<DocumentosImpedimento> DocumentosImpedimento { get; set; }
+        
+            public virtual DbSet<ProyectoMasivoDetalle> ProyectoMasivoDetalle { get; set; }
+        public virtual DbSet<PQuinquenalResponseDto> PQuinquenalResponseDto { get; set; }
+        public virtual DbSet<UsuariosInteresadosPA> UsuariosInteresadosPA { get; set; }
         public virtual DbSet<Informe> Informe { get; set; }
+        public virtual DbSet<ComentarioPY> ComentarioPY { get; set; }
+        public virtual DbSet<COMENTARIOPQ> COMENTARIOPQ { get; set; }
+        public virtual DbSet<COMENTARIOPA> COMENTARIOPA { get; set; }
+        
         public virtual DbSet<TipoInforme> TipoInforme { get; set; }
         public virtual DbSet<TipoSeguimiento> TipoSeguimiento { get; set; }
         public virtual DbSet<ActaDinamica> ActaDinamica { get; set; }
@@ -46,6 +60,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<TipoImpedimento> TipoImpedimento { get; set; }
         public virtual DbSet<Material> Material { get; set; }
         public virtual DbSet<PQuinquenal> PQuinquenal { get; set; }
+
         public virtual DbSet<PlanAnual> PlanAnual { get; set; }
         public virtual DbSet<Distrito> Distrito { get; set; }
         public virtual DbSet<TipoProyecto> TipoProyecto { get; set; }
@@ -77,7 +92,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         
         public virtual DbSet<Baremo> Baremo { get; set; }
 
-
+         public virtual DbSet<Impedimento> Impedimento { get; set; }
         public virtual DbSet<Impedimentos> Impedimentos { get; set; }
         public virtual DbSet<Imped_evi_reempla> Imped_evi_reempla { get; set; }
         public virtual DbSet<Imped_gest_inast> Imped_gest_inast { get; set; }
@@ -99,12 +114,26 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<PQComentarios> PQComentarios { get; set; }
         public virtual DbSet<PQDocumentos> PQDocumentos { get; set; }
         public virtual DbSet<CamposModulo_Permisos> CamposModulo_Permisos { get; set; }
-        //protected override void onmodelcreating(modelbuilder modelbuilder)
-        //{
-        //    modelbuilder.entity<proyecto>()
-        //        .property(f => f.fecharegistro)
-        //        .hascolumntype("datetime2");
-        //}
+        protected override void OnModelCreating(ModelBuilder modelbuilder)
+        {
+            modelbuilder.Entity<ProyectoDetalle>(
+                eb =>
+                {
+                    eb.HasNoKey();
+                });
+            modelbuilder.Entity<ImpedimentoDetalle>(
+                eb =>
+                {
+                    eb.HasNoKey();
+                });
+            modelbuilder.Entity<ProyectoMasivoDetalle>(
+                eb =>
+                {
+                    eb.HasNoKey();
+                });
+            
+
+        }
 
 
     }

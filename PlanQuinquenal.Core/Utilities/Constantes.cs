@@ -19,12 +19,13 @@ namespace PlanQuinquenal.Core.Utilities
         public const string NOOPTION = "";
         public const string TipoProyecto = "TipoProyecto";
         public const string Distrito = "Distrito";
-        public const string TipoRegistroPY = "TipoRegistroPY";
+        public const string TipoRegistroPY = "TipoRegistro";
         public const string PathFinanciamientoTemplate = "\\\\Content\\";
         public const string DobleFactor = "\\doble.html";
         public const string ErrorImport = "Hubo un error en la carga del archivo";
         public const string SatisfactorioImport = "Se cargó el archivo correctamente";
         public const string ActualizacionSatisfactoria = "Se actualizó correctamente el registro";
+        public const string EliminacionSatisfactoria = "Se eliminó el registro correctamente";
         public const string NoExistePQNQ = "No existe el Plan Quinquenal seleccionado";
         public const string RegistroExiste = "Registro encontrado satisfactoriamente";
         public const string BaremoNoExiste = "No existe un baremo con el código solicitado";
@@ -34,5 +35,6 @@ namespace PlanQuinquenal.Core.Utilities
         public const string CreacionExistosa = "Se creó el registro satisfactoriamente";
         public const string BusquedaExitosa = "Se encontró el registro satisfactoriamente";
         public const string BusquedaNoExitosa = "No se encontró el registro";
+
     }
 }

@@ -24,7 +24,7 @@ namespace PlanQuinquenal.Core.DTOs
         public int ConstructorId { get; set; }
         public int BaremoId { get; set; }
 
-        public string FechaGacificacion { get; set; }
+        public string? FechaGacificacion { get; set; }
         public Decimal LongAprobPa { get; set; }
         public Decimal LongRealHab { get; set; }
         public Decimal LongRealPend { get; set; }

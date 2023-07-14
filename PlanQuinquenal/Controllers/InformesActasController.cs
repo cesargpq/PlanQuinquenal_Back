@@ -76,6 +76,13 @@ namespace PlanQuinquenal.Controllers
 
 
         }
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var resultado = await _inforemesActasRepository.Delete(id);
+            return Ok(resultado);
+
+        }
 
         [HttpPut("AprobarActa")]
         public async Task<IActionResult> AprobarActa(AprobarActaDto a)

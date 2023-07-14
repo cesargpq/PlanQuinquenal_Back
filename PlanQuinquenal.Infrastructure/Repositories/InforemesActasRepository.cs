@@ -101,8 +101,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 informe.FechaCreacion = DateTime.Now;
                 informe.FechaModificacion = DateTime.Now;
                 informe.Tipo = tipoInforme.Descripcion;
+                informe.TipoInformeId = tipoInforme.Id;
+                informe.Activo = true;
 
-               
+
 
 
                 _context.Add(informe);
@@ -395,6 +397,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     .ThenInclude(y => y.Usuario)
                     .Include(x => x.Asistentes)
                     .ThenInclude(y => y.Usuario)
+                    .Include(x=>x.ActaDinamica)
+                   
                     .FirstOrDefaultAsync();
 
                 var responseInforme = mapper.Map<InformeResponseDto>(Informe);
@@ -439,11 +443,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var tipoInforme = await _context.TipoInforme.Where(x => x.Id == pag.TipoDocumento).FirstOrDefaultAsync();
             var tipoSeg = await _context.TipoSeguimiento.Where(x => x.Id == pag.TipoSeguimiento).FirstOrDefaultAsync();
             var queryable = _context.Informe
+                    .OrderBy(x=>x.FechaCreacion)
                     .Where(x => pag.CodigoDocumento != "" ? x.CodigoExpediente.Contains(pag.CodigoDocumento) : true)
                     .Where(x => pag.TipoDocumento != 0 ? x.Tipo.Contains(tipoInforme.Descripcion) : true)
                     .Where(x => pag.TipoSeguimiento != 0 ? x.TipoSeguimiento.Contains(tipoSeg.Descripcion) : true)
                     .Where(x=> pag.CodigoProyecto != "" ? x.CodigoProyecto==pag.CodigoProyecto:true)
                     .Where(x => pag.Etapa != 0 ? x.Etapa == pag.Etapa : true)
+                    .Where(x=>x.Activo==true)
                     .Include(x => x.UserInteresados)
                     .ThenInclude(y => y.Usuario)
                     .Include(x => x.Participantes)
@@ -452,7 +458,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     .ThenInclude(y => y.Usuario)
                     .AsQueryable();
             int cantidad = queryable.Count();
-            var listaPaginada = await queryable.OrderBy(e => e.CodigoExpediente).Paginar(pag).ToListAsync();
+            var listaPaginada = await queryable.OrderBy(e => e.FechaCreacion).Paginar(pag).ToListAsync();
             var proyectoDto = mapper.Map<List<InformeResponseDto>>(listaPaginada);
 
             var pagination = new PaginacionResponseDto<InformeResponseDto>
@@ -531,6 +537,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 getInforme.UsuarioModifica = idUser;
                 getInforme.FechaModificacion = DateTime.Now;
                 getInforme.Tipo = tipoInforme.Descripcion;
+                getInforme.TipoInformeId = tipoInforme.Id;
 
                 //Acta
                 getInforme.Agenda = informeReqDTO.Agenda != null ? informeReqDTO.Agenda : null;
@@ -807,6 +814,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     Message = Constantes.ErrorSistema
                 };
             }
+        }
+
+        public async Task<ResponseDTO> Delete(int id)
+        {
+            var infomre = await _context.Informe.Where(x => x.Id == id).FirstOrDefaultAsync();
+            infomre.Activo = false;
+            _context.Update(infomre);
+            await _context.SaveChangesAsync();
+
+            return new ResponseDTO { Valid = true, Message = Constantes.EliminacionSatisfactoria };
         }
     }
 }

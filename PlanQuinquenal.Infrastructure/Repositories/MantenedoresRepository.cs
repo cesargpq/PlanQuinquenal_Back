@@ -35,6 +35,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
+            else if (attribute.Equals("Baremo")){
+                var dato = await _context.Baremo.Where(x => x.Estado == true).ToListAsync();
+
+                foreach (var item in dato)
+                {
+                    MaestroResponseDto obj = new MaestroResponseDto();
+                    obj.Descripcion = item.CodigoBaremo;
+                    obj.Id=item.Id;
+                    dto.Add(obj);
+                }
+                
+               
+            }
             else if (attribute.Equals("TipoInforme"))
             {
                 var dato = await _context.TipoInforme.Where(x => x.Estado == true).ToListAsync();
@@ -112,15 +125,26 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var dato = await _context.PlanAnual.Where(x => x.Estado == true).ToListAsync();
 
-                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
-                dto = resultadoMap;
+                foreach (var item in dato)
+                {
+                    MaestroResponseDto m = new MaestroResponseDto();
+                    m.Id = item.Id;
+                    m.Descripcion = item.AnioPlan;
+                    dto.Add(m);
+                }
+                
             }
             else if (attribute.Equals("PlanQuinquenal"))
             {
                 var dato = await _context.PQuinquenal.Where(x => x.Estado == true).ToListAsync();
 
-                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
-                dto = resultadoMap;
+                foreach (var item in dato)
+                {
+                    MaestroResponseDto m = new MaestroResponseDto();
+                    m.Id = item.Id;
+                    m.Descripcion = item.AnioPlan;
+                    dto.Add(m);
+                }
             }
             else if (attribute.Equals("TipoProyecto"))
             {
