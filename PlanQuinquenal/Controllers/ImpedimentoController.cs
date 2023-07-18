@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Infrastructure.Repositories;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -94,5 +95,55 @@ namespace PlanQuinquenal.Controllers
 
             return Ok(resultado);
         }
+
+        [HttpGet("Descargar")]
+        public async Task<IActionResult> Descargar(int id)
+        {
+            var resultado = await _impedimentoRepository.Download(id);
+            string nombrearchivo = Path.GetFileName(resultado.nombreArchivo).Trim();
+            byte[] fl = System.IO.File.ReadAllBytes(resultado.ruta);
+            return File(fl, System.Net.Mime.MediaTypeNames.Application.Octet, nombrearchivo);
+        }
+        [HttpPost("ImpedimentosImport")]
+        public async Task<IActionResult> ProyectoImport(RequestMasivo data)
+        {
+            var resultado = await _impedimentoRepository.ProyectoImport(data);
+            return Ok(resultado);
+        }
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+
+            var resultado = await _impedimentoRepository.Delete(id, idUser);
+            return Ok(resultado);
+        }
+        [HttpDelete("DeleteDocumentos")]
+        public async Task<IActionResult> DeleteDocumentos(int id)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+
+            var resultado = await _impedimentoRepository.DeleteDocumentos(id, idUser);
+            return Ok(resultado);
+        }
+
     }
 }

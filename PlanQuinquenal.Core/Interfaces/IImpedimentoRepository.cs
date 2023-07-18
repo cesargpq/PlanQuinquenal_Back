@@ -14,11 +14,14 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ResponseDTO> Add(ImpedimentoRequestDTO p, int idUser);
         Task<ResponseDTO> Update(ImpedimentoUpdateDto p, int idUser,int id);
         Task<ResponseEntidadDto<ImpedimentoDetalle>> GetById(int Id);
-
-        Task<PaginacionResponseDto<ImpedimentoDetalle>> Listar(ImpedimentoRequestListDto p);
+        Task<DocumentoResponseDto> Download(int id);
+        Task<PaginacionResponseDtoException<ImpedimentoDetalle>> Listar(ImpedimentoRequestListDto p);
 
         Task<ResponseDTO> Documentos(ImpedimentoDocumentoDto p,int idUser);
 
         Task<PaginacionResponseDtoException<Object>> ListarDocumentos(ListaDocImpedimentosDTO p);
+        Task<ImportResponseDto<Impedimento>> ProyectoImport(RequestMasivo data);
+        Task<ResponseDTO> Delete(int id, int idUser);
+        Task<ResponseDTO> DeleteDocumentos(int id, int idUser);
     }
 }

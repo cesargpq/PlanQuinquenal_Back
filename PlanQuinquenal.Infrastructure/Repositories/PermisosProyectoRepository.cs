@@ -165,6 +165,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 documentos.FechaModificacion = DateTime.Now;
                 documentos.UsuarioCreacion = idUser;
                 documentos.UsuarioModifca = idUser;
+                documentos.Estado = true;
                 documentos.Vencimiento = documentosPermisosRequestDTO.Vencimiento!="" || documentosPermisosRequestDTO.Vencimiento != null ? DateTime.Parse(documentosPermisosRequestDTO.Vencimiento):null;
                 _context.Add(documentos);
                 await _context.SaveChangesAsync();
@@ -261,6 +262,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 .Where(x => listDocumentosRequestDto.Buscar != "" ? x.Expediente.Contains(listDocumentosRequestDto.Buscar) : true)
                                 .Where(x=>x.TipoPermisosProyectoId == dato.Id)
                                 .Where(x => x.ProyectoId == listDocumentosRequestDto.ProyectoId)
+                                .Where(x=>x.Estado ==true)
                                 .AsQueryable();
 
                     var entidades = await queryable.Paginar(listDocumentosRequestDto)

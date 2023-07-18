@@ -1,7 +1,9 @@
 ﻿using ApiDavis.Core.Utilidades;
 using AutoMapper;
+using iTextSharp.text.pdf.codec.wmf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -21,21 +23,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
 
-        public ImpedimentoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration)
+        public ImpedimentoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, IRepositoryMantenedores repositoryMantenedores)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
+            this._repositoryMantenedores = repositoryMantenedores;
         }
         public async Task<ResponseDTO> Add(ImpedimentoRequestDTO p,int idUser)
         {
             try
             {
-                var proy = await _context.Proyecto.Where(x => x.Id == p.ProyectoId).FirstOrDefaultAsync();
+                var proy = await _context.Proyecto.Where(x => x.Etapa == p.etapa && x.CodigoProyecto.Equals(p.codProyecto)).FirstOrDefaultAsync();
                 var baremo = await _context.Baremo.Where(x=>x.Id  == proy.BaremoId).FirstOrDefaultAsync();
                 Impedimento obj = new Impedimento();
-                obj.ProyectoId = p.ProyectoId;
+                obj.ProyectoId = proy.Id;
                 obj.ProblematicaRealId = p.ProblematicaRealId;
                 obj.LongImpedimento = p.LongImpedimento;
                 obj.CausalReemplazoId = null;
@@ -59,6 +63,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 obj.UsuarioRegisterId = idUser;
                 obj.UsuarioModificaId = idUser;
                 obj.CostoInversion = baremo.Precio * p.LongImpedimento;
+                obj.estado = true;
 
 
                 _context.Add(obj);
@@ -256,7 +261,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<PaginacionResponseDtoException<Object>> ListarDocumentos(ListaDocImpedimentosDTO p)
         {
-            var queryable =  _context.DocumentosImpedimento.Where(x => x.ImpedimentoId == p.CodigoImpedimento && x.Gestion == p.Gestion).OrderBy(x=>x.FechaRegistro).AsQueryable();
+            var queryable =  _context.DocumentosImpedimento.Where(x => x.ImpedimentoId == p.CodigoImpedimento && x.Gestion == p.Gestion && x.Estado==true).OrderBy(x=>x.FechaRegistro).AsQueryable();
 
             var entidades = await queryable.Paginar(p)
                                       .ToListAsync();
@@ -271,10 +276,254 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return objeto;
         }
 
-        public async Task<PaginacionResponseDto<ImpedimentoDetalle>> Listar(ImpedimentoRequestListDto p)
+        public async Task<PaginacionResponseDtoException<ImpedimentoDetalle>> Listar(ImpedimentoRequestListDto f)
         {
 
-            throw new NotImplementedException();
+            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+
+
+            var dato = new PaginacionResponseDtoException<ImpedimentoDetalle>
+            {
+                Cantidad = resultad.Count() == 0 ? 0 : resultad.ElementAt(0).Total,
+                Model = resultad
+            };
+            return dato;
+        }
+
+        public async Task<DocumentoResponseDto> Download(int id)
+        {
+            DocumentoResponseDto obj = new DocumentoResponseDto();
+
+
+            var dato = await _context.DocumentosImpedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
+            obj.tipoDocumento = dato.TipoDocumento;
+            obj.ruta = dato.rutaFisica;
+            obj.nombreArchivo = dato.NombreDocumento;
+            return obj;
+        }
+
+        public async Task<ImportResponseDto<Impedimento>> ProyectoImport(RequestMasivo data)
+        {
+            ImportResponseDto<Impedimento> dto = new ImportResponseDto<Impedimento>();
+            var ProblematicaReal = await _repositoryMantenedores.GetAllByAttribute(Constantes.ProblematicaReal);
+            
+            var proyectosMasivos = await _context.ProyectoMasivoDetalle.FromSqlInterpolated($"EXEC listaMasiva").ToListAsync();
+            var Baremos = await _repositoryMantenedores.GetAllByAttribute("Baremo");
+            var base64Content = data.base64;
+            var bytes = Convert.FromBase64String(base64Content);
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            List<Impedimento> lista = new List<Impedimento>();
+            List<Impedimento> listaError = new List<Impedimento>();
+            List<Impedimento> listaRepetidos = new List<Impedimento>();
+            List<Impedimento> listaInsert = new List<Impedimento>();
+            List<Impedimento> listaRepetidosInsert = new List<Impedimento>();
+
+            try
+            {
+                using (var memoryStream = new MemoryStream(bytes))
+                {
+                    using (var package = new ExcelPackage(memoryStream))
+                    {
+                        var worksheet = package.Workbook.Worksheets["Impedimento"];
+
+                        for (int row = 2; row <= worksheet.Dimension.Rows; row++)
+                        {
+                            if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
+                            var codPry = worksheet.Cells[row, 1].Value?.ToString();
+                            var etapa = worksheet.Cells[row, 2].Value?.ToString();
+                            var ProbleReal = worksheet.Cells[row, 3].Value?.ToString();
+                            var LongImpe = worksheet.Cells[row, 4].Value?.ToString();
+
+                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto == codPry && x.Etapa == Convert.ToInt32(etapa)).FirstOrDefault();
+                            var dProReal = ProblematicaReal.Where(x => x.Descripcion == ProbleReal).FirstOrDefault();
+                            int baremoId = 0;
+                            if (dCodPry != null)
+                            {
+                                var baremoAdd = Baremos.Where(x => x.Id == dCodPry.BaremoId).FirstOrDefault();
+                                baremoId = baremoAdd.Id;
+                            }
+                           
+
+
+                            if (dCodPry == null || dProReal == null || baremoId==0 )
+                            {
+                                var entidadError = new Impedimento
+                                {
+                                    LongImpedimento = Convert.ToDecimal(LongImpe)
+
+                                };
+                                listaError.Add(entidadError);
+
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    var entidad = new Impedimento
+                                    {
+                                        ProyectoId = dCodPry.Id,
+                                        ProblematicaRealId = dProReal.Id,
+                                        LongImpedimento = Convert.ToDecimal(LongImpe),
+                                        CausalReemplazoId = null,
+                                        Resuelto = false,
+                                        PrimerEstrato = 0,
+                                        SegundoEstrato = 0,
+                                        TercerEstrato = 0,
+                                        CuartoEstrato = 0,
+                                        QuintoEstrato = 0,
+                                        LongitudReemplazo = 0,
+                                        ValidacionCargoPlano = false,
+                                        ValidacionCargoSustentoRRCC = false,
+                                        ValidacionCargoSustentoAmbiental = false,
+                                        ValidacionCargoSustentoArqueologia = false,
+                                        ValidacionLegalId = null,
+                                        Comentario = "",
+                                        FechaPresentacion = null,
+                                        FechaPresentacionReemplazo = null,
+                                        fechamodifica = DateTime.Now,
+                                        FechaRegistro = DateTime.Now,
+                                        UsuarioRegisterId = null,
+                                        UsuarioModificaId = null,
+                                        CostoInversion = baremoId,
+                                        estado = true
+
+                                    };
+                                    lista.Add(entidad);
+                                }
+                                catch (Exception e)
+                                {
+                                    var entidadError = new Impedimento
+                                    {
+                                        LongImpedimento = Convert.ToDecimal(LongImpe),
+
+                                    };
+                                    listaError.Add(entidadError);
+
+                                }
+
+                            }
+
+
+                        }
+                        foreach (var item in lista)
+                        {
+                            listaInsert.Add(item);
+                        }
+                       
+                        if (listaInsert.Count > 0)
+                        {
+                            await _context.BulkInsertAsync(listaInsert);
+                            await _context.SaveChangesAsync();
+
+                        }
+                       
+
+
+                    }
+                }
+
+
+                dto.listaError = listaError;
+                dto.listaRepetidos = null;
+                dto.listaInsert = listaInsert;
+                dto.Satisfactorios = listaInsert.Count();
+                dto.Error = listaError.Count();
+                dto.Actualizados = 0;
+                dto.Valid = true;
+                dto.Message = Constantes.SatisfactorioImport;
+            }
+            catch (Exception e)
+            {
+                dto.Satisfactorios = 0;
+                dto.Error = 0;
+                dto.Actualizados = 0;
+                dto.Valid = false;
+                dto.Message = Constantes.ErrorImport;
+
+                return dto;
+            }
+
+            return dto;
+
+        }
+
+        public async Task<ResponseDTO> Delete(int id, int idUser)
+        {
+            try
+            {
+                var existe = await _context.Impedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                if (existe!=null)
+                {
+                    existe.estado = false;
+                    _context.Update(existe);
+                    await _context.SaveChangesAsync();
+                    var resultado = new ResponseDTO
+                    {
+                        Valid = false,
+                        Message = Constantes.EliminacionSatisfactoria
+                    };
+                    return resultado;
+                }
+                else
+                {
+                    var resultado = new ResponseDTO
+                    {
+                        Valid = false,
+                        Message = Constantes.BusquedaNoExitosa
+                    };
+                    return resultado;
+                }
+            }
+            catch (Exception e)
+            {
+
+                var resultado = new ResponseDTO
+                {
+                    Valid = false,
+                    Message = Constantes.ErrorSistema
+                };
+                return resultado;
+            }
+        }
+        public async Task<ResponseDTO> DeleteDocumentos(int id, int idUser)
+        {
+            try
+            {
+                var existe = await _context.DocumentosImpedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                if (existe != null)
+                {
+                    existe.Estado = false;
+                    _context.Update(existe);
+                    await _context.SaveChangesAsync();
+                    var resultado = new ResponseDTO
+                    {
+                        Valid = false,
+                        Message = Constantes.EliminacionSatisfactoria
+                    };
+                    return resultado;
+                }
+                else
+                {
+                    var resultado = new ResponseDTO
+                    {
+                        Valid = false,
+                        Message = Constantes.BusquedaNoExitosa
+                    };
+                    return resultado;
+                }
+            }
+            catch (Exception e)
+            {
+
+                var resultado = new ResponseDTO
+                {
+                    Valid = false,
+                    Message = Constantes.ErrorSistema
+                };
+                return resultado;
+            }
         }
     }
 }

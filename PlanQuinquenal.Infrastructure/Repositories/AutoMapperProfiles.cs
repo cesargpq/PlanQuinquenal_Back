@@ -20,6 +20,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<UsuarioRequestDto, Usuario>();
             CreateMap<ProyectoResponseDto, Proyecto>();
 
+            CreateMap<BolsaReemplazo, RequestBolsaDto>();
+            CreateMap<RequestBolsaDto, BolsaReemplazo>();
+
+
+           
+                CreateMap<MaestroResponseDto, EstadoAprobacion>();
+            CreateMap<EstadoAprobacion, MaestroResponseDto>();
+
+            CreateMap<MaestroResponseDto, CausalReemplazo>();
+            CreateMap<CausalReemplazo, MaestroResponseDto>();
             CreateMap<MaestroResponseDto, Material>();
             CreateMap<Material, MaestroResponseDto>();
 

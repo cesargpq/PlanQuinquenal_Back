@@ -28,7 +28,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             List<MaestroResponseDto> dto = new List<MaestroResponseDto>();
 
-            if (attribute.Equals("Material"))
+            if (attribute.ToUpper().Equals("Material".ToUpper()))
             {
                 var dato = await _context.Material.Where(x=>x.Estado == true).ToListAsync();
 
@@ -97,10 +97,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
+            else if (attribute.Equals("CausalReemplazo"))
+            {
+                var dato = await _context.CausalReemplazo.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
 
             else if (attribute.Equals("EstadoPQ"))
             {
-                var dato = await _context.EstadoPQ.Where(x => x.Estado == true).ToListAsync();
+                var dato = await _context.EstadoAprobacion.Where(x => x.Estado == true).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
@@ -184,7 +191,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             PaginacionResponseDto<MaestroResponseDto> obj = new PaginacionResponseDto<MaestroResponseDto>();
 
-            if (entidad.Entidad.Equals("Material"))
+            if (entidad.Entidad.ToUpper().Equals("Material".ToUpper()))
             {
                 var queryable = _context.Material
                                  .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
@@ -216,7 +223,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             if (entidad.Entidad.Equals("EstadoPQ"))
             {
-                var queryable = _context.EstadoPQ
+                var queryable = _context.EstadoAprobacion
                                  .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
                                  .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
 
@@ -341,7 +348,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             MaestroResponseDto dto = new MaestroResponseDto();
 
-            if (maestro.Equals("Material"))
+            if (maestro.ToUpper().Equals("Material".ToUpper()))
             {
                 var dato = await _context.Material.Where(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -375,7 +382,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             if (maestro.Equals("EstadoPQ"))
             {
-                var dato = await _context.EstadoPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+                var dato = await _context.EstadoAprobacion.Where(x => x.Id == id).FirstOrDefaultAsync();
 
                 dto.Id = dato.Id;
                 dto.Descripcion = dato.Descripcion;
@@ -443,7 +450,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
 
 
-                if (maestro.Equals("Material"))
+                if (maestro.ToUpper().Equals("Material".ToUpper()))
                 {
                     var resultado = await _context.Material.Where(x => x.Id == id).FirstOrDefaultAsync();
                     resultado.Estado = resultado.Estado == true ? false : true;
@@ -463,7 +470,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 if (maestro.Equals("EstadoPQ"))
                 {
-                    var resultado = await _context.EstadoPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    var resultado = await _context.EstadoAprobacion.Where(x => x.Id == id).FirstOrDefaultAsync();
                     resultado.Estado = resultado.Estado == true ? false : true;
                     _context.Update(resultado);
                     await _context.SaveChangesAsync();
@@ -562,7 +569,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             try
             {
-                if (postEntityReqDTO.Entidad.Equals("Material"))
+                if (postEntityReqDTO.Entidad.ToUpper().Equals("Material".ToUpper()))
                 {
                     Material data = new Material();
 
@@ -594,7 +601,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 if (postEntityReqDTO.Entidad.Equals("EstadoPQ"))
                 {
-                    EstadoPQ data = new EstadoPQ();
+                    EstadoAprobacion data = new EstadoAprobacion();
 
                     data.Descripcion = postEntityReqDTO.Descripcion;
                     data.Estado = true;
@@ -713,7 +720,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                if (postEntityReqDTO.Entidad.Equals("Material"))
+                if (postEntityReqDTO.Entidad.ToUpper().Equals("Material".ToUpper()))
                 {
                     var entidad = await _context.Material.Where(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -725,7 +732,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 if (postEntityReqDTO.Entidad.Equals("EstadoPQ"))
                 {
-                    var entidad = await _context.EstadoPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    var entidad = await _context.EstadoAprobacion.Where(x => x.Id == id).FirstOrDefaultAsync();
 
                     entidad.Descripcion = postEntityReqDTO.Descripcion;
                     entidad.Estado = true;

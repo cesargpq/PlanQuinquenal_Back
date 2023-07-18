@@ -34,5 +34,6 @@ namespace PlanQuinquenal.Core.Entities
         public int? UsuarioRegisterId { get; set; }
         public int? UsuarioModificaId { get; set; }
         public Decimal? CostoInversion { get; set; }
+        public bool estado { get; set; }
     }
 }

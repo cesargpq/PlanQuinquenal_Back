@@ -44,7 +44,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var tipoSeg = await _context.TipoSeguimiento.Where(x => x.Id == informeReqDTO.Modulo).FirstOrDefaultAsync();    
                 bool existe;
                 string tipoSeguimiento = "";
-                if (tipoSeg.Descripcion.Equals("Proyectos"))
+                if (tipoSeg.Descripcion.ToUpper().Equals("Proyectos".ToUpper()))
                 {
                     var existePry = await _context.Proyecto.Where(x=>x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto) && x.Etapa == informeReqDTO.Etapa).AnyAsync();
                     if (!existePry)
@@ -60,7 +60,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         tipoSeguimiento = "Proyectos";
                     }
                 }
-                else if (tipoSeg.Descripcion.Equals("Plan Quinquenal"))
+                else if (tipoSeg.Descripcion.ToUpper().Equals("Plan Quinquenal".ToUpper()))
                 {
                     var existeQnq= await _context.PQuinquenal.Where(x => x.AnioPlan.Equals(informeReqDTO.CodigoProyecto)).AnyAsync();
                     if (!existeQnq)
@@ -74,7 +74,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     tipoSeguimiento = "Plan Quinquenal";
 
                 }
-                else if (tipoSeg.Descripcion.Equals("Plan Anual"))
+                else if (tipoSeg.Descripcion.ToUpper().Equals("Plan Anual".ToUpper()))
                 {
                     var existeQnq = await _context.PlanAnual.Where(x => x.AnioPlan.Equals(informeReqDTO.CodigoProyecto)).AnyAsync();
                     if (!existeQnq)
@@ -88,6 +88,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     tipoSeguimiento = "Plan Anual";
 
                 }
+                else if (tipoSeg.Descripcion.ToUpper().Equals("Reemplazo".ToUpper()))
+                {
+                    var existeQnq = await _context.BolsaReemplazo.Where(x => x.Id.Equals(informeReqDTO.CodigoProyecto)).AnyAsync();
+                    if (!existeQnq)
+                    {
+                        return new ResponseDTO
+                        {
+                            Valid = true,
+                            Message = "No existe el Reemplazo ingresado"
+                        };
+                    }
+                    tipoSeguimiento = "Reemplazo";
+
+                }
+
+
+
+
                 var guidId = Guid.NewGuid();
                 
                 var informe = mapper.Map<Informe>(informeReqDTO);
@@ -134,6 +152,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\" + guidId + ".pdf";
                     rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\";
                     ruta = configuration["DNS"] + "Quinquenal" + "/" + informeReqDTO.CodigoProyecto + "/"+ tipo + "/" + guidId + ".pdf";
+
+                }
+                else if (tipoSeg.Descripcion.Equals("Reemplazo"))
+                {
+                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\" + guidId + ".pdf";
+                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\";
+                    ruta = configuration["DNS"] + "Reemplazo" + "/" + informeReqDTO.CodigoProyecto + "/" + tipo + "/" + guidId + ".pdf";
 
                 }
                 informe.Ruta = ruta;
@@ -401,7 +426,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                    
                     .FirstOrDefaultAsync();
 
+
                 var responseInforme = mapper.Map<InformeResponseDto>(Informe);
+
+                var tipoSeguimiento = await _context.TipoSeguimiento.Where(x => x.Descripcion.Equals(responseInforme.TipoSeguimiento)).FirstOrDefaultAsync();
+
+                responseInforme.TipoSeguimientoId = tipoSeguimiento.Id;
                 if (Informe != null)
                 {
                     var response = new ResponseEntidadDto<InformeResponseDto>
@@ -443,7 +473,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var tipoInforme = await _context.TipoInforme.Where(x => x.Id == pag.TipoDocumento).FirstOrDefaultAsync();
             var tipoSeg = await _context.TipoSeguimiento.Where(x => x.Id == pag.TipoSeguimiento).FirstOrDefaultAsync();
             var queryable = _context.Informe
-                    .OrderBy(x=>x.FechaCreacion)
+                    .OrderByDescending(x=>x.FechaCreacion)
                     .Where(x => pag.CodigoDocumento != "" ? x.CodigoExpediente.Contains(pag.CodigoDocumento) : true)
                     .Where(x => pag.TipoDocumento != 0 ? x.Tipo.Contains(tipoInforme.Descripcion) : true)
                     .Where(x => pag.TipoSeguimiento != 0 ? x.TipoSeguimiento.Contains(tipoSeg.Descripcion) : true)
@@ -458,7 +488,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     .ThenInclude(y => y.Usuario)
                     .AsQueryable();
             int cantidad = queryable.Count();
-            var listaPaginada = await queryable.OrderBy(e => e.FechaCreacion).Paginar(pag).ToListAsync();
+            var listaPaginada = await queryable.OrderByDescending(e => e.FechaCreacion).Paginar(pag).ToListAsync();
             var proyectoDto = mapper.Map<List<InformeResponseDto>>(listaPaginada);
 
             var pagination = new PaginacionResponseDto<InformeResponseDto>
@@ -524,6 +554,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     tipoSeguimiento = "Plan Anual";
 
                 }
+                else if (tipoSeg.Descripcion.Equals("Reemplazo"))
+                {
+                    var existeQnq = await _context.BolsaReemplazo.Where(x => x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto)).AnyAsync();
+                    if (!existeQnq)
+                    {
+                        return new ResponseDTO
+                        {
+                            Valid = true,
+                            Message = "No existe el reemplazo ingresado"
+                        };
+                    }
+                    tipoSeguimiento = "Reemplazo";
+
+                }
                 var guidId = Guid.NewGuid();
                 var getInforme = await _context.Informe.Where(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -573,6 +617,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\";
                     ruta = configuration["DNS"] + "Quinquenal" + "/" + informeReqDTO.CodigoProyecto + "/" + tipo + "/" + guidId + ".pdf";
 
+                }
+                else if (tipoSeg.Descripcion.Equals("Reemplazo"))
+                {
+                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\" + guidId + ".pdf";
+                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\";
+                    ruta = configuration["DNS"] + "Reemplazo" + "/" + informeReqDTO.CodigoProyecto + "/" + tipo + "/" + guidId + ".pdf";
                 }
                 getInforme.Ruta = ruta;
                 getInforme.RutaFisica = rutaFisica;

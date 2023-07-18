@@ -190,6 +190,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     proyecto.TipoProyectoId = proyectoRequestDto.TipoProyectoId == 0 ? null : proyectoRequestDto.TipoProyectoId;
                     proyecto.BaremoId = proyectoRequestDto.BaremoId == 0 ? null : proyectoRequestDto.BaremoId;
                     proyecto.descripcion = "";
+                    proyecto.CodigoMalla = proyectoRequestDto.CodigoMalla;
                     proyecto.Etapa = proyectoRequestDto.Etapa;
                     proyecto.IngenieroResponsableId = null;
                     proyecto.EstadoGeneralId = 2;

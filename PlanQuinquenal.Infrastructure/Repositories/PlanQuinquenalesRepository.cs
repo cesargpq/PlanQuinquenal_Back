@@ -463,35 +463,48 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             try
             {
-                var quinquenal = mapper.Map<PQuinquenal>(p);
-
-                quinquenal.FechaRegistro = DateTime.Now;
-                quinquenal.FechaModifica = DateTime.Now;
-                quinquenal.UsuarioRegisterId = idUser;
-                quinquenal.UsuarioModifica = idUser;
-                quinquenal.Estado = true;
-
-                _context.Add(quinquenal);
-                await _context.SaveChangesAsync();
-
-                if(p.UsuariosInteresados.Count> 0)
+                var existe = await _context.PQuinquenal.Where(x => x.AnioPlan.Equals(p.AnioPlan)).FirstOrDefaultAsync();
+                if (existe != null )
                 {
-                    foreach (var item in p.UsuariosInteresados)
+                    return new ResponseDTO
                     {
-                        UsuariosInteresadosPQ obj = new UsuariosInteresadosPQ();
-                        obj.PQuinquenalId = quinquenal.Id;
-                        obj.UsuarioId = item;
-                        obj.Estado = true;
-                        _context.Add(obj);
-                        await _context.SaveChangesAsync();
-                    }
+                        Valid = false,
+                        Message = Constantes.ExisteRegistro
+                    };
                 }
-                
-                return new ResponseDTO
+                else
                 {
-                    Valid = true,
-                    Message = Constantes.CreacionExistosa
-                };
+                    var quinquenal = mapper.Map<PQuinquenal>(p);
+
+                    quinquenal.FechaRegistro = DateTime.Now;
+                    quinquenal.FechaModifica = DateTime.Now;
+                    quinquenal.UsuarioRegisterId = idUser;
+                    quinquenal.UsuarioModifica = idUser;
+                    quinquenal.Estado = true;
+
+                    _context.Add(quinquenal);
+                    await _context.SaveChangesAsync();
+
+                    if (p.UsuariosInteresados.Count > 0)
+                    {
+                        foreach (var item in p.UsuariosInteresados)
+                        {
+                            UsuariosInteresadosPQ obj = new UsuariosInteresadosPQ();
+                            obj.PQuinquenalId = quinquenal.Id;
+                            obj.UsuarioId = item;
+                            obj.Estado = true;
+                            _context.Add(obj);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
+                    return new ResponseDTO
+                    {
+                        Valid = true,
+                        Message = Constantes.CreacionExistosa
+                    };
+                }
+               
             }
             catch (Exception e)
             {
@@ -558,22 +571,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var pq = await _context.PQuinquenal.Where(x => x.Id == id).FirstOrDefaultAsync();
+                var pq = await _context.PQuinquenal.Where(x => x.Id != id && x.AnioPlan.Equals(dto.AnioPlan)).FirstOrDefaultAsync();
 
-                if(pq != null)
+                if(pq == null)
                 {
-                    pq.AnioPlan= dto.AnioPlan;
-                    pq.Descripcion= dto.Descripcion;
-                    pq.EstadoAprobacionId = dto.EstadoAprobacionId;
-                    pq.FechaAprobacion = Convert.ToDateTime(dto.FechaAprobacion);
-                    pq.FechaModifica = DateTime.Now;
-                    pq.UsuarioModifica = idUser;
-                    _context.Update(pq);
+                    var pqUpdate = await _context.PQuinquenal.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    pqUpdate.AnioPlan= dto.AnioPlan;
+                    pqUpdate.Descripcion= dto.Descripcion;
+                    pqUpdate.EstadoAprobacionId = dto.EstadoAprobacionId;
+                    pqUpdate.FechaAprobacion = Convert.ToDateTime(dto.FechaAprobacion);
+                    pqUpdate.FechaModifica = DateTime.Now;
+                    pqUpdate.UsuarioModifica = idUser;
+                    _context.Update(pqUpdate);
                     await _context.SaveChangesAsync();
 
                     if(dto.UsuariosInteresados.Count() > 0)
                     {
-                        var userInt = await _context.UsuariosInteresadosPQ.Where(x => x.PQuinquenalId == pq.Id).ToListAsync();
+                        var userInt = await _context.UsuariosInteresadosPQ.Where(x => x.PQuinquenalId == pqUpdate.Id).ToListAsync();
                         foreach (var item in userInt)
                         {
                             _context.Remove(item);
@@ -582,7 +597,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         foreach (var item in dto.UsuariosInteresados)
                         {
                             UsuariosInteresadosPQ usr = new UsuariosInteresadosPQ();
-                            usr.PQuinquenalId = pq.Id;
+                            usr.PQuinquenalId = pqUpdate.Id;
                             usr.UsuarioId = item;
                             usr.Estado = true;
                             _context.Add(usr);

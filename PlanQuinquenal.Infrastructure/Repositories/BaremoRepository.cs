@@ -283,6 +283,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     baremo.CodigoBaremo = data.CodigoBaremo;
                     baremo.Precio = data.Precio;
                     baremo.Descripcion = data.Descripcion;
+                    baremo.PQuinquenalId = data.PlanQuinquenalId;
                     _context.Add(baremo);
                     await _context.SaveChangesAsync();
                     dto.Message = Constantes.CreacionExistosa;

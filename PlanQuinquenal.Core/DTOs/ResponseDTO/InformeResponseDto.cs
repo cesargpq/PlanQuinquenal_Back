@@ -41,6 +41,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public string? FechaCreacion { get; set; }
         public string? FechaModificacion { get; set; }
         public string? TipoSeguimiento { get; set; }
+        public int? TipoSeguimientoId { get; set; }
         public string? Tipo { get; set; }
         public int TipoInformeId { get; set; }
         public List<UsuariosInteresadosInformesResponseDto> UserInteresados { get; set; }

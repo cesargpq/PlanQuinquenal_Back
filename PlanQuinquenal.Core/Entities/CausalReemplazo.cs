@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanQuinquenal.Core.DTOs.RequestDTO
+namespace PlanQuinquenal.Core.Entities
 {
-    public class ImpedimentoRequestListDto:PaginacionDTO
+    public class CausalReemplazo:Maestro
     {
+
     }
 }

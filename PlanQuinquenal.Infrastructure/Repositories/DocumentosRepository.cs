@@ -78,8 +78,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 }
             }
+            else if (documentoRequestDto.Modulo.Equals("BR"))
+            {
+                var data = await PlanAnualAdd(documentoRequestDto);
+                if (data)
+                {
+                    obj.Valid = true;
+                    obj.Message = Constantes.CreacionExistosa;
+                }
+                else
+                {
+                    obj.Valid = true;
+                    obj.Message = Constantes.ErrorSistema;
+
+                }
+            }
             return obj;
         }
+
         public async Task<bool> PlanAnualAdd(DocumentoRequestDto documentoRequestDto)
         {
             try

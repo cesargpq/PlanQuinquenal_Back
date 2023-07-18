@@ -50,7 +50,7 @@ namespace PlanQuinquenal
             services.AddTransient<IComentarioRepository, ComentarioRepository>();
             services.AddTransient<IPlanAnualRepository, PlanAnualRepository>();
             services.AddTransient<IImpedimentoRepository, ImpedimentoRepository>();
-            
+            services.AddTransient<IBolsaReemplazoRepository, BolsaReemplazoRepository>();
             services.AddTransient<HashService>();
             services.AddTransient<Constantes>();
 

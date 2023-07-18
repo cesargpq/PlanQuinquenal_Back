@@ -13,19 +13,19 @@ namespace PlanQuinquenal.Core.Entities
     {
         [Key]
         public int cod_usu { get; set; }
-        public string nombre_usu { get; set; }
-        public string apellido_usu { get; set; }
-        public string correo_usu { get; set; }
-        public string passw_user { get; set; }
-        public string estado_user { get; set; }
-        public int cod_rol { get; set; }
+        public string? nombre_usu { get; set; }
+        public string? apellido_usu { get; set; }
+        public string? correo_usu { get; set; }
+        public string? passw_user { get; set; }
+        public string? estado_user { get; set; }
+        public int? cod_rol { get; set; }
         
-        public int Perfilcod_perfil { get; set; }
-        public Perfil Perfil { get; set; }
-        public int Unidad_negociocod_und { get; set; }
-        public Unidad_negocio Unidad_negocio { get; set; }
+        public int? Perfilcod_perfil { get; set; }
+        public Perfil? Perfil { get; set; }
+        public int? Unidad_negociocod_und { get; set; }
+        public Unidad_negocio? Unidad_negocio { get; set; }
         public bool Estado { get; set; }
-        public int Intentos { get; set; }
+        public int? Intentos { get; set; }
         public bool Interno { get; set; }
         public DateTime? LastSesion { get; set; }
         public bool Conectado { get; set; }
