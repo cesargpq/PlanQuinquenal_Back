@@ -261,7 +261,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<PaginacionResponseDtoException<Object>> ListarDocumentos(ListaDocImpedimentosDTO p)
         {
-            var queryable =  _context.DocumentosImpedimento.Where(x => x.ImpedimentoId == p.CodigoImpedimento && x.Gestion == p.Gestion && x.Estado==true).OrderBy(x=>x.FechaRegistro).AsQueryable();
+            var queryable =  _context.DocumentosImpedimento.Where(x => x.ImpedimentoId == p.CodigoImpedimento && x.Gestion == p.Gestion)
+                                                            .Where(x=>x.Estado ==true)
+                                                            .Where(x=> x.NombreDocumento.Contains(p.NombreDocumento))
+                .OrderByDescending(x=>x.FechaRegistro).AsQueryable();
 
             var entidades = await queryable.Paginar(p)
                                       .ToListAsync();

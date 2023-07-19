@@ -615,7 +615,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var result = new ResponseDTO
                     {
-                        Message = Constantes.NoExistePQNQ,
+                        Message = Constantes.ExisteRegistro,
                         Valid = false
                     };
                     return result;

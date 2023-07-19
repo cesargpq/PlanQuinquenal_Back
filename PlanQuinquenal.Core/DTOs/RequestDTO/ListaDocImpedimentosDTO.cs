@@ -8,6 +8,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
     public class ListaDocImpedimentosDTO:PaginacionDTO
     {
+        public string NombreDocumento { get; set; }
         public int CodigoImpedimento { get; set; }
         public string Gestion { get; set; }
     }

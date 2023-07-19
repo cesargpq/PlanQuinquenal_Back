@@ -47,7 +47,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             Message = "El permiso envíado no existe"
                         };
                     }
-                    var permisoExiste = await _context.PermisosProyecto.Where(x => x.ProyectoId == existeProyecto.Id).FirstOrDefaultAsync();
+                    var permisoExiste = await _context.PermisosProyecto.Where(x => x.ProyectoId == existeProyecto.Id && x.TipoPermisosProyectoId == obtenerPermiso.Id).FirstOrDefaultAsync();
                     if (permisoExiste!=null)
                     {
                         permisoExiste.Longitud = permisoRequestDTO.Longitud;

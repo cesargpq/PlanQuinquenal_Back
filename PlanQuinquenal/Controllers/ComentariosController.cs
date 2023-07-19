@@ -63,6 +63,11 @@ namespace PlanQuinquenal.Controllers
                 var resultado = await _comentarioRepository.ListarPQ(p, idUser);
                 return Ok(resultado);
             }
+            else if (tipoSe.Descripcion.ToUpper().Equals("Gestión de Reemplazo".ToUpper()))
+            {
+                var resultado = await _comentarioRepository.ListarBR(p, idUser);
+                return Ok(resultado);
+            }
             else
             {
                 var resultado = await _comentarioRepository.ListarPA(p, idUser);

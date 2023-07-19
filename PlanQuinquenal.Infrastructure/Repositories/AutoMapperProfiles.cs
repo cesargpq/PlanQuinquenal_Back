@@ -36,6 +36,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<ComentarioPY, ComentarioRequestDTO>();
             CreateMap<ComentarioRequestDTO, ComentarioPY>();
 
+            CreateMap<COMENTARIOBR, ComentarioRequestDTO>();
+            CreateMap<ComentarioRequestDTO, COMENTARIOBR>();
+            
             CreateMap<COMENTARIOPQ, ComentarioRequestDTO>();
             CreateMap<ComentarioRequestDTO, COMENTARIOPQ>();
 
@@ -111,7 +114,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<DocumentoRequestDto, DocumentosPy>();
             CreateMap<DocumentoRequestDto, DocumentosPQ>();
             CreateMap<DocumentoRequestDto, DocumentosPA>();
-
+            CreateMap<DocumentoRequestDto, DocumentosBR>();
+            
 
             CreateMap<InformeReqDTO, Informe>()
                 .ForMember(x => x.UserInteresados, c => c.Ignore())

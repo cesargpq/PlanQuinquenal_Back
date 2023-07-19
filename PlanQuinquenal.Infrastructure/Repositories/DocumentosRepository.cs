@@ -80,7 +80,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else if (documentoRequestDto.Modulo.Equals("BR"))
             {
-                var data = await PlanAnualAdd(documentoRequestDto);
+                var data = await BolsaReemplazoAdd(documentoRequestDto);
                 if (data)
                 {
                     obj.Valid = true;
@@ -96,6 +96,37 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return obj;
         }
 
+        public async Task<bool> BolsaReemplazoAdd(DocumentoRequestDto documentoRequestDto)
+        {
+            try
+            {
+                var resultado = await _context.BolsaReemplazo.Where(x => x.CodigoProyecto.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
+                if (resultado != null)
+                {
+                    var guidId = Guid.NewGuid();
+                    var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
+                    var map = mapper.Map<DocumentosBR>(documentoRequestDto);
+                    map.BolsaReemplazoId = resultado.Id;
+                    map.CodigoDocumento = documentoRequestDto.NombreDocumento;
+                    map.FechaEmision = DateTime.Now;
+                    map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
+                    map.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + documentoRequestDto.CodigoProyecto + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.ruta = configuration["DNS"] + "Reemplazo" + "/" + documentoRequestDto.CodigoProyecto + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.Estado = true;
+                    _context.Add(map);
+                    await _context.SaveChangesAsync();
+
+                    saveDocument(documentoRequestDto, guidId);
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
         public async Task<bool> PlanAnualAdd(DocumentoRequestDto documentoRequestDto)
         {
             try
@@ -223,6 +254,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     modulo = "PlanAnual";
                 }
+                else if (documentoRequestDto.Modulo.Equals("BR"))
+                {
+                    modulo = "Reemplazo";
+                }
                 ruta = configuration["RUTA_ARCHIVOS"] + $"\\{modulo + "\\"}";
                
                 if (!Directory.Exists(ruta))
@@ -306,6 +341,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         obj.Message = Constantes.NOEXISTEDOCUMENTO;
                     }
                 }
+                else if (modulo.Equals("BR"))
+                {
+                    var data = await _context.DocumentosBR.Where(x => x.Id == id && x.Estado == true).FirstOrDefaultAsync();
+                    if (data != null)
+                    {
+                        obj.Valid = true;
+                        obj.Message = data.ruta;
+                    }
+                    else
+                    {
+                        obj.Valid = false;
+                        obj.Message = Constantes.NOEXISTEDOCUMENTO;
+                    }
+                }
                 return obj;
             }
             catch (Exception)
@@ -340,6 +389,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var dato = await _context.DocumentosPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
                 obj.tipoDocumento = dato.TipoDocumento;
                 obj.ruta = dato.rutafisica;
+                obj.nombreArchivo = dato.NombreDocumento;
+            }
+            else if (modulo.Equals("BR"))
+            {
+                var dato = await _context.DocumentosBR.Where(x => x.Id == id).FirstOrDefaultAsync();
+                obj.tipoDocumento = dato.TipoDocumento;
+                obj.ruta = dato.rutaFisica;
                 obj.nombreArchivo = dato.NombreDocumento;
             }
             return obj;
@@ -377,6 +433,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     else if (modulo.Equals("PQ"))
                     {
                         var dato = await _context.DocumentosPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
+                        dato.Estado = false;
+                        _context.Update(dato);
+                        await _context.SaveChangesAsync();
+                        obj.Valid = true;
+                        obj.Message = Constantes.EliminacionSatisfactoria;
+
+                        return obj;
+                    }
+                    else if (modulo.Equals("BR"))
+                    {
+                        var dato = await _context.DocumentosBR.Where(x => x.Id == id).FirstOrDefaultAsync();
                         dato.Estado = false;
                         _context.Update(dato);
                         await _context.SaveChangesAsync();

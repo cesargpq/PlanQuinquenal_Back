@@ -14,8 +14,9 @@ namespace PlanQuinquenal.Core.Interfaces
 
         Task<ResponseDTO> Add(ComentarioRequestDTO c,int idUser);
 
-        Task<PaginacionResponseDtoException<ComentarioPY>> ListarPY(RequestComentarioDTO p, int idUser);
-        Task<PaginacionResponseDtoException<COMENTARIOPQ>> ListarPQ(RequestComentarioDTO p, int idUser);
-        Task<PaginacionResponseDtoException<COMENTARIOPA>> ListarPA(RequestComentarioDTO p, int idUser);
+        Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarPY(RequestComentarioDTO p, int idUser);
+        Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarPQ(RequestComentarioDTO p, int idUser);
+        Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarBR(RequestComentarioDTO p, int idUser);
+        Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarPA(RequestComentarioDTO p, int idUser);
     }
 }

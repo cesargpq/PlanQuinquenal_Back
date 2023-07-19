@@ -14,13 +14,15 @@ namespace PlanQuinquenal.Core.Entities
         public string? CodigoProyecto { get; set; }
         public int? Etapa { get; set; }
         public string? CodigoMalla { get; set; }
+        public Decimal? LongImpedimento { get; set; }
+        public int? CausalReemplazoId { get; set; }
         public string? Distrito { get; set; }
         public string? Constructor { get; set; }
         public string? IngenieroResponsable { get; set; }
         public string? ProblematicaReal { get; set; }
         public Decimal? LongitudReemplazo { get; set; }
         public Decimal? CostoInversion { get; set; }
-        public Decimal? LongImpedimento { get; set; }
+       
         public int? PrimerEstrato { get; set; }
         public int? SegundoEstrato { get; set; }
         public int? TercerEstrato { get; set; }

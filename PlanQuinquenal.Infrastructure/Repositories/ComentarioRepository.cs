@@ -67,6 +67,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.Message = Constantes.CreacionExistosa;
                     obj.Valid = true;
                 }
+                else if (tipoSeguimiento.Descripcion.Equals("Gestión de Reemplazo"))
+                {
+                    var comentario = mapper.Map<COMENTARIOBR>(c);
+                    comentario.BolsaReemplazoId = c.ProyectoId;
+                    comentario.UsuarioId = idUser;
+                    comentario.Fecha = DateTime.Now;
+                    _context.Add(comentario);
+                    await _context.SaveChangesAsync();
+                    obj.Message = Constantes.CreacionExistosa;
+                    obj.Valid = true;
+                }
                 else
                 {
                     obj.Message = Constantes.BusquedaNoExitosa;
@@ -87,7 +98,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
             }
         }
-        public async Task<PaginacionResponseDtoException<COMENTARIOPA>> ListarPA(RequestComentarioDTO p, int idUser)
+        public async Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarPA(RequestComentarioDTO p, int idUser)
         {
 
             var resultado = await _context.COMENTARIOPA
@@ -120,14 +131,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             var elementosPagina = lista.Skip((p.Pagina - 1) * p.RecordsPorPagina).Take(p.RecordsPorPagina);
 
-            var map = new PaginacionResponseDtoException<COMENTARIOPA>
+            List<ComentarioResultDTO> listaComent = new List<ComentarioResultDTO>();
+            foreach (var item in elementosPagina)
+            {
+                var ComentarioRsult = new ComentarioResultDTO
+                {
+                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
+                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
+                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
+                    Fecha = elementosPagina.ElementAt(0).Fecha
+                };
+                listaComent.Add(ComentarioRsult);
+            }
+
+            var map = new PaginacionResponseDtoException<ComentarioResultDTO>
             {
                 Cantidad = lista.Count,
-                Model = elementosPagina
+                Model = listaComent
             };
             return map;
         }
-        public async Task<PaginacionResponseDtoException<COMENTARIOPQ>> ListarPQ(RequestComentarioDTO p, int idUser)
+        public async Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarPQ(RequestComentarioDTO p, int idUser)
         {
 
             var resultado = await _context.COMENTARIOPQ
@@ -160,14 +184,80 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             var elementosPagina = lista.Skip((p.Pagina - 1) * p.RecordsPorPagina).Take(p.RecordsPorPagina);
 
-            var map = new PaginacionResponseDtoException<COMENTARIOPQ>
+            List<ComentarioResultDTO> listaComent = new List<ComentarioResultDTO>();
+            foreach (var item in elementosPagina)
+            {
+                var ComentarioRsult = new ComentarioResultDTO
+                {
+                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
+                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
+                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
+                    Fecha = elementosPagina.ElementAt(0).Fecha
+                };
+                listaComent.Add(ComentarioRsult);
+            }
+
+            var map = new PaginacionResponseDtoException<ComentarioResultDTO>
             {
                 Cantidad = lista.Count,
-                Model = elementosPagina
+                Model = listaComent
             };
             return map;
         }
-        public async Task<PaginacionResponseDtoException<ComentarioPY>> ListarPY(RequestComentarioDTO p, int idUser)
+        public async Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarBR(RequestComentarioDTO p, int idUser)
+        {
+
+            var resultado = await _context.COMENTARIOBR
+                                    .Include(x => x.Usuario)
+                                    .Where(x => x.BolsaReemplazoId == p.Codigo)
+                                    .ToListAsync();
+
+            var usuarioLog = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).FirstOrDefaultAsync();
+            var usuarioInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == p.Codigo && x.UsuarioId == idUser).FirstOrDefaultAsync();
+            List<COMENTARIOBR> lista = new List<COMENTARIOBR>();
+
+            foreach (var comentario in resultado)
+            {
+                if (comentario.TipoComentario == 1)
+                {
+                    if (usuarioInt != null || usuarioLog.Perfil.nombre_perfil == "Administrador" || idUser == comentario.UsuarioId)
+                    {
+                        lista.Add(comentario);
+                    }
+                }
+                else
+                {
+                    var usuario = await _context.Usuario.Where(x => x.cod_usu == comentario.UsuarioId).FirstOrDefaultAsync();
+                    if (comentario.Usuario.Unidad_negociocod_und == usuarioLog.Unidad_negociocod_und || usuarioInt != null || idUser == comentario.UsuarioId)
+                    {
+                        lista.Add(comentario);
+                    }
+                }
+            }
+
+            var elementosPagina = lista.Skip((p.Pagina - 1) * p.RecordsPorPagina).Take(p.RecordsPorPagina);
+
+            List<ComentarioResultDTO> listaComent = new List<ComentarioResultDTO>();
+            foreach (var item in elementosPagina)
+            {
+                var ComentarioRsult = new ComentarioResultDTO
+                {
+                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
+                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
+                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
+                    Fecha = elementosPagina.ElementAt(0).Fecha
+                };
+                listaComent.Add(ComentarioRsult);
+            }
+            
+            var map = new PaginacionResponseDtoException<ComentarioResultDTO>
+            {
+                Cantidad = lista.Count,
+                Model = listaComent
+            };
+            return map;
+        }
+        public async Task<PaginacionResponseDtoException<ComentarioResultDTO>> ListarPY(RequestComentarioDTO p, int idUser)
         {
             
             var resultado = await _context.ComentarioPY
@@ -199,11 +289,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
 
             var elementosPagina = lista.Skip((p.Pagina - 1) * p.RecordsPorPagina).Take(p.RecordsPorPagina);
-           
-            var map = new PaginacionResponseDtoException<ComentarioPY>
+
+            List<ComentarioResultDTO> listaComent = new List<ComentarioResultDTO>();
+            foreach (var item in elementosPagina)
+            {
+                var ComentarioRsult = new ComentarioResultDTO
+                {
+                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
+                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
+                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
+                    Fecha = elementosPagina.ElementAt(0).Fecha
+                };
+                listaComent.Add(ComentarioRsult);
+            }
+
+            var map = new PaginacionResponseDtoException<ComentarioResultDTO>
             {
                 Cantidad = lista.Count,
-                Model = elementosPagina
+                Model = listaComent
             };
             return map;
         }

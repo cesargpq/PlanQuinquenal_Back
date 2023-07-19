@@ -88,9 +88,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     tipoSeguimiento = "Plan Anual";
 
                 }
-                else if (tipoSeg.Descripcion.ToUpper().Equals("Reemplazo".ToUpper()))
+                else if (tipoSeg.Descripcion.ToUpper().Equals("Gestión de Reemplazo".ToUpper()))
                 {
-                    var existeQnq = await _context.BolsaReemplazo.Where(x => x.Id.Equals(informeReqDTO.CodigoProyecto)).AnyAsync();
+                    var existeQnq = await _context.BolsaReemplazo.Where(x => x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto)).AnyAsync();
                     if (!existeQnq)
                     {
                         return new ResponseDTO
@@ -99,7 +99,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             Message = "No existe el Reemplazo ingresado"
                         };
                     }
-                    tipoSeguimiento = "Reemplazo";
+                    tipoSeguimiento = "Gestión de Reemplazo";
 
                 }
 
@@ -154,11 +154,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     ruta = configuration["DNS"] + "Quinquenal" + "/" + informeReqDTO.CodigoProyecto + "/"+ tipo + "/" + guidId + ".pdf";
 
                 }
-                else if (tipoSeg.Descripcion.Equals("Reemplazo"))
+                else if (tipoSeg.Descripcion.ToUpper().Equals("Gestión de Reemplazo".ToUpper()))
                 {
-                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\" + guidId + ".pdf";
-                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\";
-                    ruta = configuration["DNS"] + "Reemplazo" + "/" + informeReqDTO.CodigoProyecto + "/" + tipo + "/" + guidId + ".pdf";
+                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Gestión de Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\" + guidId + ".pdf";
+                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Gestión de Reemplazo\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\";
+                    ruta = configuration["DNS"] + "Gestión de Reemplazo" + "/" + informeReqDTO.CodigoProyecto + "/" + tipo + "/" + guidId + ".pdf";
 
                 }
                 informe.Ruta = ruta;
