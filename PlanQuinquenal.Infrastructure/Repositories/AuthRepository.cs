@@ -66,7 +66,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<JwtResponse> Autenticar(LoginRequestDTO usuario)
         {
             JwtResponse jwt = new JwtResponse();
-            usuario.password = hashService.Encriptar(usuario.password);
+            
             var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user).Include(s => s.Perfil).FirstOrDefaultAsync();
            if(userResult != null)
             {
@@ -95,6 +95,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 else
                 {
+                    usuario.password = hashService.Encriptar(usuario.password);
                     jwt = await LoginInterno(usuario,_context);
 
                         if (!jwt.state && userResult.Intentos < _constantes.CANTIDAD_INTENTOS)
@@ -176,13 +177,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         
         public static JwtResponse ActiveDirectory(LoginRequestDTO usuario)
         {
-            using (var entry = new System.DirectoryServices.DirectoryEntry("LDAP://SLIMDOM02", "usr_plan_quinquenal", "AcDJC@l1d4d$"))
+
+            using (var entry = new System.DirectoryServices.DirectoryEntry("LDAP://SLIMDOM02", usuario.user, usuario.password))
             {
-                var dato = entry;
+                JwtResponse jwt = new JwtResponse();
+                DirectorySearcher dsearch = new DirectorySearcher(entry);
+                dsearch.Filter = "sAMAccountName=" + usuario.user + "";
+                SearchResult results = null;
+
+                try
+                {
+                    results = dsearch.FindOne();
+
+                    if (results != null)
+                    {
+                        string NombreCompleto = results.GetDirectoryEntry().Properties["DisplayName"].Value.ToString();
+                        string NTusername = results.GetDirectoryEntry().Properties["sAMAccountName"].Value.ToString();
+                        string co = results.GetDirectoryEntry().Properties["department"].Value.ToString();//department
+                    }
+
+                    jwt = ExisteUsuario();
+                    return jwt;
+                }
+                catch (Exception e)
+                {
+
+                    jwt = DatosInvalidos();
+                    return jwt;
+                }
             }
-            JwtResponse jwt = new JwtResponse();
-            jwt.state = true;
-            return jwt;
+          
         }
         public static async Task<JwtResponse>  LoginInterno(LoginRequestDTO usuario, PlanQuinquenalContext context)
         {

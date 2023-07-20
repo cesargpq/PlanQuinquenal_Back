@@ -136,7 +136,8 @@ namespace PlanQuinquenal.Core.Utilities
             var claims = new List<Claim>()
             {
                 new Claim("$I$Us$@I@D", credencialesUsuario.cod_usu.ToString()),
-                new Claim("LastSesion",credencialesUsuario.LastSesion.ToString())
+                new Claim("LastSesion",credencialesUsuario.LastSesion.ToString()),
+                new Claim("Jti",Guid.NewGuid().ToString())
             };
 
             var llave = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("ASK9DASDASJD9ASJD9ASJDA9SJDAS9JDAS9JDA9SJD9ASJDAS9JDAS9DJAS9JDAS9DJAS9DJAS9DJAS9DAJS"));
