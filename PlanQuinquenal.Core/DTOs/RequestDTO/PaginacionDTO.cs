@@ -10,7 +10,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     {
         public int Pagina { get; set; }
         private int recordsPorPagina = 10;
-        private readonly int cantidadMaximaPorPagina = 50;
+        private readonly int cantidadMaximaPorPagina = 999999;
 
         public int RecordsPorPagina
         {

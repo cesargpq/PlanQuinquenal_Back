@@ -36,33 +36,33 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._repositoryMantenedores = repositoryMantenedores;
         }
 
-        public async Task<ProyectoResponseDto> GetById(int id)
-        {
+        //public async Task<ProyectoResponseDto> GetById(int id)
+        //{
 
 
-            var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+        //    var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
 
 
-            var proyecto = await _context.Proyecto
-                                         .Include(x => x.PlanAnual)
-                                         .Include(x => x.PQuinquenal)
-                                         .Include(x => x.Material)
-                                         .Include(x => x.Distrito)
-                                         .Include(x => x.Constructor)
-                                         .Include(x => x.TipoProyecto)
-                                         .Include(x => x.EstadoGeneral)
-                                         .Include(x => x.TipoRegistro)
-                                         .Include(x => x.Baremo)
-                                         .Include(x => x.IngenieroResponsable)
-                                         .Include(x => x.UsuariosInteresados)
-                                         .ThenInclude(x => x.Usuario)
-                                         .Where(x => x.Id == id).FirstOrDefaultAsync();
+        //    var proyecto = await _context.Proyecto
+        //                                 .Include(x => x.PlanAnual)
+        //                                 .Include(x => x.PQuinquenal)
+        //                                 .Include(x => x.Material)
+        //                                 .Include(x => x.Distrito)
+        //                                 .Include(x => x.Constructor)
+        //                                 .Include(x => x.TipoProyecto)
+        //                                 .Include(x => x.EstadoGeneral)
+        //                                 .Include(x => x.TipoRegistro)
+        //                                 .Include(x => x.Baremo)
+        //                                 .Include(x => x.IngenieroResponsable)
+        //                                 .Include(x => x.UsuariosInteresados)
+        //                                 .ThenInclude(x => x.Usuario)
+        //                                 .Where(x => x.Id == id).FirstOrDefaultAsync();
 
-            var proyectoDto = mapper.Map<ProyectoResponseDto>(proyecto);
-            return proyectoDto;
+        //    var proyectoDto = mapper.Map<ProyectoResponseDto>(proyecto);
+        //    return proyectoDto;
 
-            //verificar  si no existe
-        }
+        //    verificar si no existe
+        //}
         public async Task<PaginacionResponseDtoException<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos)
         {
 
@@ -270,6 +270,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         existe.BaremoId = p.BaremoId == null || p.BaremoId == 0 ? null : p.BaremoId;
                         existe.FechaGasificacion = p.FechaGacificacion != "" ? DateTime.Parse(p.FechaGacificacion) : null;
                         existe.LongAprobPa = p.LongAprobPa;
+                        existe.LongRealPend = p.LongRealPend;
                         existe.LongRealHab = p.LongRealHab;
                         existe.LongProyectos = p.LongProyectos;
                         existe.UsuarioModificaId = idUser;
@@ -468,9 +469,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         TipoRegistroId = dTipoRegistroPY.Id,
                                         DistritoId = dDistrito.Id,
                                         TipoProyectoId = dTipoProyecto.Id,
-                                        LongAprobPa = Decimal.Parse(longAproPa),
-                                        LongRealHab = Decimal.Parse(longRealHab),
-                                        LongRealPend = Decimal.Parse(longRealPend),
+                                        LongAprobPa = longAproPa == null ? 0 : Decimal.Parse(longAproPa),
+                                        LongRealHab = longRealHab == null ? 0 : Decimal.Parse(longRealHab),
+                                        LongRealPend = longRealPend == null ? 0 : Decimal.Parse(longRealPend),
+                                        LongProyectos = 0,
+                                        LongImpedimentos=0,
+                                        LongReemplazada=0,
                                         //LongImpedimentos = Decimal.Parse(longImpedimentos),
                                         //LongReemplazada = Decimal.Parse(longReemplazada),
                                         CodigoMalla = codMalla,
@@ -627,6 +631,70 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return table;
         }
 
+        public async Task<ResponseEntidadDto<ProyectoResponseIdDTO>> GetById(int Id)
+        {
+            var resultad = await _context.ProyectoResponseIdDTO.FromSqlRaw($"EXEC listarpybyid  {Id}").ToListAsync();
+            var usuariosInteresados = await _context.UsuariosInteresadosPy
+                                            .Include(x=>x.Usuario)    
+                                            .Where(x => x.ProyectoId == Id).ToListAsync();
 
+            List<UsuarioResponseDto> obj = new List<UsuarioResponseDto>();
+
+            foreach (var item in usuariosInteresados)
+            {
+                UsuarioResponseDto o = new UsuarioResponseDto();
+                o.Id = item.UsuarioId;
+                o.Nombre = item.Usuario.nombre_usu + " " + item.Usuario.apellido_usu;
+                obj.Add(o);
+            }
+            if (resultad.Count >0)
+            {
+                resultad.ElementAt(0).UsuariosInteresados = obj;
+                var result = new ResponseEntidadDto<ProyectoResponseIdDTO>
+                {
+                    Message = Constantes.BusquedaExitosa,
+                    Valid = true,
+                    Model = resultad[0]
+                };
+                return result;
+            }
+            else
+            {
+                var result = new ResponseEntidadDto<ProyectoResponseIdDTO>
+                {
+                    Message = Constantes.BusquedaNoExitosa,
+                    Valid = false,
+                    Model = null
+                };
+                return result;
+            }
+        }
+
+        public async Task<PaginacionResponseDtoException<ProyectoDetalle>> GetSeleccionados(PlanQuinquenalSelectedId p)
+        {
+            List<int> intList = new List<int> { 1, 2, 3, 4, 5 };
+
+            var dataTable = new DataTable();
+            dataTable.TableName = "dbo.IntArray";
+            dataTable.Columns.Add("Id", typeof(int));
+            foreach (var item in p.Value)
+            {
+                dataTable.Rows.Add(item);
+            }
+
+            SqlParameter parameter = new SqlParameter("IntArray", SqlDbType.Structured);
+            parameter.TypeName = dataTable.TableName;
+            parameter.Value = dataTable;
+
+
+            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC ListarPYIndividual {parameter}").ToListAsync();
+
+            var result = new PaginacionResponseDtoException<ProyectoDetalle>
+            {
+                Cantidad = resultad.Count,
+                Model = resultad
+            };
+            return result;
+        }
     }
 }

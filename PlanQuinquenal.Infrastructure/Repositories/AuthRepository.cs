@@ -5,9 +5,11 @@ using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
+using System.DirectoryServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -174,7 +176,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         
         public static JwtResponse ActiveDirectory(LoginRequestDTO usuario)
         {
-
+            using (var entry = new System.DirectoryServices.DirectoryEntry("LDAP://SLIMDOM02", "usr_plan_quinquenal", "AcDJC@l1d4d$"))
+            {
+                var dato = entry;
+            }
             JwtResponse jwt = new JwtResponse();
             jwt.state = true;
             return jwt;

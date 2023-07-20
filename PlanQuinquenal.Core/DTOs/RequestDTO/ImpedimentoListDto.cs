@@ -4,33 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanQuinquenal.Core.Entities
+namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
-    public class ImpedimentoDetalle
+    public class ImpedimentoListDto:PaginacionDTO
     {
-        public int Total { get; set; }
-        public int Id { get; set; }
-        public string? PQ { get; set; }
         public string? CodigoProyecto { get; set; }
         public int? Etapa { get; set; }
         public string? CodigoMalla { get; set; }
-        public Decimal? LongImpedimento { get; set; }
+        public int? DistritoId { get; set; }
         public int? CausalReemplazoId { get; set; }
-        public string? CausalReemplazo { get; set; }
-        
-        public string? Distrito { get; set; }
-        public string? Constructor { get; set; }
-        public string? IngenieroResponsable { get; set; }
-        public string? ProblematicaReal { get; set; }
+        public int? ConstructorId { get; set; }
+        public int? IngenieroResponsableId { get; set; }
+        public int? ProblematicaRealId { get; set; }
         public Decimal? LongitudReemplazo { get; set; }
+        public Decimal? LongImpedimento { get; set; }
         public Decimal? CostoInversion { get; set; }
-       
         public int? PrimerEstrato { get; set; }
         public int? SegundoEstrato { get; set; }
         public int? TercerEstrato { get; set; }
         public int? CuartoEstrato { get; set; }
         public int? QuintoEstrato { get; set; }
-        public int? TotalPotencial { get; set; }
-        public DateTime? FechaRegistro { get; set; }
+        public string? FechaRegistro { get; set; }
     }
 }

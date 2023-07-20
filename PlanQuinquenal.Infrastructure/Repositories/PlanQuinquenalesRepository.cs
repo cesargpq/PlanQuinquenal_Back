@@ -1,5 +1,6 @@
 ﻿using ApiDavis.Core.Utilidades;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
@@ -11,6 +12,7 @@ using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -631,6 +633,33 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
                 return result;
             }
+        }
+
+        public async Task<PaginacionResponseDtoException<PQuinquenalResponseDto>> GetSeleccionados(PlanQuinquenalSelectedId p)
+        {
+            List<int> intList = new List<int> { 1, 2, 3, 4, 5 };
+
+            var dataTable = new DataTable();
+            dataTable.TableName = "dbo.IntArray";
+            dataTable.Columns.Add("Id", typeof(int));
+            foreach (var item in p.Value)
+            {
+                dataTable.Rows.Add(item);
+            }
+
+            SqlParameter parameter = new SqlParameter("IntArray", SqlDbType.Structured);
+            parameter.TypeName = dataTable.TableName;
+            parameter.Value = dataTable;
+
+            
+            var resultad = await _context.PQuinquenalResponseDto.FromSqlInterpolated($"EXEC ListarPQIndividual {parameter}" ).ToListAsync();
+
+            var result = new PaginacionResponseDtoException<PQuinquenalResponseDto>
+            {
+                Cantidad = resultad.Count,
+                Model = resultad
+            };
+            return result;
         }
     }
 }

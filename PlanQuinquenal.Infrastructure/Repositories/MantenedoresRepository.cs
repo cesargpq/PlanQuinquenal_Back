@@ -48,6 +48,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 
                
             }
+            else if (attribute.Equals("ZonaPermiso"))
+            {
+                var dato = await _context.ZonaPermiso.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
             else if (attribute.Equals("TipoInforme"))
             {
                 var dato = await _context.TipoInforme.Where(x => x.Estado == true).ToListAsync();

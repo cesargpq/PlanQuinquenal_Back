@@ -88,7 +88,7 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpPost("Listar")]
-        public async Task<IActionResult> Listar(ImpedimentoRequestListDto p)
+        public async Task<IActionResult> Listar(ImpedimentoListDto p)
         {
 
             var resultado = await _impedimentoRepository.Listar(p);

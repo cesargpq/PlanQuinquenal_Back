@@ -104,6 +104,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resultado = await _context.COMENTARIOPA
                                     .Include(x => x.Usuario)
                                     .Where(x => x.PlanAnualId == p.Codigo)
+                                    .OrderByDescending(x=>x.Fecha)
                                     .ToListAsync();
 
             var usuarioLog = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).FirstOrDefaultAsync();
@@ -136,10 +137,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var ComentarioRsult = new ComentarioResultDTO
                 {
-                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
-                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
-                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
-                    Fecha = elementosPagina.ElementAt(0).Fecha
+                    usuario = item.Usuario.nombre_usu + " " + item.Usuario.apellido_usu,
+                    perfil = item.Usuario.Perfil.nombre_perfil,
+                    Descripcion = item.Descripcion,
+                    Fecha = item.Fecha
                 };
                 listaComent.Add(ComentarioRsult);
             }
@@ -157,6 +158,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resultado = await _context.COMENTARIOPQ
                                     .Include(x => x.Usuario)
                                     .Where(x => x.PQuinquenalId == p.Codigo)
+                                    .OrderByDescending(x => x.Fecha)
                                     .ToListAsync();
 
             var usuarioLog = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).FirstOrDefaultAsync();
@@ -189,10 +191,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var ComentarioRsult = new ComentarioResultDTO
                 {
-                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
-                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
-                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
-                    Fecha = elementosPagina.ElementAt(0).Fecha
+                    usuario = item.Usuario.nombre_usu + " " + item.Usuario.apellido_usu,
+                    perfil = item.Usuario.Perfil.nombre_perfil,
+                    Descripcion = item.Descripcion,
+                    Fecha = item.Fecha
                 };
                 listaComent.Add(ComentarioRsult);
             }
@@ -210,6 +212,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resultado = await _context.COMENTARIOBR
                                     .Include(x => x.Usuario)
                                     .Where(x => x.BolsaReemplazoId == p.Codigo)
+                                    .OrderByDescending(x => x.Fecha)
                                     .ToListAsync();
 
             var usuarioLog = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).FirstOrDefaultAsync();
@@ -242,10 +245,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var ComentarioRsult = new ComentarioResultDTO
                 {
-                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
-                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
-                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
-                    Fecha = elementosPagina.ElementAt(0).Fecha
+                    usuario = item.Usuario.nombre_usu + " " + item.Usuario.apellido_usu,
+                    perfil = item.Usuario.Perfil.nombre_perfil,
+                    Descripcion = item.Descripcion,
+                    Fecha = item.Fecha
                 };
                 listaComent.Add(ComentarioRsult);
             }
@@ -263,6 +266,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resultado = await _context.ComentarioPY
                                     .Include(x=>x.Usuario)
                                     .Where(x=> x.ProyectoId ==p.Codigo)
+                                    .OrderByDescending(x=>x.Fecha)
                                     .ToListAsync();
 
             var usuarioLog = await _context.Usuario.Include(x=>x.Perfil).Where(x => x.cod_usu == idUser).FirstOrDefaultAsync();
@@ -295,10 +299,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var ComentarioRsult = new ComentarioResultDTO
                 {
-                    usuario = elementosPagina.ElementAt(0).Usuario.nombre_usu + " " + elementosPagina.ElementAt(0).Usuario.apellido_usu,
-                    perfil = elementosPagina.ElementAt(0).Usuario.Perfil.nombre_perfil,
-                    Descripcion = elementosPagina.ElementAt(0).Descripcion,
-                    Fecha = elementosPagina.ElementAt(0).Fecha
+                    usuario = item.Usuario.nombre_usu + " " + item.Usuario.apellido_usu,
+                    perfil = item.Usuario.Perfil.nombre_perfil,
+                    Descripcion =item.Descripcion,
+                    Fecha = item.Fecha
                 };
                 listaComent.Add(ComentarioRsult);
             }

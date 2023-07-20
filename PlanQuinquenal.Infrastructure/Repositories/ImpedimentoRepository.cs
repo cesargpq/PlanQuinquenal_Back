@@ -279,10 +279,29 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return objeto;
         }
 
-        public async Task<PaginacionResponseDtoException<ImpedimentoDetalle>> Listar(ImpedimentoRequestListDto f)
+        public async Task<PaginacionResponseDtoException<ImpedimentoDetalle>> Listar(ImpedimentoListDto f)
         {
 
-            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            if (f.CodigoProyecto.Equals("")) f.CodigoProyecto = null;
+            if (f.CodigoMalla.Equals("")) f.CodigoMalla = null;
+            if (f.FechaRegistro.Equals("")) f.FechaRegistro = null;
+
+            
+            if (f.Etapa == 0) f.Etapa = null;
+            if (f.DistritoId == 0) f.DistritoId = null;
+            if (f.CausalReemplazoId == 0) f.CausalReemplazoId = null;
+            if (f.ConstructorId == 0) f.ConstructorId = null;
+            if (f.IngenieroResponsableId == 0) f.IngenieroResponsableId = null;
+            if (f.ProblematicaRealId == 0) f.ProblematicaRealId = null;
+            if (f.LongitudReemplazo == 0) f.LongitudReemplazo = null;
+            if (f.LongImpedimento == 0) f.LongImpedimento = null;
+            if (f.CostoInversion == 0) f.CostoInversion = null;
+            if (f.PrimerEstrato == 0) f.PrimerEstrato = null;
+            if (f.SegundoEstrato == 0) f.SegundoEstrato = null;
+            if (f.TercerEstrato == 0) f.TercerEstrato = null;
+            if (f.CuartoEstrato == 0) f.CuartoEstrato = null;
+            if (f.QuintoEstrato == 0) f.QuintoEstrato = null;
+            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.CodigoProyecto} , {f.Etapa} , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ImpedimentoDetalle>

@@ -38,6 +38,23 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _bolsaReemplazoRepository.Add(requestBolsaDto,idUser);
             return Ok(resultado);
         }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(RequestUpdateBolsaDTO p, int id)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+
+            var resultado = await _bolsaReemplazoRepository.Update(p, id, idUser);
+            return Ok(resultado);
+        }
         [HttpPost("Listar")]
         public async Task<IActionResult> Listar(BolsaRequestList requestBolsaDto)
         {

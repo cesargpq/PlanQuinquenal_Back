@@ -28,6 +28,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._repositoryMantenedores = repositoryMantenedores;
         }
 
+        public async Task<ResponseDTO> Update(RequestUpdateBolsaDTO p, int id, int idUser)
+        {
+            var br = await _context.BolsaReemplazo.Where(x => x.Id != id && x.CodigoProyecto.Equals(p.CodigoProyecto)).FirstOrDefaultAsync();
+            if (br == null)
+            {
+                var brUpdate = await _context.BolsaReemplazo.Where(x => x.Id == id).FirstOrDefaultAsync();
+                brUpdate.CodigoProyecto = p.CodigoProyecto;
+                brUpdate.DistritoId = p.DistritoId;
+                brUpdate.ConstructorId = p.ConstructorId;
+                brUpdate.CodigoMalla = p.CodigoMalla;
+                brUpdate.Estrato1 = p.Estrato1;
+                brUpdate.Estrato2 = p.Estrato2;
+                brUpdate.Estrato3 = p.Estrato3;
+                brUpdate.Estrato4 = p.Estrato4;
+                brUpdate.Estrato5 = p.Estrato5;
+                brUpdate.CostoInversion = p.CostoInversion;
+                brUpdate.LongitudReemplazo = p.LongitudReemplazo;
+                brUpdate.ReemplazoId = p.ReemplazoId;
+                brUpdate.PermisoId = p.PermisoId;
+                brUpdate.UsuarioModifica = idUser;
+                brUpdate.FechaModifica = DateTime.Now;
+                _context.Update(brUpdate);
+                await _context.SaveChangesAsync();
+
+                var result = new ResponseDTO
+                {
+                    Message = Constantes.ActualizacionSatisfactoria,
+                    Valid = true
+                };
+                return result;
+            }
+            else
+            {
+                var result = new ResponseDTO
+                {
+                    Message = Constantes.ExisteRegistro,
+                    Valid = false
+                };
+                return result;
+            }
+        }
         public async Task<ResponseDTO> Add(RequestBolsaDto p, int idUser)
         {
             try

@@ -126,6 +126,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
+                var existe = await _context.PlanAnual.Where(x => x.AnioPlan.Equals(p.AnioPlan)).FirstOrDefaultAsync();
+                if (existe != null)
+                {
+                    return new ResponseDTO
+                    {
+                        Valid = false,
+                        Message = Constantes.ExisteRegistro
+                    };
+                }
                 var quinquenal = mapper.Map<PlanAnual>(p);
 
                 quinquenal.FechaRegistro = DateTime.Now;
@@ -172,22 +181,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var pq = await _context.PlanAnual.Where(x => x.Id == id).FirstOrDefaultAsync();
+                var pq = await _context.PlanAnual.Where(x => x.Id != id && x.AnioPlan.Equals(dto.AnioPlan)).FirstOrDefaultAsync();
 
-                if (pq != null)
+                if (pq == null)
                 {
-                    pq.AnioPlan = dto.AnioPlan;
-                    pq.Descripcion = dto.Descripcion;
-                    pq.EstadoAprobacionId = dto.EstadoAprobacionId;
-                    pq.FechaAprobacion = Convert.ToDateTime(dto.FechaAprobacion);
-                    pq.FechaModifica = DateTime.Now;
-                    pq.UsuarioModifica = idUser;
-                    _context.Update(pq);
+                    var pqUpdate = await _context.PlanAnual.Where(x => x.Id == id).FirstOrDefaultAsync();
+                    pqUpdate.AnioPlan = dto.AnioPlan;
+                    pqUpdate.Descripcion = dto.Descripcion;
+                    pqUpdate.EstadoAprobacionId = dto.EstadoAprobacionId;
+                    pqUpdate.FechaAprobacion = Convert.ToDateTime(dto.FechaAprobacion);
+                    pqUpdate.FechaModifica = DateTime.Now;
+                    pqUpdate.UsuarioModifica = idUser;
+                    _context.Update(pqUpdate);
                     await _context.SaveChangesAsync();
 
                     if (dto.UsuariosInteresados.Count() > 0)
                     {
-                        var userInt = await _context.UsuariosInteresadosPA.Where(x => x.PlanAnualId == pq.Id).ToListAsync();
+                        var userInt = await _context.UsuariosInteresadosPA.Where(x => x.PlanAnualId == pqUpdate.Id).ToListAsync();
                         foreach (var item in userInt)
                         {
                             _context.Remove(item);
@@ -196,7 +206,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         foreach (var item in dto.UsuariosInteresados)
                         {
                             UsuariosInteresadosPA usr = new UsuariosInteresadosPA();
-                            usr.PlanAnualId = pq.Id;
+                            usr.PlanAnualId = pqUpdate.Id;
                             usr.UsuarioId = item;
                             usr.estado = true;
                             _context.Add(usr);
@@ -214,7 +224,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var result = new ResponseDTO
                     {
-                        Message = Constantes.NoExistePQNQ,
+                        Message = Constantes.ExisteRegistro,
                         Valid = false
                     };
                     return result;

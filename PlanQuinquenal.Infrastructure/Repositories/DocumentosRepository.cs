@@ -485,6 +485,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var queryable = _context.DocumentosPy
                                     .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
+                                    .Where(x=>x.ProyectoId == listDocumentosRequestDto.ProyectoId)
                                     .Where(x=> x.Estado==true)
                                     .OrderBy(x=>x.FechaEmision)
                                     .AsQueryable();
@@ -519,7 +520,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var queryable = _context.DocumentosPQ
                             .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
-                        .AsQueryable();
+                            .Where(x => x.PQuinquenalId == listDocumentosRequestDto.ProyectoId)
+                             .Where(x => x.Estado == true)
+                                    .OrderBy(x => x.FechaEmision)
+                                    .AsQueryable();
+                       
 
                     var entidades = await queryable.Paginar(listDocumentosRequestDto)
                                        .ToListAsync();
@@ -550,7 +555,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 try
                 {
                     var queryable = _context.DocumentosPA
-                        .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true).AsQueryable();
+                        .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
+                        .Where(x => x.PlanAnualId == listDocumentosRequestDto.ProyectoId)
+                             .Where(x => x.Estado == true)
+                                    .OrderBy(x => x.FechaEmision)
+                                    .AsQueryable();
 
                     var entidades = await queryable.Paginar(listDocumentosRequestDto)
                                        .ToListAsync();

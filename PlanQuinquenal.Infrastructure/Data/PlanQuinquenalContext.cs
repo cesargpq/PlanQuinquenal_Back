@@ -26,6 +26,8 @@ namespace PlanQuinquenal.Infrastructure.Data
 
         public virtual DbSet<UsuariosInteresadosPQ> UsuariosInteresadosPQ { get; set; }
         public virtual DbSet<ProyectoDetalle> ProyectoDetalle { get; set; }
+        public virtual DbSet<ProyectoResponseIdDTO> ProyectoResponseIdDTO { get; set; }
+        public virtual DbSet<ZonaPermiso> ZonaPermiso { get; set; }
         public virtual DbSet<BolsaDetalle> BolsaDetalle { get; set; }
         public virtual DbSet<EstadoAprobacion> EstadoAprobacion { get; set; }
         public virtual DbSet<DocumentosBR> DocumentosBR { get; set; }

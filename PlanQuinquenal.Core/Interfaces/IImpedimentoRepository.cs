@@ -15,7 +15,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ResponseDTO> Update(ImpedimentoUpdateDto p, int idUser,int id);
         Task<ResponseEntidadDto<ImpedimentoDetalle>> GetById(int Id);
         Task<DocumentoResponseDto> Download(int id);
-        Task<PaginacionResponseDtoException<ImpedimentoDetalle>> Listar(ImpedimentoRequestListDto p);
+        Task<PaginacionResponseDtoException<ImpedimentoDetalle>> Listar(ImpedimentoListDto p);
 
         Task<ResponseDTO> Documentos(ImpedimentoDocumentoDto p,int idUser);
 

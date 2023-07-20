@@ -239,7 +239,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                         _context.AddRange(listaActaAsis);
                         await _context.SaveChangesAsync();
-                        foreach (var item in informeReqDTO.UserParticipantes)
+                        foreach (var item in informeReqDTO.UserAsistentes)
                         {
                             var users = await _context.Usuario.Where(x => x.cod_usu == item).FirstOrDefaultAsync();
                             listaAsistentes.Add(users.nombre_usu + " " + users.apellido_usu);
