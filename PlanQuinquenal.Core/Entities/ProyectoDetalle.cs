@@ -15,7 +15,6 @@ namespace PlanQuinquenal.Core.Entities
         public string? descripcion { get; set; }
         public int? PQuinquenalId { get; set; }
         public string? AnioPlanPQ { get; set; }
-        public int? Etapa { get; set; }
         public string? AñosPQ { get; set; }
         public int? PlanAnualId { get; set; }
         public string? AnioPlanPA { get; set; }

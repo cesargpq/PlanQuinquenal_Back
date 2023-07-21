@@ -17,7 +17,7 @@ namespace PlanQuinquenal.Core.DTOs
         public int DistritoId { get; set; }
 
         public int TipoProyectoId { get; set; }
-        public int Etapa { get; set; }
+        
         public string CodigoMalla { get; set; }
         public int TipoRegistroId { get; set; }
         public int IngenieroResponsableId { get; set; }

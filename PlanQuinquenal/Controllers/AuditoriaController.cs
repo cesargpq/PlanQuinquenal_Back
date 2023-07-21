@@ -30,67 +30,39 @@ namespace PlanQuinquenal.Controllers
         [HttpGet]
         public async Task<IActionResult>  Get()
         {
-        
-            //var identity = HttpContext.User.Identity as ClaimsIdentity;
-            //int idUsuario = 0;
-            //foreach (var item in identity.Claims)
+            var publicIP = HttpContext.Items["PublicIP"] as IPAddress;
+
+            
+            //var resultado = await _context.TablasAuditoria.Include(x => x.EventosAuditoria).ToListAsync();
+
+            //var cont = resultado.Count();
+            //List<EventosAuditoria> data = new List<EventosAuditoria>();
+            //EventosAuditoria obje = new EventosAuditoria();
+
+            //List<TablasAuditoria> data2 = new List<TablasAuditoria>();
+            //TablasAuditoria obje2 = new TablasAuditoria();
+
+
+            //foreach (var item in resultado)
             //{
-            //    if (item.Type.Equals("$I$Us$@I@D"))
+            //    obje2 = item;
+            //    obje2.Estado = false;
+            //    data2.Add(obje2);
+            //    if(item.EventosAuditoria != null)
             //    {
-            //        idUsuario = Convert.ToInt16(item.Value);
+            //        foreach (var items in item.EventosAuditoria)
+            //        {
+            //            obje = items;
+            //            obje.Estado = false;
+            //            data.Add(obje);
+            //        }
             //    }
             //}
+            //_context.UpdateRange(data2);
+            //_context.UpdateRange(data);
 
-            //var datazz = await authRepository.GetToken(idUsuario);
-
-            //if (!datazz)
-            //{
-            //    return Unauthorized();
-            //}
-            
-            //Logs log = new Logs();
-            //string ipAddress = Response.HttpContext.Connection.RemoteIpAddress.ToString();
-            //if (ipAddress == "::1")
-            //{
-            //    var datas = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
-            //    ipAddress = Dns.GetHostEntry(Dns.GetHostName()).AddressList[5].ToString() + "-" + Dns.GetHostEntry(Dns.GetHostName()).AddressList[6].ToString();
-            //}
-
-            //log.servicio = ipAddress;
-
-            
-            //_context.Add(log);
             //await _context.SaveChangesAsync();
-            var resultado = await _context.TablasAuditoria.Include(x => x.EventosAuditoria).ToListAsync();
-
-            var cont = resultado.Count();
-            List<EventosAuditoria> data = new List<EventosAuditoria>();
-            EventosAuditoria obje = new EventosAuditoria();
-
-            List<TablasAuditoria> data2 = new List<TablasAuditoria>();
-            TablasAuditoria obje2 = new TablasAuditoria();
-
-
-            foreach (var item in resultado)
-            {
-                obje2 = item;
-                obje2.Estado = false;
-                data2.Add(obje2);
-                if(item.EventosAuditoria != null)
-                {
-                    foreach (var items in item.EventosAuditoria)
-                    {
-                        obje = items;
-                        obje.Estado = false;
-                        data.Add(obje);
-                    }
-                }
-            }
-            _context.UpdateRange(data2);
-            _context.UpdateRange(data);
-
-            await _context.SaveChangesAsync();
-            return Ok(resultado);
+            return Ok();
         }
         
     }

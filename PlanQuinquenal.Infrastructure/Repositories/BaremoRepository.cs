@@ -22,11 +22,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     {
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
 
-        public BaremoRepository(PlanQuinquenalContext context, IMapper mapper) 
+        public BaremoRepository(PlanQuinquenalContext context, IMapper mapper, IRepositoryMantenedores repositoryMantenedores) 
         {
             this._context = context;
             this.mapper = mapper;
+            this._repositoryMantenedores = repositoryMantenedores;
         }
 
         public async Task<Baremo> GetById(int id)
@@ -50,7 +52,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             List<Baremo> listaBaremoError = new List<Baremo>();
             List<Baremo> listaBaremoRepetidos = new List<Baremo>();
             List<Baremo> listaBaremoInsert = new List<Baremo>();
-
+            var PlanQuin = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
+            var Baremos = await _repositoryMantenedores.GetAllByAttribute("Baremo");
             try
             {
                 using (var memoryStream = new MemoryStream(bytes))
@@ -67,7 +70,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var valor3 = worksheet.Cells[row, 3].Value?.ToString();
                             var valor4 = worksheet.Cells[row, 4].Value?.ToString();
                             
-                            var dato =await _context.PQuinquenal.Where(x => x.AnioPlan == valor4).FirstOrDefaultAsync();
+                            var dato = PlanQuin.Where(x => x.Descripcion == valor4).FirstOrDefault();
                             if(dato == null)
                             {
                                 var entidadError = new Baremo
@@ -108,16 +111,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             try
                             {
-                                var existe = await _context.Baremo.Where(x => x.CodigoBaremo.Equals(item.CodigoBaremo)).FirstAsync();
+                                var existe =  Baremos.Where(x => x.Descripcion.Equals(item.CodigoBaremo)).FirstOrDefault();
                                 if (existe != null)
                                 {
-                                    listaBaremoRepetidos.Add(item);
-                                    existe.Precio = item.Precio;
-                                    existe.Descripcion = item.Descripcion;
-                                    existe.Estado = item.Estado;
-                                    existe.PQuinquenalId = item.PQuinquenalId;
-                                    _context.Baremo.Update(existe);
-                                    await _context.SaveChangesAsync();
+                                    Baremo obj = new Baremo();
+                                    obj.Id = existe.Id;
+                                    obj.CodigoBaremo = existe.Descripcion;
+                                    obj.Precio = item.Precio;
+                                    obj.Descripcion = item.Descripcion;
+                                    obj.Estado = item.Estado;
+                                    obj.PQuinquenalId = item.PQuinquenalId;
+                                    listaBaremoRepetidos.Add(obj);
                                 }
                                 else
                                 {
@@ -134,8 +138,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                         if (listaBaremoInsert.Count > 0)
                         {
-                            await _context.Baremo.AddRangeAsync(listaBaremoInsert);
+                            await _context.BulkInsertAsync(listaBaremoInsert);
                             await _context.SaveChangesAsync();
+                        }
+                        if (listaBaremoRepetidos.Count > 0)
+                        {
+                            _context.BulkUpdate(listaBaremoRepetidos);
+
+                            //var numerosParam = new SqlParameter("@ObjectList", SqlDbType.Structured)
+                            //{
+                            //    TypeName = "dbo.Proyecto", // Reemplaza dbo.NumeroTableType por el nombre de tu tipo de tabla definido en SQL Server
+                            //    Value = ToDataTable(listaRepetidosInsert)
+                            //};
+                            //var proyectosMasivoss = _context.ProyectoMasivoDetalle.FromSqlRaw($"EXEC UpdateObjectList {numerosParam}");
+                            //// Crea un parámetro de tipo tabla en SQL Server
+
                         }
 
 

@@ -56,7 +56,7 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
         [HttpPost("Listar")]
-        public async Task<IActionResult> Listar(ListDocumentosRequestDto listDocumentosRequestDto)
+        public async Task<IActionResult> Listar(ListDocumentosRqDTO listDocumentosRequestDto)
         {
             var resultado = await _documentosRepository.Listar(listDocumentosRequestDto);
             return Ok(resultado);

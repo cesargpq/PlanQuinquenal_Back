@@ -28,7 +28,7 @@ namespace PlanQuinquenal.Controllers
             {
                 var worksheet = workbook.Worksheets.Add("Plan Quinquenal");
                 var currentRow = 1;
-                for (int i = 1; i <= 7; i++)
+                for (int i = 1; i <= 8; i++)
                 {
                     //worksheet.Cell(currentRow, i).Style.Fill.BackgroundColor = XLColor.FromHtml("#2ec6ff");
                     //worksheet.Cell(currentRow, i).Style.Font.SetBold();
@@ -36,15 +36,17 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, i).Style.Font.SetBold();
                     worksheet.Cell(currentRow, i).Style.Font.FontColor = XLColor.Black;
                 }
-                worksheet.Cell(currentRow, 1).Value = "Plan Anual";
+                worksheet.Cell(currentRow, 1).Value = "Plan Quinquenal";
                 worksheet.Cell(currentRow, 2).Value = "Estado de Aprobación";
                 worksheet.Cell(currentRow, 3).Value = "Fecha de Registro";
                 worksheet.Cell(currentRow, 4).Value = "Fecha de modificación";
                 worksheet.Cell(currentRow, 5).Value = "Usuario que registró";
                 worksheet.Cell(currentRow, 6).Value = "Usuario que modificó";
                 worksheet.Cell(currentRow, 7).Value = "Avance";
+                worksheet.Cell(currentRow, 8).Value = "Fecha Aprobacion";
+                worksheet.Cell(currentRow, 9).Value = "Descripción";
 
-                if(resultado != null)
+                if (resultado != null)
                 {
                     foreach (var item in resultado.Model)
                     {
@@ -58,6 +60,9 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 5).Value = item.UsuarioRegister;
                         worksheet.Cell(currentRow, 6).Value = item.UsuarioModifica;
                         worksheet.Cell(currentRow, 7).Value = item.Avance;
+                        worksheet.Cell(currentRow, 8).Style.DateFormat.Format = "dd/MM/yyyy hh:mm";
+                        worksheet.Cell(currentRow, 8).Value = item.FechaAprobacion;
+                        worksheet.Cell(currentRow, 9).Value = item.Descripcion;
                     }
                     worksheet.Columns().AdjustToContents();
                     
@@ -96,6 +101,8 @@ namespace PlanQuinquenal.Controllers
                 worksheet.Cell(currentRow, 5).Value = "Usuario que registró";
                 worksheet.Cell(currentRow, 6).Value = "Usuario que modificó";
                 worksheet.Cell(currentRow, 7).Value = "Avance";
+                worksheet.Cell(currentRow, 8).Value = "Fecha Aprobacion";
+                worksheet.Cell(currentRow, 9).Value = "Descripción";
 
                 if (resultado != null)
                 {
@@ -111,6 +118,8 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 5).Value = item.UsuarioRegister;
                         worksheet.Cell(currentRow, 6).Value = item.UsuarioModifica;
                         worksheet.Cell(currentRow, 7).Value = item.Avance;
+                        worksheet.Cell(currentRow, 8).Value = item.FechaAprobacion;
+                        worksheet.Cell(currentRow, 9).Value = item.Descripcion;
                     }
                     worksheet.Columns().AdjustToContents();
 
@@ -175,7 +184,7 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 2).Value = item.descripcion;
                         worksheet.Cell(currentRow, 3).Value = item.AnioPlanPQ;
                         worksheet.Cell(currentRow, 4).Value = item.AnioPlanPA;
-                        worksheet.Cell(currentRow, 5).Value = item.Etapa;
+                       
                         worksheet.Cell(currentRow, 6).Value = item.CodigoMalla;
                         worksheet.Cell(currentRow, 7).Value = item.Material;
                         worksheet.Cell(currentRow, 8).Value = item.Distrito;
@@ -260,7 +269,7 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 2).Value = item.descripcion;
                         worksheet.Cell(currentRow, 3).Value = item.AnioPlanPQ;
                         worksheet.Cell(currentRow, 4).Value = item.AnioPlanPA;
-                        worksheet.Cell(currentRow, 5).Value = item.Etapa;
+                       
                         worksheet.Cell(currentRow, 6).Value = item.CodigoMalla;
                         worksheet.Cell(currentRow, 7).Value = item.Material;
                         worksheet.Cell(currentRow, 8).Value = item.Distrito;

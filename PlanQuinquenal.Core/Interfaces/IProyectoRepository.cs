@@ -15,10 +15,10 @@ namespace PlanQuinquenal.Core.Interfaces
         //Task<ProyectoResponseDto> GetById(int id);
         Task<PaginacionResponseDtoException<ProyectoDetalle>> GetSeleccionados(PlanQuinquenalSelectedId p);
         Task<ResponseEntidadDto<ProyectoResponseIdDTO>> GetById(int Id);
-        Task<PaginacionResponseDtoException<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos);
+        
         Task<PaginacionResponseDtoException<ProyectoDetalle>> GetAll2(FiltersProyectos filterProyectos);
         Task<ResponseDTO> Update(ProyectoRequestUpdateDto p,int id, int idUser);
-        Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto,int idUser);
+        Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto,DatosUsuario usuario);
         Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data);
     }
 }

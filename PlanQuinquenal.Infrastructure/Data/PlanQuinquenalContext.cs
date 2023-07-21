@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -23,7 +24,13 @@ namespace PlanQuinquenal.Infrastructure.Data
 
         }
 
-
+        public virtual DbSet<TrazabilidadVerifica> TrazabilidadVerifica { get; set; }
+        
+        public virtual DbSet<ReporteMaterialDetalle> ReporteMaterialDetalle { get; set; }
+        public virtual DbSet<Trazabilidad> Trazabilidad { get; set; }
+        
+        public virtual DbSet<DistritosPermisoDTO> DistritosPermisoDTO { get; set; }
+        
         public virtual DbSet<UsuariosInteresadosPQ> UsuariosInteresadosPQ { get; set; }
         public virtual DbSet<ProyectoDetalle> ProyectoDetalle { get; set; }
         public virtual DbSet<ProyectoResponseIdDTO> ProyectoResponseIdDTO { get; set; }
@@ -31,9 +38,14 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<BolsaDetalle> BolsaDetalle { get; set; }
         public virtual DbSet<EstadoAprobacion> EstadoAprobacion { get; set; }
         public virtual DbSet<DocumentosBR> DocumentosBR { get; set; }
-
+        public virtual DbSet<Reemplazo> Reemplazo { get; set; }
+        public virtual DbSet<BolsaDetalleById> BolsaDetalleById { get; set; }
+        
         public virtual DbSet<CausalReemplazo> CausalReemplazo { get; set; }
+        public virtual DbSet<ImpedimentoDetalleById> ImpedimentoDetalleById { get; set; }
         public virtual DbSet<ImpedimentoDetalle> ImpedimentoDetalle { get; set; }
+        public virtual DbSet<ValidacionLegal> ValidacionLegal { get; set; }
+        
         public virtual DbSet<DocumentosImpedimento> DocumentosImpedimento { get; set; }
         public virtual DbSet<BolsaReemplazo> BolsaReemplazo { get; set; }
         public virtual DbSet<ProyectoMasivoDetalle> ProyectoMasivoDetalle { get; set; }
@@ -140,7 +152,22 @@ namespace PlanQuinquenal.Infrastructure.Data
                     eb.HasNoKey();
                 });
             
-
+                modelbuilder.Entity<ReporteMaterialDetalle>(
+                eb =>
+                {
+                    eb.HasNoKey();
+                });
+            modelbuilder.Entity<DistritosPermisoDTO>(
+                eb =>
+                {
+                    eb.HasNoKey();
+                });
+            modelbuilder.Entity<TrazabilidadVerifica>(
+               eb =>
+               {
+                   eb.HasNoKey();
+               });
+            
         }
 
 

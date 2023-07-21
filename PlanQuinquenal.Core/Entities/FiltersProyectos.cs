@@ -14,7 +14,6 @@ namespace PlanQuinquenal.Core.Entities
         public string? NroExpediente { get; set; }
         //falta
         public int? EstadoGeneral { get; set; }
-        public int? Etapa { get; set; }
         //falta
        
         public string? NombreProyecto { get; set; }

@@ -10,13 +10,11 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
     public class ProyectoResponseIdDTO
     {
-        public int Total { get; set; }
         public int? Id { get; set; }
         public string? CodigoProyecto { get; set; }
         public string? descripcion { get; set; }
         public int? PQuinquenalId { get; set; }
         public string? AnioPlanPQ { get; set; }
-        public int? Etapa { get; set; }
         public string? AñosPQ { get; set; }
         public string? CodigoMalla { get; set; }
         public int? PlanAnualId { get; set; }

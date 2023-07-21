@@ -46,7 +46,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string tipoSeguimiento = "";
                 if (tipoSeg.Descripcion.ToUpper().Equals("Proyectos".ToUpper()))
                 {
-                    var existePry = await _context.Proyecto.Where(x=>x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto) && x.Etapa == informeReqDTO.Etapa).AnyAsync();
+                    var existePry = await _context.Proyecto.Where(x=>x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto) ).AnyAsync();
                     if (!existePry)
                     {
                         return new ResponseDTO
@@ -392,9 +392,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             hashService.Parrafo(doc,"INFORME "+informe.CodigoExpediente,negrita,true);
             hashService.Parrafo(doc, $"Fecha: {informe.FechaInforme?.ToString("dd/MM/yyyy")}", _standardFont, false);
             hashService.Parrafo(doc, $"Resumen general", _standardFont, false);
-            hashService.GenerarTextAreaLista(informe.ResumenGeneral, doc);
+            hashService.Parrafo(doc, informe.ResumenGeneral, _standardFont, false);
             hashService.Parrafo(doc,$"Actividades a realizar:",_standardFont, false);
-            hashService.GenerarTextAreaLista(informe.ActividadesRealizadas, doc);
+            hashService.Parrafo(doc,informe.ActividadesRealizadas, _standardFont, false);
             hashService.Parrafo(doc, $"Próximos pasos:", _standardFont, false);
 
             List<string> proximosPasos = new List<string>();
@@ -512,7 +512,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string tipoSeguimiento = "";
                 if (tipoSeg.Descripcion.Equals("Proyectos"))
                 {
-                    var existePry = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto) && x.Etapa == informeReqDTO.Etapa).AnyAsync();
+                    var existePry = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(informeReqDTO.CodigoProyecto) ).AnyAsync();
                     if (!existePry)
                     {
                         return new ResponseDTO

@@ -6,6 +6,7 @@ using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Infrastructure.Repositories;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -60,6 +61,12 @@ namespace PlanQuinquenal.Controllers
         {
             
             var resultado = await _bolsaReemplazoRepository.Listar(requestBolsaDto);
+            return Ok(resultado);
+        }
+        [HttpGet("id")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var resultado = await _bolsaReemplazoRepository.GetById(id);
             return Ok(resultado);
         }
         [HttpPost("ImportarMasivo")]

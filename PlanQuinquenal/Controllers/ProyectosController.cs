@@ -8,6 +8,7 @@ using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Filters;
 using PlanQuinquenal.Infrastructure.Repositories;
+using System.Net;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -27,6 +28,10 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("NuevoProyecto")]
         public async Task<IActionResult> NuevoProyecto(ProyectoRequest nvoProyecto)
         {
+            var publicIP = HttpContext.Items["PublicIP"] as IPAddress;
+
+            var ip= publicIP.ToString();
+
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
             foreach (var item in identity.Claims)

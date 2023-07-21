@@ -35,6 +35,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
             }
+            if (attribute.ToUpper().Equals("ValidacionLegal".ToUpper()))
+            {
+                var dato = await _context.ValidacionLegal.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
+            
+            if (attribute.ToUpper().Equals("Reemplazo".ToUpper()))
+            {
+                var dato = await _context.Reemplazo.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
+            }
             else if (attribute.Equals("Baremo")){
                 var dato = await _context.Baremo.Where(x => x.Estado == true).ToListAsync();
 

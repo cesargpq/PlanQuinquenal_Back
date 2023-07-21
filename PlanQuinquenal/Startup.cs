@@ -52,8 +52,9 @@ namespace PlanQuinquenal
             services.AddTransient<IImpedimentoRepository, ImpedimentoRepository>();
             services.AddTransient<IBolsaReemplazoRepository, BolsaReemplazoRepository>();
             services.AddTransient<IDashboardRepository, DashboardRepository>();
+            services.AddTransient<ITrazabilidadRepository, TrazabilidadRepository>();
 
-            
+
             services.AddTransient<HashService>();
             services.AddTransient<Constantes>();
 
@@ -123,6 +124,7 @@ namespace PlanQuinquenal
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
+            services.AddHttpClient();
             services.AddAutoMapper(typeof(Startup));
             services.AddAutoMapper(typeof(UsuarioRepository));
             services.AddCors(opciones =>
@@ -151,7 +153,7 @@ namespace PlanQuinquenal
             app.UseRouting();
             app.UseCors();
             app.UseAuthorization();
-
+            app.UseMiddleware<PublicIpMiddleware>();
             app.UseEndpoints(options =>
             {
                 options.MapControllers();

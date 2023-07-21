@@ -14,6 +14,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ResponseDTO> Add(RequestBolsaDto p,int idUser);
         Task<ResponseDTO> Update(RequestUpdateBolsaDTO p, int id, int idUser);
         Task<PaginacionResponseDtoException<BolsaDetalle>> Listar(BolsaRequestList p);
+        Task<ResponseEntidadDto<BolsaDetalleById>> GetById(int id);
         Task<ImportResponseDto<BolsaReemplazo>> ImportarMasivo(RequestMasivo data, int idUser);
     }
 }

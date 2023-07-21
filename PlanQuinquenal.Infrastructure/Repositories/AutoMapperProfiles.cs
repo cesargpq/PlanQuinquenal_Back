@@ -23,9 +23,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<BolsaReemplazo, RequestBolsaDto>();
             CreateMap<RequestBolsaDto, BolsaReemplazo>();
 
+            
+            CreateMap<MaestroResponseDto, ValidacionLegal>();
+            CreateMap<ValidacionLegal, MaestroResponseDto>();
 
-           
-                CreateMap<MaestroResponseDto, EstadoAprobacion>();
+            CreateMap<MaestroResponseDto, Reemplazo>();
+            CreateMap<Reemplazo, MaestroResponseDto>();
+
+
+            CreateMap<MaestroResponseDto, EstadoAprobacion>();
             CreateMap<EstadoAprobacion, MaestroResponseDto>();
 
             CreateMap<MaestroResponseDto, ZonaPermiso>();
@@ -134,7 +140,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<Informe, InformeReqDTO>();
 
             CreateMap<DocumentoResponseDto, DocumentosPy>();
-
+            CreateMap<DocumentoResponseDto, DocumentosBR>();
 
             CreateMap<BaremoResponseDTO, Baremo>();
 
@@ -164,7 +170,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 .ForMember(x => x.nombreArchivo, y => y.MapFrom(src => src.CodigoDocumento))
                 .ForMember(x => x.codigoDocumento, y => y.MapFrom(src => Separa(src.NombreDocumento)))
                 .ForMember(x => x.Aprobaciones, y => y.MapFrom(src => DateOnly(src.Aprobaciones)));
-
+            CreateMap<DocumentosBR, DocumentoResponseDto>()
+                .ForMember(x => x.nombreArchivo, y => y.MapFrom(src => src.CodigoDocumento))
+                .ForMember(x => x.codigoDocumento, y => y.MapFrom(src => Separa(src.NombreDocumento)))
+                .ForMember(x => x.Aprobaciones, y => y.MapFrom(src => DateOnly(src.Aprobaciones)));
 
             CreateMap<UsuariosInteresadosPy, UsuariosInteresadosPyResponseDto>();
             CreateMap<UsuariosInteresadosPyResponseDto, UsuariosInteresadosPy > ();
@@ -236,15 +245,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     dest => dest.PQuinquenalResponseDto,
                     opt => opt.MapFrom(src => src.PQuinquenal)).ForMember(
                     dest => dest.PlanAnualResponseDto,
-                    opt => opt.MapFrom(src => src.PlanAnual)).ForMember(
-                    dest => dest.EstadoGeneralDesc,
-                    opt => opt.MapFrom(src =>
-                    GetStateGeneral(src.LongAprobPa,
-                    src.LongRealHab, src.LongRealPend,
-                    (src.LongRealPend - src.LongReemplazada),
-                    src.LongImpedimentos))).ForMember(
-                    dest => dest.longPendienteEjecución,
-                    opt => opt.MapFrom(src => src.LongRealPend - src.LongReemplazada))
+                    opt => opt.MapFrom(src => src.PlanAnual))
                     .ForMember(
                     dest => dest.Avance,
                     opt => opt.MapFrom(src => ObtenerAvance(src.LongRealHab, src.LongAprobPa)))

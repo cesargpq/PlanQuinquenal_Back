@@ -36,7 +36,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var proy = await _context.Proyecto.Where(x => x.Etapa == p.etapa && x.CodigoProyecto.Equals(p.codProyecto)).FirstOrDefaultAsync();
+                var proy = await _context.Proyecto.Where(x =>x.CodigoProyecto.Equals(p.codProyecto)).FirstOrDefaultAsync();
                 var baremo = await _context.Baremo.Where(x=>x.Id  == proy.BaremoId).FirstOrDefaultAsync();
                 Impedimento obj = new Impedimento();
                 obj.ProyectoId = proy.Id;
@@ -170,13 +170,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
         }
 
-        public async Task<ResponseEntidadDto<ImpedimentoDetalle>> GetById(int Id)
+        public async Task<ResponseEntidadDto<ImpedimentoDetalleById>> GetById(int Id)
         {
-            var resultad = await _context.ImpedimentoDetalle.FromSqlRaw($"EXEC impedimentobyid  {Id}").ToListAsync();
+            var resultad = await _context.ImpedimentoDetalleById.FromSqlRaw($"EXEC impedimentobyid  {Id}").ToListAsync();
 
             if (resultad.Count > 0)
             {
-                var result = new ResponseEntidadDto<ImpedimentoDetalle>
+                var result = new ResponseEntidadDto<ImpedimentoDetalleById>
                 {
                     Message = Constantes.BusquedaExitosa,
                     Valid = true,
@@ -186,7 +186,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else
             {
-                var result = new ResponseEntidadDto<ImpedimentoDetalle>
+                var result = new ResponseEntidadDto<ImpedimentoDetalleById>
                 {
                     Message = Constantes.BusquedaNoExitosa,
                     Valid = false,
@@ -212,7 +212,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 else
                 {
-                    existe.ProyectoId = p.ProyectoId;
                     existe.ProblematicaRealId = p.ProblematicaRealId==0?null:p.ProblematicaRealId;
                     existe.LongImpedimento = p.LongImpedimento==null?0:p.LongImpedimento;
                     existe.CausalReemplazoId = p.CausalReemplazoId==0 || p.CausalReemplazoId == null?null:p.CausalReemplazoId;

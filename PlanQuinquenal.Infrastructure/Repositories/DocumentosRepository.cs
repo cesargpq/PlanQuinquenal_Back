@@ -200,7 +200,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var resultado = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(documentoRequestDto.CodigoProyecto) && x.Etapa == documentoRequestDto.Etapa).FirstOrDefaultAsync();
+                var resultado = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
                     var guidId = Guid.NewGuid();
@@ -477,15 +477,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
         }
 
-        public async Task<PaginacionResponseDto<DocumentoResponseDto>> Listar(ListDocumentosRequestDto listDocumentosRequestDto)
+        public async Task<PaginacionResponseDto<DocumentoResponseDto>> Listar(ListDocumentosRqDTO listDocumentosRequestDto)
         {
             if (listDocumentosRequestDto.Modulo == "PY")
             {
                 try
                 {
+                    var proyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(listDocumentosRequestDto.codigoProyecto) ).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPy
                                     .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
-                                    .Where(x=>x.ProyectoId == listDocumentosRequestDto.ProyectoId)
+                                    .Where(x=>x.ProyectoId == proyecto.Id)
                                     .Where(x=> x.Estado==true)
                                     .OrderBy(x=>x.FechaEmision)
                                     .AsQueryable();
@@ -518,9 +519,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
+                    var pq = await _context.PQuinquenal.Where(x => x.AnioPlan == listDocumentosRequestDto.codigoProyecto).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPQ
                             .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
-                            .Where(x => x.PQuinquenalId == listDocumentosRequestDto.ProyectoId)
+                            .Where(x => x.PQuinquenalId == pq.Id)
                              .Where(x => x.Estado == true)
                                     .OrderBy(x => x.FechaEmision)
                                     .AsQueryable();
@@ -554,9 +556,46 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
+                    var pa = await _context.PlanAnual.Where(x => x.AnioPlan == listDocumentosRequestDto.codigoProyecto).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPA
                         .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
-                        .Where(x => x.PlanAnualId == listDocumentosRequestDto.ProyectoId)
+                        .Where(x => x.PlanAnualId == pa.Id)
+                             .Where(x => x.Estado == true)
+                                    .OrderBy(x => x.FechaEmision)
+                                    .AsQueryable();
+
+                    var entidades = await queryable.Paginar(listDocumentosRequestDto)
+                                       .ToListAsync();
+
+                    var map = mapper.Map<List<DocumentoResponseDto>>(entidades);
+                    int cantidad = queryable.Count();
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = cantidad,
+                        Model = map
+                    };
+                    return objeto;
+                }
+                catch (Exception e)
+                {
+
+                    var objeto = new PaginacionResponseDto<DocumentoResponseDto>
+                    {
+                        Cantidad = 0,
+                        Model = null
+                    };
+                    return objeto;
+                }
+
+            }
+            else if (listDocumentosRequestDto.Modulo == "BR")
+            {
+                try
+                {
+                    var br = await _context.BolsaReemplazo.Where(x => x.CodigoProyecto == listDocumentosRequestDto.codigoProyecto).FirstOrDefaultAsync();
+                    var queryable = _context.DocumentosBR
+                        .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
+                        .Where(x => x.BolsaReemplazoId == br.Id)
                              .Where(x => x.Estado == true)
                                     .OrderBy(x => x.FechaEmision)
                                     .AsQueryable();

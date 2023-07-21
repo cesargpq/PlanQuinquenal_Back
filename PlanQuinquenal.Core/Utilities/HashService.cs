@@ -210,8 +210,8 @@ namespace PlanQuinquenal.Core.Utilities
             int contador = 0;
             foreach (var item in lista)
             {
-                contador++;
-                pasosConcatena += contador + ".- " + item + "\n";
+                
+                pasosConcatena +=  item + "\n";
             }
             Paragraph proximos_pasos = new Paragraph($"{pasosConcatena}", _standardFont);
             proximos_pasos.IndentationLeft = 53;

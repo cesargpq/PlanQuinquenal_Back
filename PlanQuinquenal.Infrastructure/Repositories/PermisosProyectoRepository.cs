@@ -33,7 +33,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var existeProyecto = await _context.Proyecto.Where(x => x.Etapa == permisoRequestDTO.Etapa && x.CodigoProyecto.Equals(permisoRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
+                var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(permisoRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
 
 
                 if (existeProyecto != null)
@@ -143,7 +143,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO, int idUser)
         {
-            var existeProyecto = await _context.Proyecto.Where(x => x.Etapa == documentosPermisosRequestDTO.Etapa && x.CodigoProyecto.Equals(documentosPermisosRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
+            var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(documentosPermisosRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
 
             if(existeProyecto != null)
             {

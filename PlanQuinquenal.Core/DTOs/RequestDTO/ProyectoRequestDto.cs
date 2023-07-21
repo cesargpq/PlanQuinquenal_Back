@@ -11,8 +11,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     {
         public string CodigoProyecto { get; set; }
         public int PQuinquenalId { get; set; }
-
-        public int Etapa { get; set; }
         public string AñosPQ { get; set; }
         public int PlanAnualId { get; set; }
         public int MaterialId { get; set; }

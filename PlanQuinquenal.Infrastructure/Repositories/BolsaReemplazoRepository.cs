@@ -35,8 +35,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var brUpdate = await _context.BolsaReemplazo.Where(x => x.Id == id).FirstOrDefaultAsync();
                 brUpdate.CodigoProyecto = p.CodigoProyecto;
-                brUpdate.DistritoId = p.DistritoId;
-                brUpdate.ConstructorId = p.ConstructorId;
+                brUpdate.DistritoId = p.DistritoId == 0 ? null : p.DistritoId;
+                brUpdate.ConstructorId = p.ConstructorId == 0 ? null : p.ConstructorId;
                 brUpdate.CodigoMalla = p.CodigoMalla;
                 brUpdate.Estrato1 = p.Estrato1;
                 brUpdate.Estrato2 = p.Estrato2;
@@ -45,8 +45,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 brUpdate.Estrato5 = p.Estrato5;
                 brUpdate.CostoInversion = p.CostoInversion;
                 brUpdate.LongitudReemplazo = p.LongitudReemplazo;
-                brUpdate.ReemplazoId = p.ReemplazoId;
-                brUpdate.PermisoId = p.PermisoId;
+                brUpdate.ReemplazoId = p.ReemplazoId == 0 ? null: p.ReemplazoId;
+                brUpdate.PermisoId = p.PermisoId==0 ?null : p.PermisoId;
                 brUpdate.UsuarioModifica = idUser;
                 brUpdate.FechaModifica = DateTime.Now;
                 _context.Update(brUpdate);
@@ -338,6 +338,53 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
 
             return dto;
+        }
+
+        public async Task<ResponseEntidadDto<BolsaDetalleById>> GetById(int Id)
+        {
+            try
+            {
+
+                var resultad = await _context.BolsaDetalleById.FromSqlRaw($"EXEC bolsaId  {Id}").ToListAsync();
+
+
+                if (resultad.Count > 0)
+                {
+                    var result = new ResponseEntidadDto<BolsaDetalleById>
+                    {
+                        Message = Constantes.BusquedaExitosa,
+                        Valid = true,
+                        Model = resultad[0]
+                    };
+                    return result;
+                }
+                else
+                {
+                    var result = new ResponseEntidadDto<BolsaDetalleById>
+                    {
+                        Message = Constantes.BusquedaNoExitosa,
+                        Valid = false,
+                        Model = null
+                    };
+                    return result;
+                }
+
+
+
+
+
+            }
+            catch (Exception e)
+            {
+
+                var result = new ResponseEntidadDto<BolsaDetalleById>
+                {
+                    Message = Constantes.ErrorSistema,
+                    Valid = false,
+                    Model = null
+                };
+                return result;
+            }
         }
     }
 }

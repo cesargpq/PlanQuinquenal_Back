@@ -25,149 +25,28 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     {
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
-        private readonly IBaremoRepository _baremoRepository;
+        
         private readonly IRepositoryMantenedores _repositoryMantenedores;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public ProyectoRepositorio(PlanQuinquenalContext context, IMapper mapper, IBaremoRepository baremoRepository, IRepositoryMantenedores repositoryMantenedores)
+        public ProyectoRepositorio(PlanQuinquenalContext context, IMapper mapper,  IRepositoryMantenedores repositoryMantenedores , ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
-            this._baremoRepository = baremoRepository;
+
             this._repositoryMantenedores = repositoryMantenedores;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
 
-        //public async Task<ProyectoResponseDto> GetById(int id)
-        //{
+        
+       
 
-
-        //    var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
-
-
-        //    var proyecto = await _context.Proyecto
-        //                                 .Include(x => x.PlanAnual)
-        //                                 .Include(x => x.PQuinquenal)
-        //                                 .Include(x => x.Material)
-        //                                 .Include(x => x.Distrito)
-        //                                 .Include(x => x.Constructor)
-        //                                 .Include(x => x.TipoProyecto)
-        //                                 .Include(x => x.EstadoGeneral)
-        //                                 .Include(x => x.TipoRegistro)
-        //                                 .Include(x => x.Baremo)
-        //                                 .Include(x => x.IngenieroResponsable)
-        //                                 .Include(x => x.UsuariosInteresados)
-        //                                 .ThenInclude(x => x.Usuario)
-        //                                 .Where(x => x.Id == id).FirstOrDefaultAsync();
-
-        //    var proyectoDto = mapper.Map<ProyectoResponseDto>(proyecto);
-        //    return proyectoDto;
-
-        //    verificar si no existe
-        //}
-        public async Task<PaginacionResponseDtoException<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos)
-        {
-
-            var queryable = await _context.Proyecto
-                                         .Include(x => x.PlanAnual)
-                                         .Include(x => x.PQuinquenal)
-                                         .Include(x => x.Material)
-                                         .Include(x => x.Distrito)
-                                         .Include(x => x.Constructor)
-                                         .Include(x => x.TipoProyecto)
-                                         .Include(x => x.EstadoGeneral)
-                                         .Include(x => x.TipoRegistro)
-                                         .Include(x => x.IngenieroResponsable)
-                                         .Include(x => x.Baremo)
-                                         .ToListAsync();
-
-            var proyectoDto = mapper.Map<List<ProyectoResponseDto>>(queryable);
-
-
-
-            var listaFin = proyectoDto
-                                     .Where(x => filterProyectos.CodigoProyecto != "" ? x.CodigoProyecto.Contains(filterProyectos.CodigoProyecto) : true)
-                                     .Where(x => filterProyectos.Etapa != 0 ? x.Etapa == filterProyectos.Etapa : true)
-                                     .Where(x => filterProyectos.NombreProyecto != "" ? x.descripcion.Contains(filterProyectos.NombreProyecto) : true)
-                                     .Where(x => filterProyectos.MaterialId != 0 ? x.Material.Id == filterProyectos.MaterialId : true)
-                                     .Where(x => filterProyectos.DistritoId != 0 ? x.Distrito.Id == filterProyectos.DistritoId : true)
-                                     .Where(x => filterProyectos.TipoProyectoId != 0 ? x.TipoProyecto.Id == filterProyectos.TipoProyectoId : true)
-                                     .Where(x => filterProyectos.PQuinquenalId != 0 ? x.PQuinquenalId == filterProyectos.PQuinquenalId : true)
-                                     .Where(x => filterProyectos.AñoPq != "" ? x.AñosPQ.Contains(filterProyectos.AñoPq) : true)
-                                     .Where(x => filterProyectos.PAnualId != 0 ? x.PlanAnualId == filterProyectos.PAnualId : true)
-                                     .Where(x => filterProyectos.CodigoMalla != "" ? x.CodigoMalla.Contains(filterProyectos.CodigoMalla) : true)
-                                     .Where(x => filterProyectos.ConstructorId != 0 ? x.ConstructorId == filterProyectos.ConstructorId : true)
-                                     .Where(x => filterProyectos.IngenieroId != 0 ? x.IngenieroResponsableId == filterProyectos.IngenieroId : true)
-                                     .Where(x => filterProyectos.UsuarioRegisterId != 0 ? x.UsuarioRegisterId == filterProyectos.UsuarioRegisterId : true)
-                                     .Where(x => filterProyectos.FechaGasificacion != "" ? x.FechaGasificacion == filterProyectos.FechaGasificacion.Replace("-", "/") : true)
-                                     //.Where(x => filterProyectos.Porcentaje == 1 && filterProyectos.ValorPorcentaje != 0 ? x.Avance < Convert.ToDecimal(filterProyectos.ValorPorcentaje) / 100 :
-                                     //   filterProyectos.Porcentaje == 2 && filterProyectos.ValorPorcentaje != 0 ? x.Avance <= Convert.ToDecimal(filterProyectos.ValorPorcentaje) / 100 :
-                                     //   filterProyectos.Porcentaje == 3 && filterProyectos.ValorPorcentaje != 0 ? x.Avance > Convert.ToDecimal(filterProyectos.ValorPorcentaje) / 100 :
-                                     //   filterProyectos.Porcentaje == 3 && filterProyectos.ValorPorcentaje != 0 ? x.Avance >= Convert.ToDecimal(filterProyectos.ValorPorcentaje) / 100 :
-                                     //   filterProyectos.Porcentaje == 3 && filterProyectos.ValorPorcentaje != 0 ? x.Avance == Convert.ToDecimal(filterProyectos.ValorPorcentaje) / 100 :
-                                     //   filterProyectos.Porcentaje == 3 && filterProyectos.ValorPorcentaje != 0 ? x.Avance != Convert.ToDecimal(filterProyectos.ValorPorcentaje) / 100 :
-                                     //   true)
-                                     .ToList();
-
-
-
-            var fin = listaFin.Skip((filterProyectos.Pagina - 1) * filterProyectos.RecordsPorPagina).Take(filterProyectos.RecordsPorPagina);
-
-            var objeto = new PaginacionResponseDtoException<ProyectoResponseDto>
-            {
-                Cantidad = listaFin.Count(),
-                Model = fin
-            };
-            return objeto;
-
-
-        }
-        //public async Task<PaginacionResponseDto<ProyectoResponseDto>> GetAll(FiltersProyectos filterProyectos)
-        //{
-
-        //var queryable = _context.Proyecto
-        //                             .Include(x => x.PlanAnual)
-        //                             .Include(x => x.PQuinquenal)
-        //                             .Include(x => x.Material)
-        //                             .Include(x => x.Distrito)
-        //                             .Include(x => x.Constructor)
-        //                             .Include(x => x.TipoProyecto)
-        //                             .Include(x => x.EstadoGeneral)
-        //                             .Include(x => x.TipoRegistro)
-        //                             .Include(x => x.IngenieroResponsable)
-        //                             .Include(x => x.Baremo)
-        //                             .Where(x => filterProyectos.CodigoProyecto != "" ? x.CodigoProyecto == filterProyectos.CodigoProyecto : true)
-        //                             .Where(x => filterProyectos.Etapa != 0 ? x.Etapa == filterProyectos.Etapa : true)
-        //                             .Where(x => filterProyectos.NombreProyecto != "" ? x.descripcion.Contains(filterProyectos.NombreProyecto) : true)
-        //                             .Where(x => filterProyectos.MaterialId != 0 ? x.Material.Id == filterProyectos.MaterialId : true)
-        //                             .Where(x => filterProyectos.DistritoId != 0 ? x.Distrito.Id == filterProyectos.DistritoId : true)
-        //                             .Where(x => filterProyectos.TipoProyectoId != 0 ? x.TipoProyecto.Id == filterProyectos.TipoProyectoId : true)
-        //                             .Where(x => filterProyectos.PQuinquenalId != 0 ? x.PQuinquenal.Id == filterProyectos.PQuinquenalId : true)
-        //                             .Where(x => filterProyectos.AñoPq != "" ? x.AñosPQ.Contains(filterProyectos.AñoPq) : true)
-        //                             .Where(x => filterProyectos.PAnualId != 0 ? x.PlanAnual.Id == filterProyectos.PAnualId : true)
-        //                             .Where(x => filterProyectos.CodigoMalla != "" ? x.CodigoMalla.Contains(filterProyectos.CodigoMalla) : true)
-        //                             .Where(x => filterProyectos.ConstructorId != 0 ? x.ConstructorId == filterProyectos.ConstructorId : true)
-        //                             .Where(x => filterProyectos.IngenieroId != 0 ? x.IngenieroResponsable.cod_usu == filterProyectos.IngenieroId : true)
-        //                             .Where(x => filterProyectos.UsuarioRegisterId != 0 ? x.UsuarioRegisterId == filterProyectos.UsuarioRegisterId : true)
-        //                             .AsQueryable();
-        //    int cantidad = queryable.Count();
-        //    var listaPaginada = await queryable.OrderBy(e => e.descripcion).Paginar(filterProyectos).ToListAsync();
-        //    var proyectoDto = mapper.Map<List<ProyectoResponseDto>>(listaPaginada);
-
-        //    var objeto = new PaginacionResponseDto<ProyectoResponseDto>
-        //    {
-        //        Cantidad = cantidad,
-        //        Model = proyectoDto
-        //    };
-        //    return objeto;
-
-
-        //}
-
-        public async Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto, int idUser)
+        public async Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto, DatosUsuario usuario)
         {
             try
             {
-                var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto && x.Etapa == proyectoRequestDto.Etapa).FirstOrDefaultAsync();
-
+                var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto).FirstOrDefaultAsync();
+                
                 if (existe != null)
                 {
                     return new ResponseDTO
@@ -191,15 +70,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     proyecto.BaremoId = proyectoRequestDto.BaremoId == 0 ? null : proyectoRequestDto.BaremoId;
                     proyecto.descripcion = "";
                     proyecto.CodigoMalla = proyectoRequestDto.CodigoMalla;
-                    proyecto.Etapa = proyectoRequestDto.Etapa;
                     proyecto.IngenieroResponsableId = null;
-                    proyecto.EstadoGeneralId = 2;
-                    proyecto.UsuarioRegisterId = idUser;
-                    proyecto.UsuarioModificaId = idUser;
+                    proyecto.UsuarioRegisterId = usuario.UsuaroId;
+                    proyecto.UsuarioModificaId = usuario.UsuaroId;
                     proyecto.FechaGasificacion = null;
                     proyecto.FechaRegistro = DateTime.Now;
                     proyecto.fechamodifica = DateTime.Now;
-                    proyecto.LongImpedimentos = 0;
+                    //proyecto.LongImpedimentos = 0;
                     proyecto.LongRealHab = 0;
                     proyecto.LongRealPend = 0;
                     proyecto.LongProyectos = 0;
@@ -226,7 +103,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         _context.AddRange(listPqUser);
                         await _context.SaveChangesAsync();
                     }
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Proyectos , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad obj = new Trazabilidad();
+                        List<Trazabilidad> lista = new List<Trazabilidad>();
+                        obj.Tabla = "Proyecto";
+                        obj.Evento = "Creación";
+                        obj.DescripcionEvento = $"Creación de un nuevo proyecto {proyecto.CodigoProyecto}";
+                        obj.UsuarioId = usuario.UsuaroId;
+                        obj.DireccionIp = usuario.Ip;
+                        obj.CampoActual = "";
+                        obj.CampoAnterior = "";
+                        obj.FechaRegistro = DateTime.Now;
 
+                        lista.Add(obj);
+                        await _trazabilidadRepository.Add(lista);
+                    }
+                    
                     return new ResponseDTO
                     {
                         Valid = true,
@@ -253,6 +147,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                
                     var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
 
+                var pryAnterior = mapper.Map<ProyectoRequestUpdateDto>(existe);
                     if (existe != null)
                     {
                         existe.descripcion = p.Descripcion;
@@ -262,7 +157,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         existe.MaterialId = p.MaterialId == null || p.MaterialId == 0 ? null : p.MaterialId;
                         existe.DistritoId = p.DistritoId == null || p.DistritoId == 0 ? null : p.DistritoId;
                         existe.TipoProyectoId = p.TipoProyectoId == null || p.TipoProyectoId == 0 ? null : p.TipoProyectoId;
-                        existe.Etapa = p.Etapa;
                         existe.CodigoMalla = p.CodigoMalla;
                         existe.TipoRegistroId = p.TipoRegistroId == null || p.TipoRegistroId == 0 ? null : p.TipoRegistroId;
                         existe.IngenieroResponsableId = p.IngenieroResponsableId == null || p.IngenieroResponsableId == 0 ? null : p.IngenieroResponsableId;
@@ -355,7 +249,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             //    f.FechaGasificacion = cadena[2] + "-" + cadena[1] +"-" + cadena[0];
             //}
             if (f.EstadoGeneral == 0) f.EstadoGeneral = null;
-            if (f.Etapa == 0) f.Etapa = null;
+            
             if (f.MaterialId == 0) f.MaterialId = null;
             if (f.DistritoId == 0) f.DistritoId = null;
             if (f.TipoProyectoId == 0) f.TipoProyectoId = null;
@@ -367,7 +261,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
 
-            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.Etapa} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ProyectoDetalle>
@@ -463,7 +357,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         PQuinquenalId = dPQ.Id,
                                         AñosPQ = anioPQ,
                                         PlanAnualId = PlanAnualId.Id,
-                                        Etapa = Convert.ToInt32(etapa),
                                         MaterialId = dMaterial.Id,
                                         ConstructorId = dConstructor.Id,
                                         TipoRegistroId = dTipoRegistroPY.Id,
@@ -473,12 +366,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         LongRealHab = longRealHab == null ? 0 : Decimal.Parse(longRealHab),
                                         LongRealPend = longRealPend == null ? 0 : Decimal.Parse(longRealPend),
                                         LongProyectos = 0,
-                                        LongImpedimentos=0,
-                                        LongReemplazada=0,
+                                        //LongImpedimentos=0,
+                                        //LongReemplazada=0,
                                         //LongImpedimentos = Decimal.Parse(longImpedimentos),
                                         //LongReemplazada = Decimal.Parse(longReemplazada),
                                         CodigoMalla = codMalla,
-                                        BaremoId = codigoVNR
+                                        BaremoId = codigoVNR,
+                                        FechaRegistro = DateTime.Now,
+                                        fechamodifica = DateTime.Now
 
                                     };
                                     lista.Add(entidad);
@@ -502,7 +397,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             try
                             {
-                                var existes = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(item.CodigoProyecto) && x.Etapa.Equals(item.Etapa)).FirstOrDefault();
+                                var existes = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(item.CodigoProyecto) ).FirstOrDefault();
 
                                 if (existes != null)
                                 {
@@ -521,12 +416,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     existe.MaterialId = item.MaterialId;
                                     existe.DistritoId = item.DistritoId;
                                     existe.TipoProyectoId = item.TipoProyectoId;
-                                    existe.Etapa = item.Etapa;
                                     existe.CodigoMalla = item.CodigoMalla;
                                     existe.TipoRegistroId = item.TipoRegistroId;
                                     existe.IngenieroResponsableId = existes.IngenieroResponsableId;
                                     existe.ConstructorId = item.ConstructorId;
-                                    existe.EstadoGeneralId = existes.EstadoGeneralId;
                                     existe.BaremoId = item.BaremoId;
                                     existe.UsuarioRegisterId = existes.UsuarioRegisterId;
                                     existe.UsuarioModificaId = existes.UsuarioModificaId;
@@ -536,8 +429,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     existe.LongAprobPa = item.LongAprobPa;
                                     existe.LongRealHab = item.LongRealHab;
                                     existe.LongRealPend = item.LongRealPend;
-                                    existe.LongImpedimentos = existes.LongImpedimentos;
-                                    existe.LongReemplazada = existes.LongReemplazada;
+                                    //existe.LongImpedimentos = existes.LongImpedimentos;
+                                    //existe.LongReemplazada = existes.LongReemplazada;
                                     existe.LongProyectos = existes.LongProyectos;
 
                                     listaRepetidosInsert.Add(existe);
