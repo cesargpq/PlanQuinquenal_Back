@@ -23,7 +23,8 @@ namespace PlanQuinquenal.Infrastructure.Data
         {
 
         }
-
+        
+        public virtual DbSet<MensualDtoResponse> MensualDtoResponse { get; set; }
         public virtual DbSet<TrazabilidadVerifica> TrazabilidadVerifica { get; set; }
         public virtual DbSet<ProyectoEtapaResponseDto> ProyectoEtapaResponseDto { get; set; }
         
@@ -169,6 +170,11 @@ namespace PlanQuinquenal.Infrastructure.Data
                    eb.HasNoKey();
                });
             modelbuilder.Entity<ProyectoEtapaResponseDto>(
+               eb =>
+               {
+                   eb.HasNoKey();
+               });
+            modelbuilder.Entity<MensualDtoResponse>(
                eb =>
                {
                    eb.HasNoKey();

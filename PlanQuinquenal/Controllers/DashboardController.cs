@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlanQuinquenal.Core.DTOs;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Interfaces;
 
 namespace PlanQuinquenal.Controllers
@@ -29,7 +30,7 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
         [HttpPost("ListarAvanceMensual")]
-        public async Task<IActionResult> ListarAvanceMensual(RequestDashboradDTO p)
+        public async Task<IActionResult> ListarAvanceMensual(AvanceMensualDto p)
         {
             var resultado = await _dashboardRepository.ListarAvanceMensual(p);
             return Ok(resultado);

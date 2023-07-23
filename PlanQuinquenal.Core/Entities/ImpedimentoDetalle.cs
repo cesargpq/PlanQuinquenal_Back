@@ -12,7 +12,6 @@ namespace PlanQuinquenal.Core.Entities
         public int Id { get; set; }
         public string? PQ { get; set; }
         public string? CodigoProyecto { get; set; }
-        public int? Etapa { get; set; }
         public string? CodigoMalla { get; set; }
         public Decimal? LongImpedimento { get; set; }
         public int? CausalReemplazoId { get; set; }

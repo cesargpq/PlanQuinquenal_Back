@@ -286,7 +286,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.FechaRegistro.Equals("")) f.FechaRegistro = null;
 
             
-            if (f.Etapa == 0) f.Etapa = null;
+         
             if (f.DistritoId == 0) f.DistritoId = null;
             if (f.CausalReemplazoId == 0) f.CausalReemplazoId = null;
             if (f.ConstructorId == 0) f.ConstructorId = null;
@@ -300,7 +300,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.TercerEstrato == 0) f.TercerEstrato = null;
             if (f.CuartoEstrato == 0) f.CuartoEstrato = null;
             if (f.QuintoEstrato == 0) f.QuintoEstrato = null;
-            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.CodigoProyecto} , {f.Etapa} , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ImpedimentoDetalle>
@@ -351,11 +351,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
                             var codPry = worksheet.Cells[row, 1].Value?.ToString();
-                            var etapa = worksheet.Cells[row, 2].Value?.ToString();
-                            var ProbleReal = worksheet.Cells[row, 3].Value?.ToString();
-                            var LongImpe = worksheet.Cells[row, 4].Value?.ToString();
+                            var ProbleReal = worksheet.Cells[row, 2].Value?.ToString();
+                            var LongImpe = worksheet.Cells[row, 3].Value?.ToString();
 
-                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto == codPry && x.Etapa == Convert.ToInt32(etapa)).FirstOrDefault();
+                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto == codPry ).FirstOrDefault();
                             var dProReal = ProblematicaReal.Where(x => x.Descripcion == ProbleReal).FirstOrDefault();
                             int baremoId = 0;
                             if (dCodPry != null)

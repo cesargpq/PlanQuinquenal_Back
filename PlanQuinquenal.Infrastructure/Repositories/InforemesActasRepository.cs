@@ -137,9 +137,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string tipo = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "Informe" : "Acta";
                 if (tipoSeg.Descripcion.Equals("Proyectos"))
                 {
-                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto +"_"+ informeReqDTO.Etapa+"\\"+ tipo + "\\" + guidId + ".pdf";
-                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto + "_" + informeReqDTO.Etapa + "\\" + tipo + "\\";
-                    ruta = configuration["DNS"] + "Proyectos" + "/" + informeReqDTO.CodigoProyecto + "_" + informeReqDTO.Etapa +"/"+ tipo + "/" + guidId + ".pdf";
+                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto +"\\"+ tipo + "\\" + guidId + ".pdf";
+                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto  + "\\" + tipo + "\\";
+                    ruta = configuration["DNS"] + "Proyectos" + "/" + informeReqDTO.CodigoProyecto +"/"+ tipo + "/" + guidId + ".pdf";
                 }
                 else if (tipoSeg.Descripcion.Equals("Plan Anual"))
                 {
@@ -601,9 +601,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string tipo = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "Informe" : "Acta";
                 if (tipoSeg.Descripcion.Equals("Proyectos"))
                 {
-                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto + "_" + informeReqDTO.Etapa + "\\" + tipo + "\\" + guidId + ".pdf";
-                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto + "_" + informeReqDTO.Etapa + "\\" + tipo + "\\";
-                    ruta = configuration["DNS"] + "Proyectos" + "/" + informeReqDTO.CodigoProyecto + "_" + informeReqDTO.Etapa + "/" + tipo + "/" + guidId + ".pdf";
+                    rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto + "\\" + tipo + "\\" + guidId + ".pdf";
+                    rutadirectory = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\" + informeReqDTO.CodigoProyecto  + "\\" + tipo + "\\";
+                    ruta = configuration["DNS"] + "Proyectos" + "/" + informeReqDTO.CodigoProyecto + "/" + tipo + "/" + guidId + ".pdf";
                 }
                 else if (tipoSeg.Descripcion.Equals("Plan Anual"))
                 {

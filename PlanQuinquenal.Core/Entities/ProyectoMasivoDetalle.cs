@@ -18,12 +18,12 @@ namespace PlanQuinquenal.Core.Entities
         public int? MaterialId { get; set; }
         public int? DistritoId { get; set; }
         public int? TipoProyectoId { get; set; }
-        public int? Etapa { get; set; }
+        
         public string? CodigoMalla { get; set; }
         public int? TipoRegistroId { get; set; }
         public int? IngenieroResponsableId { get; set; }
         public int? ConstructorId { get; set; }
-        public int? EstadoGeneralId { get; set; }
+        
 
         public int? BaremoId { get; set; }
         public int? UsuarioRegisterId { get; set; }
@@ -37,8 +37,7 @@ namespace PlanQuinquenal.Core.Entities
         public Decimal? LongAprobPa { get; set; }
         public Decimal? LongRealHab { get; set; }
         public Decimal? LongRealPend { get; set; }
-        public Decimal? LongImpedimentos { get; set; }
-        public Decimal? LongReemplazada { get; set; }
+        
         public Decimal? LongProyectos { get; set; }
         
             
