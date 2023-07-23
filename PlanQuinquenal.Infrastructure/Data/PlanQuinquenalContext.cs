@@ -98,6 +98,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Perfil> Perfil { get; set; }
         public virtual DbSet<Secc_modulos> Secc_modulos { get; set; }
         public virtual DbSet<ColumTablaUsu> ColumTablaUsu { get; set; }
+        public virtual DbSet<ColumnasTablas> ColumnasTablas { get; set; }
         public virtual DbSet<TablasAuditoria> TablasAuditoria { get; set; }
         public virtual DbSet<EventosAuditoria> EventosAuditoria { get; set; }
         public virtual DbSet<PlanQuinquenal.Core.Entities.PlanQuinquenal> PlanQuinquenal { get; set; }

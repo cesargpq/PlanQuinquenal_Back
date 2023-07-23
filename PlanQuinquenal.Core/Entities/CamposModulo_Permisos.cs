@@ -11,7 +11,9 @@ namespace PlanQuinquenal.Core.Entities
     {
         [Key]
         public int id { get; set; }
+        public string descripcion { get; set; }
         public string nombre_campo { get; set; }
-        public int modulo { get; set; }
+        public string modulo { get; set; }
+        public string pagina { get; set; }
     }
 }

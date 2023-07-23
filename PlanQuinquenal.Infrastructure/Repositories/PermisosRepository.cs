@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApiDavis.Core.Utilidades;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections;
@@ -26,18 +29,33 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             
             ColumsTablaPerResponse respMod = new ColumsTablaPerResponse();
+            List<ColumTablaUsuResponseDto> lstpermisoColumUsu = new List<ColumTablaUsuResponseDto>(); 
 
-            var queryable = await _context.ColumTablaUsu
+            var queryable = await _context.ColumTablaUsu.Include(x => x.columTabla)
                                      .Where(x => x.iduser == idUser)
-                                     .Where(x => x.tabla == tabla)
+                                     .Where(x => x.columTabla.tabla == tabla)
                                      .ToListAsync();
+
+            foreach(var colums in queryable)
+            {
+                var permisoColumTabla = new ColumTablaUsuResponseDto
+                {
+                    id = colums.id,
+                    title = colums.columTabla.title,
+                    campo = colums.columTabla.campo,
+                    tipo = colums.columTabla.tipo,
+                    seleccion = colums.seleccion
+                };
+
+                lstpermisoColumUsu.Add(permisoColumTabla);
+            }
 
             if (queryable.Count() > 0)
             {
 
                 respMod.idMensaje = "1";
                 respMod.mensaje = "Permisos obtenidos correctamente";
-                respMod.perm_ColumTabla = queryable;
+                respMod.perm_ColumTabla = lstpermisoColumUsu;
             }
             else
             {
@@ -179,20 +197,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<Object> ObtenerConfRolesPerm(int modulo)
+        public async Task<PaginacionResponseDto<dynamic>> ObtenerConfRolesPerm(string modulo, ConfRolesPerm paginacion)
         {
             List<dynamic> listaPermisos = new List<dynamic>();
             var QuerylistaCampos = _context.CamposModulo_Permisos.Where(x => x.modulo == modulo).AsQueryable();
             var listaPerfiles = await _context.Perfil.OrderBy(e => e.cod_perfil).ToListAsync();
             int cantRegist = QuerylistaCampos.Count();
-            var listaCampos = await QuerylistaCampos.ToListAsync();
+            var listaCampos = await QuerylistaCampos.Paginar(paginacion).ToListAsync();
 
-
-            List<ConfRolesPerm> lstresp = new List<ConfRolesPerm>();
             foreach (var campo in listaCampos)
             {
                 dynamic obj = new ExpandoObject();
-                obj.nom_seccion = campo.nombre_campo;
+                obj.nom_seccion = campo.descripcion;
                 foreach (var perfilItem in listaPerfiles)
                 {
                     int perfil_sec = perfilItem.Permisos_viz_seccioncodSec_permViz;
@@ -201,6 +217,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     dynamic perfil = new ExpandoObject();
                     perfil.id = listapermisos[0].cod_perm_campo;
                     perfil.edit_campo = listapermisos[0].edit_campo;
+                    perfil.nombre = perfilItem.nombre_perfil;
                     string perfilNombre = "Perfil" + perfilItem.cod_perfil;
                     ((IDictionary<string, object>)obj)[perfilNombre] = perfil;
                 }
@@ -208,36 +225,61 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 listaPermisos.Add(obj);
             }
 
-
-            var resp = new
+            var objetos = new PaginacionResponseDto<dynamic>
             {
-                cantidad = cantRegist,
-                listaPerfiles = listaPermisos
+                Cantidad = cantRegist,
+                Model = listaPermisos
+
             };
+            return objetos;
 
-            var json = JsonConvert.SerializeObject(resp);
-            return json;
 
-            //var queryable = await _context.Permisos_viz_seccion.Include(p => p.seccionModulo).ToListAsync();
+        }
 
-            //foreach (var permRol in queryable)
-            //{
-            //    ConfRolesPerm objPerRol = new ConfRolesPerm();
-            //    objPerRol.cod_perm_campo = permRol.cod_perm_campo;
-            //    objPerRol.codSec_permViz = permRol.codSec_permViz;
-            //    objPerRol.cod_seccion = permRol.cod_seccion;
-            //    objPerRol.nom_seccion = permRol.seccionModulo.seccion;
-            //    objPerRol.modulo = permRol.seccionModulo.modulo;
-            //    objPerRol.nom_campo = permRol.nom_campo;
-            //    objPerRol.visib_campo = permRol.visib_campo;
-            //    objPerRol.edit_campo = permRol.edit_campo;
+        public async Task<PaginacionResponseDto<dynamic>> obtenerPermisosPagina(string nombrePagina, int idUser)
+        {
+            List<dynamic> listaPermisos = new List<dynamic>();
+            var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
+            int codigoPerm = Usuario[0].Perfil.Permisos_viz_seccioncodSec_permViz;
 
-            //    lstresp.Add(objPerRol);
+            var lstCamposPermiso = await _context.Permisos_viz_seccion.Include(y => y.campo).Where(y => y.codSec_permViz == codigoPerm)
+                .Where(y => y.campo.pagina == nombrePagina).ToListAsync();
+            foreach (var campo in lstCamposPermiso)
+            {
+                dynamic obj = new ExpandoObject();
+                obj.nombreCampo = campo.campo.nombre_campo;
+                obj.flagEdicion = campo.edit_campo;
+                listaPermisos.Add(obj);
+            }
 
-            //}
+            var objetos = new PaginacionResponseDto<dynamic>
+            {
+                Cantidad = 0,
+                Model = listaPermisos
 
-            //return lstresp;
+            };
+            return objetos;
+        }
 
+        public async Task<ResponseDTO> actualizarPermisoPerfil(ActualizarPermisoRequestDto permiso)
+        {
+            ResponseDTO dto = new ResponseDTO();
+            try
+            {
+                var modPermiso = _context.Permisos_viz_seccion.FirstOrDefault(p => p.cod_perm_campo == permiso.codigo);
+                modPermiso.edit_campo = permiso.flag_edit;
+                _context.SaveChanges();
+
+                dto.Message = Constantes.CreacionExistosa;
+                dto.Valid = true;
+            }
+            catch
+            {
+                dto.Message = Constantes.ErrorSistema;
+                dto.Valid = false;
+            }
+            
+            return dto;
         }
 
     }

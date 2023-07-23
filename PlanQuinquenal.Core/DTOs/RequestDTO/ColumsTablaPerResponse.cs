@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.Entities;
+﻿using PlanQuinquenal.Core.DTOs.ResponseDTO;
+using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     {
         public string idMensaje { get; set; }
         public string mensaje { get; set; }
-        public List<ColumTablaUsu> perm_ColumTabla { get; set; }
+        public List<ColumTablaUsuResponseDto> perm_ColumTabla { get; set; }
     }
 }

@@ -92,14 +92,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     secciones.Add(seccion.id);
                 }
 
-                var permSec = _context.Permisos_viz_seccion
-                        .Where(p => secciones.Contains(p.cod_seccion))
-                        .ToList();
+                //var permSec = _context.Permisos_viz_seccion
+                //        .Where(p => secciones.Contains(p.cod_seccion))
+                //        .ToList();
 
                 respMod.idMensaje = "1";
                 respMod.mensaje = "Permisos obtenidos correctamente";
                 respMod.perm_modulos = lstBDPermModulo[0];
-                respMod.perm_campos = permSec;
+                //respMod.perm_campos = permSec;
             }
             else
             {
@@ -127,13 +127,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     secciones.Add(secc.id);
                 }
 
-                var permSec = _context.Permisos_viz_seccion
-                        .Where(p => secciones.Contains(p.cod_seccion))
-                        .ToList();
+                //var permSec = _context.Permisos_viz_seccion
+                //        .Where(p => secciones.Contains(p.cod_seccion))
+                //        .ToList();
 
                 respMod.idMensaje = "1";
                 respMod.mensaje = "Permisos obtenidos correctamente";
-                respMod.perm_campos = permSec;
+                //respMod.perm_campos = permSec;
             }
             else
             {

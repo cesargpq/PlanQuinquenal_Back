@@ -191,6 +191,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             _context.Add(usuarioDto);
 
             await _context.SaveChangesAsync();
+
+            #region creacion de permisos de visualizacion de columnas de todas las tablas
+
+            var QuerylistaColums = _context.ColumnasTablas.AsQueryable();
+            var listaColums = await QuerylistaColums.ToListAsync();
+            foreach (var campo in listaColums)
+            {
+                var nuevoPermiso = new ColumTablaUsu
+                {
+                    seleccion = true,
+                    iduser = usuarioDto.cod_usu,
+                    idColum = campo.id
+                };
+                _context.ColumTablaUsu.Add(nuevoPermiso);
+                _context.SaveChanges();
+            }
+
+            #endregion
             return resp;
         }
     }

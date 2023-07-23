@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.Entities
 {
-    public class Secc_modulos
+    public class ColumnasTablas
     {
         [Key]
         public int id { get; set; }
-        public string modulo { get; set; }
-        public string seccion { get; set; }
-        public bool vis_seccion { get; set; }
+        public string title { get; set; }
+        public string campo { get; set; }
+        public string tipo { get; set; }
+        public string tabla { get; set; }
     }
 }
