@@ -25,6 +25,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         }
 
         public virtual DbSet<TrazabilidadVerifica> TrazabilidadVerifica { get; set; }
+        public virtual DbSet<ProyectoEtapaResponseDto> ProyectoEtapaResponseDto { get; set; }
         
         public virtual DbSet<ReporteMaterialDetalle> ReporteMaterialDetalle { get; set; }
         public virtual DbSet<Trazabilidad> Trazabilidad { get; set; }
@@ -163,6 +164,11 @@ namespace PlanQuinquenal.Infrastructure.Data
                     eb.HasNoKey();
                 });
             modelbuilder.Entity<TrazabilidadVerifica>(
+               eb =>
+               {
+                   eb.HasNoKey();
+               });
+            modelbuilder.Entity<ProyectoEtapaResponseDto>(
                eb =>
                {
                    eb.HasNoKey();

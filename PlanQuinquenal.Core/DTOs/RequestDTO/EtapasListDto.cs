@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
-    public class ListDocumentosRqDTO:PaginacionDTO
+    public class EtapasListDto 
     {
-        public string Modulo { get; set; }
         public int ProyectoId { get; set; }
-  
-        public string Buscar { get; set; }
-
     }
 }

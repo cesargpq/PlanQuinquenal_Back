@@ -589,5 +589,30 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             };
             return result;
         }
+
+        public async Task<PaginacionResponseDtoException<ProyectoEtapaResponseDto>> ListarEtapas(EtapasListDto filterProyectos)
+        {
+            var resultad = await _context.ProyectoEtapaResponseDto.FromSqlInterpolated($"EXEC ListarEtapas {filterProyectos.ProyectoId}").ToListAsync();
+            if (resultad.Count > 0)
+            {
+                var result = new PaginacionResponseDtoException<ProyectoEtapaResponseDto>
+                {
+                    Cantidad = resultad.Count,
+                    Model = resultad
+                };
+                return result;
+            }
+            else
+            {
+                var result = new PaginacionResponseDtoException<ProyectoEtapaResponseDto>
+                {
+                    Cantidad = 0,
+                    Model = null
+                };
+                return result;
+            }
+            
+
+        }
     }
 }

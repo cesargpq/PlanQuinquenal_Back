@@ -9,8 +9,9 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class DocumentosPermisosRequestDTO
     {
         public string base64 { get; set; }
-        public string CodigoProyecto { get; set; }
-        public int Etapa { get; set; }
+        //public string CodigoProyecto { get; set; }
+        //public int Etapa { get; set; }
+        public int ProyectoId { get; set; }
         public string TipoPermisosProyecto { get; set; }
         public string NombreDocumento { get; set; }
         public string Fecha { get; set; }

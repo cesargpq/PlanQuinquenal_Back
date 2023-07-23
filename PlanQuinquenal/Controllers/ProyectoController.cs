@@ -84,5 +84,11 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _proyectoRepository.Update(proyecto,id,idUser);
             return Ok(resultado);
         }
+        [HttpPost("ListarEtapas")]
+        public async Task<IActionResult> ListarEtapas(EtapasListDto filterProyectos)
+        {
+            var resultado = await _proyectoRepository.ListarEtapas(filterProyectos);
+            return Ok(resultado);
+        }
     }
 }

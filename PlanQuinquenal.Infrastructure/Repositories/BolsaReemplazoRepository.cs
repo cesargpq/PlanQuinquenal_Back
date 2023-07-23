@@ -386,5 +386,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return result;
             }
         }
+
+        public async Task<ResponseDTO> GestionReemplazo(GestionReemplazoDto p, int idUser)
+        {
+            return new ResponseDTO
+            {
+                Valid = true,
+                Message = "Gestión de reemplazo existosa"
+            };
+        }
     }
 }
