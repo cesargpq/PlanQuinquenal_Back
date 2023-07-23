@@ -71,10 +71,10 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
-        [HttpGet("ObtenerConfRolesPerm")]
-        public async Task<IActionResult> ObtenerConfRolesPerm(int modulo)
+        [HttpPost("ObtenerConfRolesPerm")]
+        public async Task<IActionResult> ObtenerConfRolesPerm(string modulo, ConfRolesPerm paginacion)
         {
-            var resultado = await _repositoryPermisos.ObtenerConfRolesPerm(modulo);
+            var resultado = await _repositoryPermisos.ObtenerConfRolesPerm(modulo, paginacion);
             return Ok(resultado);
         }
 
@@ -101,5 +101,30 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _repositoryPermisos.ModPermisoColumnTabla(columna, idUser);
             return Ok(resultado);
         }
+
+        [HttpGet("obtenerPermisosPagina")]
+        public async Task<IActionResult> obtenerPermisosPagina(string pagina)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+
+                }
+            }
+            var resultado = await _repositoryPermisos.obtenerPermisosPagina(pagina, idUser);
+            return Ok(resultado);
+        }
+
+        [HttpPost("actualizarPermisoPerfil")]
+        public async Task<IActionResult> actualizarPermisoPerfil(ActualizarPermisoRequestDto permiso)
+        {
+            var resultado = await _repositoryPermisos.actualizarPermisoPerfil(permiso);
+            return Ok(resultado);
+        }
+
     }
 }

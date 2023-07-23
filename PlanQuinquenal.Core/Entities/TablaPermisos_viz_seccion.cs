@@ -14,13 +14,9 @@ namespace PlanQuinquenal.Core.Entities
         [Key]
         public int cod_perm_campo { get; set; }
         public int codSec_permViz { get; set; }
-        public int cod_seccion { get; set; }
         public bool visib_campo { get; set; }
         public bool edit_campo { get; set; }
         public int cod_campo { get; set; }
-
-        [ForeignKey("cod_seccion")]
-        public Secc_modulos seccionModulo { get; set; }
 
         [ForeignKey("cod_campo")]
         public CamposModulo_Permisos campo { get; set; }

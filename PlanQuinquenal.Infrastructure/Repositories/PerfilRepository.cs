@@ -65,6 +65,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     _context.Perfil.Add(nPerfil);
                     _context.SaveChanges();
 
+                    //Se crea los permisos de los campos para ese prefil
+
+                    var QuerylistaCampos = _context.CamposModulo_Permisos.AsQueryable();
+                    var listaCampos = await QuerylistaCampos.ToListAsync();
+                    foreach (var campo in listaCampos)
+                    {
+                        var nuevoPermiso = new TablaPermisos_viz_seccion
+                        {
+                            codSec_permViz = queryCons[0].cod_rol,
+                            visib_campo = false,
+                            edit_campo = false,
+                            cod_campo = campo.id
+                        };
+                        _context.Permisos_viz_seccion.Add(nuevoPermiso);
+                        _context.SaveChanges();
+                    }
+
                     var resp = new
                     {
                         idMensaje = "1",
@@ -168,13 +185,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
            
 
-            var objeto = new PaginacionResponseDto<PerfilResponse>
-            {
-                Cantidad = 0,
-                Model = lstPerfil
+            //var objeto = new PaginacionResponseDto<PerfilResponse>
+            //{
+            //    Cantidad = 0,
+            //    Model = lstPerfil
 
-            };
-            return objeto;
+            //};
+            //return objeto;
 
         }
 
