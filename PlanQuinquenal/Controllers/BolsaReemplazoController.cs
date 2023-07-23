@@ -84,5 +84,21 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _bolsaReemplazoRepository.ImportarMasivo(requestBolsaDto, idUser);
             return Ok(resultado);
         }
+
+        [HttpPost("GestionReemplazo")]
+        public async Task<IActionResult> GestionReemplazo(GestionReemplazoDto p)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            var resultado = await _bolsaReemplazoRepository.GestionReemplazo(p, idUser);
+            return Ok(resultado);
+        }
     }
 }

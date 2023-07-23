@@ -33,7 +33,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(permisoRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
+                var existeProyecto = await _context.Proyecto.Where(x => x.Id == permisoRequestDTO.ProyectoId).FirstOrDefaultAsync();
 
 
                 if (existeProyecto != null)
@@ -88,7 +88,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     return new ResponseDTO
                     {
                         Valid = false,
-                        Message = "El proyecto y la etapa ingresado no existe"
+                        Message = "El proyecto ingresado no existe"
                     };
                 };
             }
@@ -143,7 +143,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO, int idUser)
         {
-            var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(documentosPermisosRequestDTO.CodigoProyecto)).FirstOrDefaultAsync();
+            var existeProyecto = await _context.Proyecto.Where(x => x.Id == documentosPermisosRequestDTO.ProyectoId).FirstOrDefaultAsync();
 
             if(existeProyecto != null)
             {
@@ -159,8 +159,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 documentos.CodigoDocumento = guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
                 documentos.Fecha = Convert.ToDateTime(documentosPermisosRequestDTO.Fecha);
                 documentos.Expediente = documentosPermisosRequestDTO.Expediente;
-                documentos.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" +"Proyectos\\"+  documentosPermisosRequestDTO.CodigoProyecto+"_"+documentosPermisosRequestDTO.Etapa + $"\\Permiso\\{tipoPerm.Descripcion}\\" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
-                documentos.ruta = configuration["DNS"] + "Proyectos" + "/" + documentosPermisosRequestDTO.CodigoProyecto + "_" + documentosPermisosRequestDTO.Etapa+ $"/Permiso/{tipoPerm.Descripcion}/" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
+                documentos.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" +"Proyectos\\"+ existeProyecto.CodigoProyecto + $"\\Permiso\\{tipoPerm.Descripcion}\\" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
+                documentos.ruta = configuration["DNS"] + "Proyectos" + "/" + existeProyecto.CodigoProyecto  + $"/Permiso/{tipoPerm.Descripcion}/" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
                 documentos.FechaCreacion = DateTime.Now;
                 documentos.FechaModificacion = DateTime.Now;
                 documentos.UsuarioCreacion = idUser;
@@ -170,7 +170,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 _context.Add(documentos);
                 await _context.SaveChangesAsync();
 
-                saveDocument(documentosPermisosRequestDTO, guidId, tipoPerm.Descripcion);
+                saveDocument(documentosPermisosRequestDTO, guidId, tipoPerm.Descripcion,existeProyecto.CodigoProyecto);
                 return new ResponseDTO
                 {
                     Valid = true,
@@ -189,7 +189,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             
         }
-         public bool saveDocument(DocumentosPermisosRequestDTO documentoRequestDto, Guid guidId,string tipopermiso)
+         public bool saveDocument(DocumentosPermisosRequestDTO documentoRequestDto, Guid guidId,string tipopermiso, string CodigoProyecto)
         {
             try
             {
@@ -205,7 +205,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
                 
-                rutaCompleta = ruta + documentoRequestDto.CodigoProyecto+"_"+ documentoRequestDto.Etapa +$"\\Permiso\\{tipopermiso}\\";
+                rutaCompleta = ruta + CodigoProyecto+ $"\\Permiso\\{tipopermiso}\\";
                                     
                 if (!Directory.Exists(rutaCompleta))
                 {

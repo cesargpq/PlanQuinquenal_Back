@@ -12,6 +12,7 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IBolsaReemplazoRepository
     {
         Task<ResponseDTO> Add(RequestBolsaDto p,int idUser);
+        Task<ResponseDTO> GestionReemplazo(GestionReemplazoDto p, int idUser);
         Task<ResponseDTO> Update(RequestUpdateBolsaDTO p, int id, int idUser);
         Task<PaginacionResponseDtoException<BolsaDetalle>> Listar(BolsaRequestList p);
         Task<ResponseEntidadDto<BolsaDetalleById>> GetById(int id);

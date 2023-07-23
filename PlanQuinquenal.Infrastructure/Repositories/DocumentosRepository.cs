@@ -100,7 +100,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var resultado = await _context.BolsaReemplazo.Where(x => x.CodigoProyecto.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
+                var resultado = await _context.BolsaReemplazo.Where(x => x.Id.Equals(documentoRequestDto.ProyectoId)).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
                     var guidId = Guid.NewGuid();
@@ -110,15 +110,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
-                    map.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + documentoRequestDto.CodigoProyecto + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Reemplazo\\" + resultado.CodigoProyecto + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.ruta = configuration["DNS"] + "Reemplazo" + "/" + documentoRequestDto.CodigoProyecto + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.ruta = configuration["DNS"] + "Reemplazo" + "/" + resultado.CodigoProyecto + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
                     await _context.SaveChangesAsync();
 
-                    saveDocument(documentoRequestDto, guidId);
+                    saveDocument(documentoRequestDto, guidId,resultado.CodigoProyecto);
                 }
                 return true;
             }
@@ -131,7 +131,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var resultado = await _context.PlanAnual.Where(x => x.AnioPlan.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
+                var resultado = await _context.PlanAnual.Where(x => x.Id.Equals(documentoRequestDto.ProyectoId)).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
                     var guidId = Guid.NewGuid();
@@ -141,15 +141,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
-                    map.rutafisica = configuration["RUTA_ARCHIVOS"] +"\\"+"PlanAnual\\"+ documentoRequestDto.CodigoProyecto+"\\"+guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.rutafisica = configuration["RUTA_ARCHIVOS"] +"\\"+"PlanAnual\\"+ resultado.AnioPlan+"\\"+guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.Ruta = configuration["DNS"]+ "PlanAnual"+ "/" + documentoRequestDto.CodigoProyecto+ "/" + guidId+ Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.Ruta = configuration["DNS"]+ "PlanAnual"+ "/" + resultado.AnioPlan + "/" + guidId+ Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
                     await _context.SaveChangesAsync();
 
-                    saveDocument(documentoRequestDto, guidId);
+                    saveDocument(documentoRequestDto, guidId,resultado.AnioPlan);
                 }
                 return true;
             }
@@ -166,7 +166,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             try
             {
                 
-                var resultado = await _context.PQuinquenal.Where(x => x.AnioPlan.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
+                var resultado = await _context.PQuinquenal.Where(x => x.Id.Equals(documentoRequestDto.ProyectoId)).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
                     var guidId = Guid.NewGuid();
@@ -176,15 +176,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
-                    map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + documentoRequestDto.CodigoProyecto + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Quinquenal\\" + resultado.AnioPlan + "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.Ruta = configuration["DNS"] + "Quinquenal"+"/" + documentoRequestDto.CodigoProyecto + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.Ruta = configuration["DNS"] + "Quinquenal"+"/" + resultado.AnioPlan + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
                     await _context.SaveChangesAsync();
 
-                    saveDocument(documentoRequestDto, guidId);
+                    saveDocument(documentoRequestDto, guidId, resultado.AnioPlan);
                 }
                 return true;
             }
@@ -200,7 +200,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var resultado = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
+                var resultado = await _context.Proyecto.Where(x => x.Id.Equals(documentoRequestDto.ProyectoId)).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
                     var guidId = Guid.NewGuid();
@@ -210,15 +210,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
-                    map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\"+ documentoRequestDto.CodigoProyecto + "_" + documentoRequestDto.Etapa +  "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.rutafisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Proyectos\\"+ resultado.CodigoProyecto +   "\\" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.NombreDocumento = guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.TipoDocumento = Path.GetExtension(documentoRequestDto.NombreDocumento);
-                    map.Ruta = configuration["DNS"] + "Proyectos" + "/" + documentoRequestDto.CodigoProyecto+"_"+ documentoRequestDto.Etapa + "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
+                    map.Ruta = configuration["DNS"] + "Proyectos" + "/" + resultado.CodigoProyecto+ "/" + guidId + Path.GetExtension(documentoRequestDto.NombreDocumento);
                     map.Estado = true;
                     _context.Add(map);
                     await _context.SaveChangesAsync();
                    
-                    saveDocument(documentoRequestDto, guidId);
+                    saveDocument(documentoRequestDto, guidId,resultado.CodigoProyecto);
                     return true;
                 }
                 else
@@ -235,7 +235,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
            
         }
-        public bool saveDocument(DocumentoRequestDto documentoRequestDto, Guid guidId)
+        public bool saveDocument(DocumentoRequestDto documentoRequestDto, Guid guidId,string CodigoProyecto)
         {
             try
             {
@@ -265,14 +265,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     Directory.CreateDirectory(ruta);
                 }
 
-                if (documentoRequestDto.Modulo.Equals("PY"))
-                {
-                    rutaCompleta = ruta + documentoRequestDto.CodigoProyecto+"_"+ documentoRequestDto.Etapa;
-                }
-                else
-                {
-                    rutaCompleta = ruta + documentoRequestDto.CodigoProyecto;
-                }
+               
+               
+                    rutaCompleta = ruta + CodigoProyecto;
+                
                     
                 if (!Directory.Exists(rutaCompleta))
                 {
@@ -483,7 +479,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
-                    var proyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(listDocumentosRequestDto.codigoProyecto) ).FirstOrDefaultAsync();
+                    var proyecto = await _context.Proyecto.Where(x => x.Id.Equals(listDocumentosRequestDto.ProyectoId) ).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPy
                                     .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
                                     .Where(x=>x.ProyectoId == proyecto.Id)
@@ -519,7 +515,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
-                    var pq = await _context.PQuinquenal.Where(x => x.AnioPlan == listDocumentosRequestDto.codigoProyecto).FirstOrDefaultAsync();
+                    var pq = await _context.PQuinquenal.Where(x => x.Id == listDocumentosRequestDto.ProyectoId).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPQ
                             .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
                             .Where(x => x.PQuinquenalId == pq.Id)
@@ -556,7 +552,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
-                    var pa = await _context.PlanAnual.Where(x => x.AnioPlan == listDocumentosRequestDto.codigoProyecto).FirstOrDefaultAsync();
+                    var pa = await _context.PlanAnual.Where(x => x.Id == listDocumentosRequestDto.ProyectoId).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPA
                         .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
                         .Where(x => x.PlanAnualId == pa.Id)
@@ -592,7 +588,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
-                    var br = await _context.BolsaReemplazo.Where(x => x.CodigoProyecto == listDocumentosRequestDto.codigoProyecto).FirstOrDefaultAsync();
+                    var br = await _context.BolsaReemplazo.Where(x => x.Id == listDocumentosRequestDto.ProyectoId).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosBR
                         .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
                         .Where(x => x.BolsaReemplazoId == br.Id)
