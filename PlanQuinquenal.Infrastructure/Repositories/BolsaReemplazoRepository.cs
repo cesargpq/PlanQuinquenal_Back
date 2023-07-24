@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -20,15 +21,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
         private readonly IRepositoryMantenedores _repositoryMantenedores;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public BolsaReemplazoRepository(PlanQuinquenalContext context, IMapper mapper, IRepositoryMantenedores repositoryMantenedores)
+        public BolsaReemplazoRepository(PlanQuinquenalContext context, IMapper mapper, IRepositoryMantenedores repositoryMantenedores,ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
             this._repositoryMantenedores = repositoryMantenedores;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
 
-        public async Task<ResponseDTO> Update(RequestUpdateBolsaDTO p, int id, int idUser)
+        public async Task<ResponseDTO> Update(RequestUpdateBolsaDTO p, int id, DatosUsuario usuario)
         {
             var br = await _context.BolsaReemplazo.Where(x => x.Id != id && x.CodigoProyecto.Equals(p.CodigoProyecto)).FirstOrDefaultAsync();
             if (br == null)
@@ -47,10 +50,26 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 brUpdate.LongitudReemplazo = p.LongitudReemplazo;
                 brUpdate.ReemplazoId = p.ReemplazoId == 0 ? null: p.ReemplazoId;
                 brUpdate.PermisoId = p.PermisoId==0 ?null : p.PermisoId;
-                brUpdate.UsuarioModifica = idUser;
+                brUpdate.UsuarioModifica = usuario.UsuaroId;
                 brUpdate.FechaModifica = DateTime.Now;
                 _context.Update(brUpdate);
                 await _context.SaveChangesAsync();
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Editar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "BolsaReemplazo";
+                    trazabilidad.Evento = "Editar";
+                    trazabilidad.DescripcionEvento = $"Se actualizó correctamente el proyecto {brUpdate.CodigoProyecto} ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
 
                 var result = new ResponseDTO
                 {
@@ -69,7 +88,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return result;
             }
         }
-        public async Task<ResponseDTO> Add(RequestBolsaDto p, int idUser)
+        public async Task<ResponseDTO> Add(RequestBolsaDto p, DatosUsuario usuario)
         {
             try
             {
@@ -80,8 +99,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var map = mapper.Map<BolsaReemplazo>(p);
                     map.FechaModifica = DateTime.Now;
                     map.FechaRegistro = DateTime.Now;
-                    map.UsuarioModifica = idUser;
-                    map.UsuarioRegistra = idUser;
+                    map.UsuarioModifica = usuario.UsuaroId;
+                    map.UsuarioRegistra = usuario.UsuaroId;
                     map.ConstructorId = p.ContratistaId;
                     map.Estado = true;
                     map.Estrato1 = 0;
@@ -94,6 +113,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     _context.Add(map);
                     await _context.SaveChangesAsync();
+
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "BolsaReemplazo";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el anteproyecto {map.CodigoProyecto} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                     return new ResponseDTO
                     {
                         Valid = true,
@@ -156,7 +192,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return dato;
         }
 
-        public async Task<ImportResponseDto<BolsaReemplazo>> ImportarMasivo(RequestMasivo data, int idUser)
+        public async Task<ImportResponseDto<BolsaReemplazo>> ImportarMasivo(RequestMasivo data, DatosUsuario usuario)
         {
             ImportResponseDto<BolsaReemplazo> dto = new ImportResponseDto<BolsaReemplazo>();
             
@@ -216,8 +252,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CodigoMalla = codigoMalla,
                                         FechaModifica = DateTime.Now,
                                         FechaRegistro = DateTime.Now,
-                                        UsuarioModifica = idUser,
-                                        UsuarioRegistra = idUser,
+                                        UsuarioModifica = usuario.UsuaroId,
+                                        UsuarioRegistra = usuario.UsuaroId,
                                         Estado = true,
                                         Estrato1 = 0,
                                         Estrato2 = 0,
@@ -226,7 +262,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         Estrato5 = 0,
                                         CostoInversion = 0,
                                         LongitudReemplazo = 0,
-
+                                        Reemplazado=false
 
                                 };
                                     lista.Add(entidad);
@@ -278,6 +314,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         Estrato5 = existes.Estrato5,
                                         CostoInversion = existes.CostoInversion,
                                         LongitudReemplazo = existes.LongitudReemplazo,
+                                        Reemplazado = existes.Reemplazado
                                     };
                                     
 
@@ -316,7 +353,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                 }
 
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Importar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "BolsaReemplazo";
+                    trazabilidad.Evento = "Crear Masivo";
+                    trazabilidad.DescripcionEvento = $"Se insertó correctamente {listaInsert.Count()} anteproyectos";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
 
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 dto.listaError = listaError;
                 dto.listaRepetidos = listaRepetidos;
                 dto.listaInsert = listaInsert;
@@ -387,8 +438,78 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        public async Task<ResponseDTO> GestionReemplazo(GestionReemplazoDto p, int idUser)
+        public async Task<ResponseDTO> GestionReemplazo(GestionReemplazoDto p, DatosUsuario usuario)
         {
+
+            foreach (var item in p.Impedimentos)
+            {
+                var impedimentos = await _context.Impedimento.Where(x => x.Id == item).FirstOrDefaultAsync();
+                impedimentos.FechaPresentacionReemplazo = p.FechaPresenacionReemplazo;
+                impedimentos.Reemplazado = true;
+                _context.Update(impedimentos);
+            
+            }
+            foreach (var item in p.BolsaReemplazo)
+            {
+                var maxReemplaxo = await _context.ReemplazoMaxDTO.FromSqlRaw($"EXEC obtenermaxreemplaxo").ToListAsync();
+                var bolsa = await _context.BolsaReemplazo.Where(x => x.Id == item).FirstOrDefaultAsync();
+                if(maxReemplaxo.ElementAt(0).Numero != null)
+                {
+                    bolsa.NumeroReemplazo = maxReemplaxo.ElementAt(0).Numero + 1;
+                }
+                else
+                {
+                    bolsa.NumeroReemplazo = 1;
+                }
+                
+                bolsa.Reemplazado = true;
+
+                Proyecto proyecto= new Proyecto();
+                proyecto.CodigoProyecto = bolsa.CodigoProyecto;
+                proyecto.PQuinquenalId = null;
+                proyecto.AñosPQ =null;
+                proyecto.PlanAnualId = null;
+                proyecto.MaterialId = null;
+                proyecto.ConstructorId = bolsa.ConstructorId;
+                proyecto.TipoRegistroId = null;
+                proyecto.LongAprobPa = 0;
+                proyecto.TipoProyectoId = null;
+                proyecto.BaremoId = null;
+                proyecto.descripcion = "";
+                proyecto.CodigoMalla = bolsa.CodigoMalla;
+                proyecto.IngenieroResponsableId = null;
+                proyecto.UsuarioRegisterId = usuario.UsuaroId;
+                proyecto.UsuarioModificaId = usuario.UsuaroId;
+                proyecto.FechaGasificacion = null;
+                proyecto.FechaRegistro = DateTime.Now;
+                proyecto.fechamodifica = DateTime.Now;
+                //proyecto.LongImpedimentos = 0;
+                proyecto.LongRealHab = 0;
+                proyecto.LongRealPend = 0;
+                proyecto.LongProyectos = 0;
+                proyecto.DistritoId = bolsa.Id;
+                _context.Add(proyecto);
+                _context.Update(bolsa);
+                await _context.SaveChangesAsync();
+
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Gestionar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Proyecto";
+                    trazabilidad.Evento = "Gestión de reemplazo";
+                    trazabilidad.DescripcionEvento = $"Se realizó la gestión de reemplazo correctamente ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
+            }
+
             return new ResponseDTO
             {
                 Valid = true,

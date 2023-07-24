@@ -2,6 +2,7 @@
 using AutoMapper;
 using iTextSharp.text;
 using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -20,13 +21,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     {
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public ComentarioRepository(PlanQuinquenalContext context, IMapper mapper)
+        public ComentarioRepository(PlanQuinquenalContext context, IMapper mapper, ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
-        public async Task<ResponseDTO> Add(ComentarioRequestDTO c, int idUser)
+        public async Task<ResponseDTO> Add(ComentarioRequestDTO c, DatosUsuario usuario)
         {
 
             try
@@ -38,7 +41,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var comentario = mapper.Map<ComentarioPY>(c);
 
-                    comentario.UsuarioId = idUser;
+                    comentario.UsuarioId = usuario.UsuaroId;
                     comentario.Fecha = DateTime.Now;
                     _context.Add(comentario);
                     await _context.SaveChangesAsync();
@@ -49,7 +52,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var comentario = mapper.Map<COMENTARIOPQ>(c);
                     comentario.PQuinquenalId = c.ProyectoId;
-                    comentario.UsuarioId = idUser;
+                    comentario.UsuarioId = usuario.UsuaroId;
                     comentario.Fecha = DateTime.Now;
                     _context.Add(comentario);
                     await _context.SaveChangesAsync();
@@ -60,7 +63,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var comentario = mapper.Map<COMENTARIOPA>(c);
                     comentario.PlanAnualId = c.ProyectoId;
-                    comentario.UsuarioId = idUser;
+                    comentario.UsuarioId = usuario.UsuaroId;
                     comentario.Fecha = DateTime.Now;
                     _context.Add(comentario);
                     await _context.SaveChangesAsync();
@@ -71,19 +74,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     var comentario = mapper.Map<COMENTARIOBR>(c);
                     comentario.BolsaReemplazoId = c.ProyectoId;
-                    comentario.UsuarioId = idUser;
+                    comentario.UsuarioId = usuario.UsuaroId;
                     comentario.Fecha = DateTime.Now;
                     _context.Add(comentario);
                     await _context.SaveChangesAsync();
                     obj.Message = Constantes.CreacionExistosa;
                     obj.Valid = true;
+
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Comentario , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Comentario";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creo el comentario satisfactoriamente {comentario.Descripcion} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                 }
                 else
                 {
                     obj.Message = Constantes.BusquedaNoExitosa;
                     obj.Valid = true;
                 }
-
+                
 
                 return obj;
 

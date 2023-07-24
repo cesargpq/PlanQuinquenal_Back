@@ -10,7 +10,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     {
         public List<int> Impedimentos { get; set; }
         public List<int> BolsaReemplazo { get; set; }
-        public string FechaPresenacionReemplazo { get; set; }
+        public DateTime FechaPresenacionReemplazo { get; set; }
         public int NumeroReemplazo { get; set; }
     }
 }

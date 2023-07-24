@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -27,9 +28,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
         private readonly IRepositoryMetodosRehusables _repositoryMetodosRehusables;
         private readonly IMapper mapper;
-        public PlanQuinquenalesRepository(PlanQuinquenalContext context, IMapper mapper)
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
+
+        public PlanQuinquenalesRepository(PlanQuinquenalContext context, IMapper mapper, ITrazabilidadRepository trazabilidadRepository)
         {
             this.mapper = mapper;
+            this._trazabilidadRepository = trazabilidadRepository;
             this._context = context;
         }
 
@@ -459,7 +463,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         //    return lista;
         //}
 
-        public async Task<ResponseDTO> Add(PQuinquenalReqDTO p, int idUser)
+        public async Task<ResponseDTO> Add(PQuinquenalReqDTO p, DatosUsuario usuario)
         {
 
 
@@ -480,8 +484,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     quinquenal.FechaRegistro = DateTime.Now;
                     quinquenal.FechaModifica = DateTime.Now;
-                    quinquenal.UsuarioRegisterId = idUser;
-                    quinquenal.UsuarioModifica = idUser;
+                    quinquenal.UsuarioRegisterId = usuario.UsuaroId;
+                    quinquenal.UsuarioModifica = usuario.UsuaroId;
                     quinquenal.Estado = true;
 
                     _context.Add(quinquenal);
@@ -500,6 +504,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                     }
 
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanQuinquenal , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "PlanQuinquenal";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el Plan Quinquenal {quinquenal.AnioPlan} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                     return new ResponseDTO
                     {
                         Valid = true,
@@ -569,7 +589,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id,int idUser)
+        public async Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id,DatosUsuario usuario)
         {
             try
             {
@@ -584,7 +604,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     pqUpdate.EstadoAprobacionId = dto.EstadoAprobacionId;
                     pqUpdate.FechaAprobacion = Convert.ToDateTime(dto.FechaAprobacion);
                     pqUpdate.FechaModifica = DateTime.Now;
-                    pqUpdate.UsuarioModifica = idUser;
+                    pqUpdate.UsuarioModifica = usuario.UsuaroId;
                     _context.Update(pqUpdate);
                     await _context.SaveChangesAsync();
 
@@ -605,6 +625,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             _context.Add(usr);
                             await _context.SaveChangesAsync();
                         }
+                    }
+
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanQuinquenal , Editar").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "PlanQuinquenal";
+                        trazabilidad.Evento = "Editar";
+                        trazabilidad.DescripcionEvento = $"Se actualizó correctamente el Plan Quinquenal {pqUpdate.AnioPlan} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
                     }
                     var result = new ResponseDTO
                     {

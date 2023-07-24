@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Repositories;
+using System.Net;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -35,8 +37,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-
-            var resultado = await _bolsaReemplazoRepository.Add(requestBolsaDto,idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _bolsaReemplazoRepository.Add(requestBolsaDto, usuario);
             return Ok(resultado);
         }
 
@@ -52,8 +56,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-
-            var resultado = await _bolsaReemplazoRepository.Update(p, id, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _bolsaReemplazoRepository.Update(p, id, usuario);
             return Ok(resultado);
         }
         [HttpPost("Listar")]
@@ -81,7 +87,11 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _bolsaReemplazoRepository.ImportarMasivo(requestBolsaDto, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+
+            var resultado = await _bolsaReemplazoRepository.ImportarMasivo(requestBolsaDto, usuario);
             return Ok(resultado);
         }
 
@@ -97,7 +107,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _bolsaReemplazoRepository.GestionReemplazo(p, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _bolsaReemplazoRepository.GestionReemplazo(p, usuario);
             return Ok(resultado);
         }
     }

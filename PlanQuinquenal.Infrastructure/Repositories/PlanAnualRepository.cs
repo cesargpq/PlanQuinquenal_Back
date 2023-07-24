@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -18,11 +19,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
     {
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public PlanAnualRepository(PlanQuinquenalContext context, IMapper mapper)
+        public PlanAnualRepository(PlanQuinquenalContext context, IMapper mapper, ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
 
         public async Task<PaginacionResponseDtoException<PQuinquenalResponseDto>> GetAll(PQuinquenalRequestDTO p)
@@ -53,76 +56,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 throw;
             }
         }
-        //public async Task<PaginacionResponseDtoException<PQuinquenalResponseDto>> GetAll(PQuinquenalRequestDTO p)
-        //{
-        //    var queryable = await _context.PlanAnual
-        //                                    .Include(x => x.EstadoAprobacion)
-        //                                    .Include(x => x.Proyecto)
-        //                                    .ToListAsync();
-        //    List<PQuinquenalResponseDto> listaF = new List<PQuinquenalResponseDto>();
-        //    foreach (var item in queryable)
-        //    {
-        //        PQuinquenalResponseDto obj = new PQuinquenalResponseDto();
-        //        obj.Id = item.Id;
-        //        obj.AnioPlan = item.AnioPlan;
-        //        obj.Descripcion = item.Descripcion;
-        //        obj.EstadoAprobacionId = item.EstadoAprobacionId;
-        //        obj.EstadoAprobacion = item.EstadoAprobacion.Descripcion;
-        //        //obj.FechaAprobacion = item.FechaAprobacion.ToString("dd/MM/yyyy");
-        //        //obj.FechaModifica = item.FechaModifica.ToString("dd/MM/yyyy");
-        //        //obj.FechaRegistro = item.FechaRegistro.ToString("dd/MM/yyyy");
-        //        var userC = await _context.Usuario.Where(x => x.cod_usu == item.UsuarioRegisterId).FirstOrDefaultAsync();
-        //        var userM = await _context.Usuario.Where(x => x.cod_usu == item.UsuarioModifica).FirstOrDefaultAsync();
-        //        obj.UsuarioModifica = userM.nombre_usu + " " + userM.apellido_usu;
-        //        obj.UsuarioRegister = userC.nombre_usu + " " + userC.apellido_usu;
-        //        obj.UsuarioModificaId = userM.cod_usu;
-        //        obj.UsuarioRegisterId = userC.cod_usu;
-        //        var proyectos = await _context.Proyecto.Where(x => x.PlanAnualId == item.Id).ToListAsync();
-        //        decimal dato = 0;
-        //        foreach (var pry in proyectos)
-        //        {
-        //            if (pry.LongAprobPa > 0)
-        //                dato += pry.LongRealHab / pry.LongAprobPa;
-        //        }
-        //        if (proyectos.Count() > 0)
-        //        {
-        //            obj.Avance = dato / proyectos.Count();
-        //        }
-        //        else
-        //        {
-        //            obj.Avance = 0;
-        //        }
-
-        //        listaF.Add(obj);
-        //    }
-        //    var listaFin = listaF
-        //                        .Where(x => p.PQ != "" ? x.AnioPlan.Contains(p.PQ) : true)
-        //                        .Where(x => p.Aprobaciones != "" ? x.FechaAprobacion.Equals(p.Aprobaciones.Replace("-", "/")) : true)
-        //                        .Where(x => p.EstadoAprobacion != 0 ? x.EstadoAprobacionId == p.EstadoAprobacion : true)
-        //                        .Where(x => p.Descripcion != "" ? x.Descripcion.Contains(p.Descripcion) : true)
-        //                        .Where(x => p.FechaRegistro != "" ? x.FechaRegistro.Equals(p.FechaRegistro.Replace("-", "/")) : true)
-        //                        .Where(x => p.FechaModificacion != "" ? x.FechaModifica.Equals(p.FechaModificacion.Replace("-", "/")) : true)
-        //                        .Where(x => p.UsuarioRegister != 0 ? x.UsuarioRegisterId == p.UsuarioRegister : true)
-        //                        .Where(x => p.UsuarioModifica != 0 ? x.UsuarioModificaId == p.UsuarioModifica : true)
-        //                        //.Where(x => p.PorcentajeAvance == 1 && p.valor != 0 ? x.Avance < Convert.ToDecimal(p.valor) / 100 :
-        //                        //p.PorcentajeAvance == 2 && p.valor != 0 ? x.Avance <= Convert.ToDecimal(p.valor) / 100 :
-        //                        //p.PorcentajeAvance == 3 && p.valor != 0 ? x.Avance > Convert.ToDecimal(p.valor) / 100 :
-        //                        //p.PorcentajeAvance == 4 && p.valor != 0 ? x.Avance >= Convert.ToDecimal(p.valor) / 100 :
-        //                        //p.PorcentajeAvance == 5 && p.valor != 0 ? x.Avance == Convert.ToDecimal(p.valor) / 100 :
-        //                        //p.PorcentajeAvance == 6 && p.valor != 0 ? x.Avance != Convert.ToDecimal(p.valor) / 100 :
-        //                        //true)
-        //                        .AsQueryable();
-
-        //    var fin = listaFin.Skip((p.Pagina - 1) * p.RecordsPorPagina).Take(p.RecordsPorPagina);
-
-        //    var lista = new PaginacionResponseDtoException<PQuinquenalResponseDto>
-        //    {
-        //        Cantidad = listaFin.Count(),
-        //        Model = fin
-        //    };
-        //    return lista;
-        //}
-        public async Task<ResponseDTO> Add(PQuinquenalReqDTO p, int id)
+       
+        public async Task<ResponseDTO> Add(PQuinquenalReqDTO p,DatosUsuario usuario)
         {
             try
             {
@@ -139,8 +74,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 quinquenal.FechaRegistro = DateTime.Now;
                 quinquenal.FechaModifica = DateTime.Now;
-                quinquenal.UsuarioRegisterId = id;
-                quinquenal.UsuarioModifica = id;
+                quinquenal.UsuarioRegisterId = usuario.UsuaroId;
+                quinquenal.UsuarioModifica = usuario.UsuaroId;
                 quinquenal.Estado = true;
 
                 _context.Add(quinquenal);
@@ -159,6 +94,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                 }
 
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanAnual , Crear").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "PlanAnual";
+                    trazabilidad.Evento = "Crear";
+                    trazabilidad.DescripcionEvento = $"Se creó correctamente el Plan Anual {quinquenal.AnioPlan} ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 return new ResponseDTO
                 {
                     Valid = true,
@@ -177,7 +128,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         }
 
         
-        public async Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id, int idUser)
+        public async Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id, DatosUsuario usuario)
         {
             try
             {
@@ -191,7 +142,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     pqUpdate.EstadoAprobacionId = dto.EstadoAprobacionId;
                     pqUpdate.FechaAprobacion = Convert.ToDateTime(dto.FechaAprobacion);
                     pqUpdate.FechaModifica = DateTime.Now;
-                    pqUpdate.UsuarioModifica = idUser;
+                    pqUpdate.UsuarioModifica = usuario.UsuaroId;
                     _context.Update(pqUpdate);
                     await _context.SaveChangesAsync();
 
@@ -212,6 +163,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             _context.Add(usr);
                             await _context.SaveChangesAsync();
                         }
+                    }
+
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanAnual , Editar").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "PlanAnual";
+                        trazabilidad.Evento = "Editar";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el Plan Anual {pqUpdate.AnioPlan} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
                     }
                     var result = new ResponseDTO
                     {

@@ -4,6 +4,7 @@ using iTextSharp.text.pdf.codec.wmf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -24,15 +25,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
         private readonly IRepositoryMantenedores _repositoryMantenedores;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public ImpedimentoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, IRepositoryMantenedores repositoryMantenedores)
+        public ImpedimentoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, IRepositoryMantenedores repositoryMantenedores, ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
             this._repositoryMantenedores = repositoryMantenedores;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
-        public async Task<ResponseDTO> Add(ImpedimentoRequestDTO p,int idUser)
+        public async Task<ResponseDTO> Add(ImpedimentoRequestDTO p, DatosUsuario usuario)
         {
             try
             {
@@ -60,14 +63,32 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 obj.FechaPresentacionReemplazo = null;
                 obj.fechamodifica = DateTime.Now;
                 obj.FechaRegistro = DateTime.Now;
-                obj.UsuarioRegisterId = idUser;
-                obj.UsuarioModificaId = idUser;
+                obj.UsuarioRegisterId = usuario.UsuaroId;
+                obj.UsuarioModificaId = usuario.UsuaroId;
                 obj.CostoInversion = baremo.Precio * p.LongImpedimento;
+                obj.Reemplazado = false;
                 obj.estado = true;
 
 
                 _context.Add(obj);
                 await _context.SaveChangesAsync();
+
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Crear").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Impedimento";
+                    trazabilidad.Evento = "Crear";
+                    trazabilidad.DescripcionEvento = $"Se creó el impedimento del proyecto {proy.CodigoProyecto} correctamente ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 var dato = new ResponseDTO
                 {
                     Valid = true,
@@ -127,7 +148,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<ResponseDTO> Documentos(ImpedimentoDocumentoDto p, int idUser)
+        public async Task<ResponseDTO> Documentos(ImpedimentoDocumentoDto p, DatosUsuario usuario)
         {
 
             var resultado = await _context.Impedimento.Where(x => x.Id == p.CodigoImpedimento).FirstOrDefaultAsync();
@@ -155,10 +176,26 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 d.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" + "Impedimentos\\"  + p.CodigoImpedimento + "\\" + p.Gestion + "\\" + guidId + Path.GetExtension(p.NombreDocumento);
                 d.ruta = configuration["DNS"] + "Impedimentos" + "/" + p.CodigoImpedimento + "/" + p.Gestion + "/" + guidId + Path.GetExtension(p.NombreDocumento);
                 d.Estado = true;
-                d.UsuarioRegister = idUser;
+                d.UsuarioRegister = usuario.UsuaroId;
                 _context.Add(d);
                 await _context.SaveChangesAsync();
 
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , CrearDocumento").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Impedimento";
+                    trazabilidad.Evento = "CrearDocumento";
+                    trazabilidad.DescripcionEvento = $"Se creó correctamente el documento {d.CodigoDocumento} en Impedimentos";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 saveDocument(p, guidId);
                 var resp = new ResponseDTO
                 {
@@ -196,7 +233,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        public async Task<ResponseDTO> Update(ImpedimentoUpdateDto p, int idUser, int id)
+        public async Task<ResponseDTO> Update(ImpedimentoUpdateDto p, DatosUsuario usuario, int id)
         {
             try
             {
@@ -231,9 +268,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     existe.Comentario = p.Comentario == null?"":p.Comentario;
                     existe.FechaPresentacionReemplazo = p.FechaPresentacionReemplazo == null ? null : p.FechaPresentacionReemplazo;
                     existe.fechamodifica = DateTime.Now;
-                    existe.UsuarioModificaId = idUser;
+                    existe.UsuarioModificaId = usuario.UsuaroId;
                     existe.CostoInversion = p.CostoInversion == null ? 0 : p.CostoInversion;
 
+
+
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Editar").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Impedimento";
+                        trazabilidad.Evento = "Editar";
+                        trazabilidad.DescripcionEvento = $"Se actualizó el impedimento {existe.Id} correctamente  ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
 
@@ -323,7 +378,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return obj;
         }
 
-        public async Task<ImportResponseDto<Impedimento>> ProyectoImport(RequestMasivo data)
+        public async Task<ImportResponseDto<Impedimento>> ProyectoImport(RequestMasivo data, DatosUsuario usuario)
         {
             ImportResponseDto<Impedimento> dto = new ImportResponseDto<Impedimento>();
             var ProblematicaReal = await _repositoryMantenedores.GetAllByAttribute(Constantes.ProblematicaReal);
@@ -405,7 +460,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         UsuarioRegisterId = null,
                                         UsuarioModificaId = null,
                                         CostoInversion = baremoId,
-                                        estado = true
+                                        estado = true,
+                                        Reemplazado = false
 
                                     };
                                     lista.Add(entidad);
@@ -443,6 +499,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
 
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Importar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Impedimento";
+                    trazabilidad.Evento = "Importar";
+                    trazabilidad.DescripcionEvento = $"Se crearon masivamente {listaInsert.Count()} impeimentos ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 dto.listaError = listaError;
                 dto.listaRepetidos = null;
                 dto.listaInsert = listaInsert;
@@ -467,7 +538,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<ResponseDTO> Delete(int id, int idUser)
+        public async Task<ResponseDTO> Delete(int id, DatosUsuario usuario)
         {
             try
             {
@@ -478,6 +549,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     existe.estado = false;
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Eliminar").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Impedimento";
+                        trazabilidad.Evento = "Eliminar";
+                        trazabilidad.DescripcionEvento = $"Se eliminó correctamente el impedimento {existe.Id}  ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                     var resultado = new ResponseDTO
                     {
                         Valid = false,
@@ -506,7 +593,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return resultado;
             }
         }
-        public async Task<ResponseDTO> DeleteDocumentos(int id, int idUser)
+        public async Task<ResponseDTO> DeleteDocumentos(int id, DatosUsuario usuario)
         {
             try
             {
@@ -517,11 +604,29 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     existe.Estado = false;
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
+
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , EliminarDocumento").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Impedimento";
+                        trazabilidad.Evento = "EliminarDocumento";
+                        trazabilidad.DescripcionEvento = $"Se eliminó correctamente el documento {existe.CodigoDocumento} de la zona de impeimentos ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                     var resultado = new ResponseDTO
                     {
                         Valid = false,
                         Message = Constantes.EliminacionSatisfactoria
                     };
+
                     return resultado;
                 }
                 else

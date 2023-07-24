@@ -28,5 +28,7 @@ namespace PlanQuinquenal.Core.Entities
         public int? UsuarioRegistra { get; set; }
         public int? UsuarioModifica { get; set; }
         public bool? Estado { get; set; }
+        public bool? Reemplazado { get; set; }
+        public int? NumeroReemplazo { get; set; }
     }
 }

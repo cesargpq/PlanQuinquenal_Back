@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ApiDavis.Core.Utilidades;
+using PlanQuinquenal.Core.DTOs;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -21,15 +22,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public PermisosProyectoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration)
+        public PermisosProyectoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
 
-        public async Task<ResponseDTO> Add(PermisoRequestDTO permisoRequestDTO, int idUser)
+        public async Task<ResponseDTO> Add(PermisoRequestDTO permisoRequestDTO, DatosUsuario usuario)
         {
             try
             {
@@ -54,6 +57,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         permisoExiste.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
                         _context.Update(permisoExiste);
                         await _context.SaveChangesAsync();
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Editar").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Permisos";
+                            trazabilidad.Evento = "Editar";
+                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {permisoExiste.Id} del proyecto {permisoExiste.ProyectoId} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
+
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return new ResponseDTO
                         {
                             Valid = true,
@@ -71,10 +89,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         obj.Estado = true;
                         obj.FechaCreacion = DateTime.Now;
                         obj.FechaModificacion = DateTime.Now;
-                        obj.UsuarioCreacion = idUser;
-                        obj.UsuarioModifca = idUser;
+                        obj.UsuarioCreacion = usuario.UsuaroId;
+                        obj.UsuarioModifca = usuario.UsuaroId;
                         _context.Add(obj);
                         await _context.SaveChangesAsync();
+
+
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Crear").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Permisos";
+                            trazabilidad.Evento = "Crear";
+                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {obj.Id} del proyecto {obj.ProyectoId} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
+
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return new ResponseDTO
                         {
                             Valid = true,
@@ -141,7 +176,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
         }
 
-        public async Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO, int idUser)
+        public async Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO, DatosUsuario usuario)
         {
             var existeProyecto = await _context.Proyecto.Where(x => x.Id == documentosPermisosRequestDTO.ProyectoId).FirstOrDefaultAsync();
 
@@ -163,13 +198,29 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 documentos.ruta = configuration["DNS"] + "Proyectos" + "/" + existeProyecto.CodigoProyecto  + $"/Permiso/{tipoPerm.Descripcion}/" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
                 documentos.FechaCreacion = DateTime.Now;
                 documentos.FechaModificacion = DateTime.Now;
-                documentos.UsuarioCreacion = idUser;
-                documentos.UsuarioModifca = idUser;
+                documentos.UsuarioCreacion = usuario.UsuaroId;
+                documentos.UsuarioModifca = usuario.UsuaroId;
                 documentos.Estado = true;
                 documentos.Vencimiento = documentosPermisosRequestDTO.Vencimiento!="" || documentosPermisosRequestDTO.Vencimiento != null ? DateTime.Parse(documentosPermisosRequestDTO.Vencimiento):null;
                 _context.Add(documentos);
                 await _context.SaveChangesAsync();
 
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , CargarExpediente").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Permisos";
+                    trazabilidad.Evento = "CargarExpediente";
+                    trazabilidad.DescripcionEvento = $"Se cargó correctamente el expediente {documentos.NombreDocumento} en el proyecto {documentos.ProyectoId}";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 saveDocument(documentosPermisosRequestDTO, guidId, tipoPerm.Descripcion,existeProyecto.CodigoProyecto);
                 return new ResponseDTO
                 {
@@ -225,7 +276,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
         }
 
-        public async Task<ResponseDTO> Delete(int id,int idUser)
+        public async Task<ResponseDTO> Delete(int id,DatosUsuario usuario)
         {
             ResponseDTO obj = new ResponseDTO();
             try
@@ -233,10 +284,28 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var dato = await _context.DocumentosPermisos.Where(x => x.Id == id).FirstOrDefaultAsync();
                 dato.Estado = false;
-                dato.UsuarioModifca = idUser;
+                dato.UsuarioModifca = usuario.UsuaroId;
                 dato.FechaModificacion = DateTime.Now;
                 _context.Update(dato);
                 await _context.SaveChangesAsync();
+
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Eliminar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Permisos";
+                    trazabilidad.Evento = "Eliminar";
+                    trazabilidad.DescripcionEvento = $"Se elimnó correctamente el documento del proyecto  {dato.ProyectoId} ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
+
 
                 obj.Valid = true;
                 obj.Message = Constantes.EliminacionSatisfactoria;

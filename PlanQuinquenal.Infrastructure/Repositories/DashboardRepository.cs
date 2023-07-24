@@ -3,29 +3,54 @@ using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Interfaces;
+using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static iTextSharp.text.pdf.events.IndexEvents;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
     public class DashboardRepository : IDashboardRepository
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
 
-        public DashboardRepository(PlanQuinquenalContext context)
+        public DashboardRepository(PlanQuinquenalContext context, IRepositoryMantenedores repositoryMantenedores)
         {
             this._context = context;
+            this._repositoryMantenedores = repositoryMantenedores;
         }
 
-        public async Task<ResposeDistritosDetalleDTO> ListarAvanceMensual(AvanceMensualDto o)
+        public async Task<LongMesesResponseDto> ListarAvanceMensual(AvanceMensualDto o)
         {
             var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIO  {o.Anio} , {o.MaterialId}").ToListAsync();
 
             var data = resultad.GroupBy(x=>x.pquinquenalId).ToList();
+
+            var countQuinquenal = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
+
+            
+            List<MensualDtoResponse> listaMensual = new List<MensualDtoResponse>();
+
+            List<string> categorias = new List<string>();
+            #region categorias
+            categorias.Add("Enero");
+            categorias.Add("Febrero");
+            categorias.Add("Marzo");
+            categorias.Add("Abril");
+            categorias.Add("Mayo");
+            categorias.Add("Junio");
+            categorias.Add("Julio");
+            categorias.Add("Agosto");
+            categorias.Add("Septiembre");
+            categorias.Add("Octubre");
+            categorias.Add("Novimebre");
+            categorias.Add("Diciembre");
+            #endregion  
 
             List<Decimal> enero = new List<Decimal>();
             List<Decimal> febrero = new List<Decimal>();
@@ -39,114 +64,171 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             List<Decimal> octubre = new List<Decimal>();
             List<Decimal> noviembre = new List<Decimal>();
             List<Decimal> diciembre = new List<Decimal>();
-            foreach (var item in data)
+
+            for (int i = 0; i < countQuinquenal.Count(); i++)
             {
-                foreach (var planes in item)
+                foreach (var item in data)
                 {
-
-                    if (planes.Mes.Equals("Enero"))
+                    var exist = item.Where(x => x.pquinquenalId == countQuinquenal.ElementAt(i).Id).FirstOrDefault();
+                    if (exist != null && exist.pquinquenalId == countQuinquenal.ElementAt(i).Id)
                     {
-                        enero.Add(planes.LongitudConstruida);
+                        
+                        
+                        var existeE = item.Where(x => x.Mes.Equals("Enero")).FirstOrDefault();
+                        if (existeE != null)
+                        {
+                            enero.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            enero.Add(0);
+                        }
+                        var existeF = item.Where(x => x.Mes.Equals("Febrero")).FirstOrDefault();
+                        if (existeF != null)
+                        {
+                            febrero.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            febrero.Add(0);
+                        }
+                        var existeM = item.Where(x => x.Mes.Equals("Marzo")).FirstOrDefault();
+                        if (existeF != null)
+                        {
+                            marzo.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            marzo.Add(0);
+                        }
+                        var existeA = item.Where(x => x.Mes.Equals("Abril")).FirstOrDefault();
+                        if (existeF != null)
+                        {
+                            abril.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            abril.Add(0);
+                        }
+                        var existeMa = item.Where(x => x.Mes.Equals("Mayo")).FirstOrDefault();
+                        if (existeMa != null)
+                        {
+                            mayo.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            mayo.Add(0);
+                        }
+                        var existeJ = item.Where(x => x.Mes.Equals("Junio")).FirstOrDefault();
+                        if (existeJ != null)
+                        {
+                            junio.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            junio.Add(0);
+                        }
+                        var existejul = item.Where(x => x.Mes.Equals("Julio")).FirstOrDefault();
+                        if (existejul != null)
+                        {
+                            julio.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            julio.Add(0);
+                        }
+                        var existeag = item.Where(x => x.Mes.Equals("Agosto")).FirstOrDefault();
+                        if (existeag != null)
+                        {
+                            agosto.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            agosto.Add(0);
+                        }
+                        var existes = item.Where(x => x.Mes.Equals("Septiembre")).FirstOrDefault();
+                        if (existes != null)
+                        {
+                            setiembre.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            setiembre.Add(0);
+                        }
+                        var existeo = item.Where(x => x.Mes.Equals("Octubre")).FirstOrDefault();
+                        if (existeo != null)
+                        {
+                            octubre.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            octubre.Add(0);
+                        }
+                        var existeN = item.Where(x => x.Mes.Equals("Noviembre")).FirstOrDefault();
+                        if (existeN != null)
+                        {
+                            noviembre.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            noviembre.Add(0);
+                        }
+                        var existeD = item.Where(x => x.Mes.Equals("Diciembre")).FirstOrDefault();
+                        if (existeD != null)
+                        {
+                            diciembre.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            diciembre.Add(0);
+                        }
+
                     }
                     else
                     {
+                        
+                        var datao = countQuinquenal.ElementAt(i).Id;
                         enero.Add(0);
-                    }
-                    if (planes.Mes.Equals("Febrero"))
-                    {
-                        febrero.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         febrero.Add(0);
-
-                    }
-                    if (planes.Mes.Equals("Marzo"))
-                    {
-                        marzo.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         marzo.Add(0);
-                    }
-                    if (planes.Mes.Equals("Abril"))
-                    {
-                        abril.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         abril.Add(0);
-                    }
-                    if (planes.Mes.Equals("Mayo"))
-                    {
-                        mayo.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         mayo.Add(0);
-                    }
-                    if (planes.Mes.Equals("Junio"))
-                    {
-                        junio.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         junio.Add(0);
-                    }
-                    if (planes.Mes.Equals("Julio"))
-                    {
-                        julio.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         julio.Add(0);
-                    }
-                    if (planes.Mes.Equals("Agosto"))
-                    {
-                        agosto.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         agosto.Add(0);
-                    }
-                    if (planes.Mes.Equals("Septiembre"))
-                    {
-                        setiembre.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         setiembre.Add(0);
-                    }
-                    if (planes.Mes.Equals("Octubre"))
-                    {
-                        octubre.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         octubre.Add(0);
-                    }
-                    if (planes.Mes.Equals("Noviembre"))
-                    {
-                        noviembre.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         noviembre.Add(0);
-                    }
-                    if (planes.Mes.Equals("Diciembre"))
-                    {
-                        diciembre.Add(planes.LongitudConstruida);
-                    }
-                    else
-                    {
                         diciembre.Add(0);
+                       
+                    }
+                    if (i < countQuinquenal.Count()-1)
+                    {
+                        i++;
                     }
 
                 }
-                
-            }
 
-            return new ResposeDistritosDetalleDTO { };
+            }
+                
+            var result = new LongMesesResponseDto 
+            { 
+                categorias= categorias,
+                enero   = enero,
+                febrero = febrero,
+                marzo = marzo,
+                abril   = abril,
+                mayo = mayo,
+                junio = junio,
+                julio = julio,
+                agosto = agosto,
+                septiembre =setiembre,
+                octubre = octubre,
+                noviembre =noviembre,
+                diciembre = diciembre
+            };
+
+            return result;
         }
 
         public async Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o)

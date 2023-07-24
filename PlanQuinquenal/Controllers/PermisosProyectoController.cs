@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Repositories;
+using System.Net;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -34,7 +36,11 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _permisosProyectoRepository.Add(permisoRequestDTO,  idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+
+            var resultado = await _permisosProyectoRepository.Add(permisoRequestDTO,  usuario);
             return Ok(resultado);
         }
         [HttpGet]
@@ -50,7 +56,6 @@ namespace PlanQuinquenal.Controllers
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
-
             foreach (var item in identity.Claims)
             {
                 if (item.Type.Equals("$I$Us$@I@D"))
@@ -58,7 +63,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _permisosProyectoRepository.CargarExpediente(documentosPermisosRequestDTO, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _permisosProyectoRepository.CargarExpediente(documentosPermisosRequestDTO, usuario);
             return Ok(resultado);
         }
 
@@ -67,7 +75,6 @@ namespace PlanQuinquenal.Controllers
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
-
             foreach (var item in identity.Claims)
             {
                 if (item.Type.Equals("$I$Us$@I@D"))
@@ -75,8 +82,11 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
 
-            var resultado = await _permisosProyectoRepository.Delete(id, idUser);
+            var resultado = await _permisosProyectoRepository.Delete(id, usuario);
             return Ok(resultado);
         }
         [HttpPost("Listar")]

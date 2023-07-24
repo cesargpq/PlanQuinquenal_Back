@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PlanQuinquenal.Core.DTOs;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -21,20 +22,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IConfiguration configuration;
         private readonly IMapper mapper;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public DocumentosRepository(PlanQuinquenalContext context, IConfiguration configuration,IMapper mapper) 
+        public DocumentosRepository(PlanQuinquenalContext context, IConfiguration configuration,IMapper mapper, ITrazabilidadRepository trazabilidadRepository) 
         {
             this._context = context;
             this.configuration = configuration;
             this.mapper = mapper;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
 
-        public async Task<ResponseDTO> Add(DocumentoRequestDto documentoRequestDto, int idUser)
+        public async Task<ResponseDTO> Add(DocumentoRequestDto documentoRequestDto, DatosUsuario usuario)
         {
             ResponseDTO obj =new ResponseDTO();
             if (documentoRequestDto.Modulo.Equals("PQ"))
             {
-                var data  =await QuinquenalAdd(documentoRequestDto);
+                var data  =await QuinquenalAdd(documentoRequestDto,usuario);
+
                 if (data)
                 {
                     obj.Valid = true;
@@ -49,7 +53,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else if (documentoRequestDto.Modulo.Equals("PY"))
             {
-                var data = await ProyectosAdd(documentoRequestDto);
+                var data = await ProyectosAdd(documentoRequestDto, usuario);
                 if (data)
                 {
                     obj.Valid = true;
@@ -65,7 +69,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else if (documentoRequestDto.Modulo.Equals("PA"))
             {
-                var data = await PlanAnualAdd(documentoRequestDto);
+                var data = await PlanAnualAdd(documentoRequestDto, usuario);
                 if (data)
                 {
                     obj.Valid = true;
@@ -80,7 +84,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else if (documentoRequestDto.Modulo.Equals("BR"))
             {
-                var data = await BolsaReemplazoAdd(documentoRequestDto);
+                var data = await BolsaReemplazoAdd(documentoRequestDto, usuario);
                 if (data)
                 {
                     obj.Valid = true;
@@ -93,10 +97,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 }
             }
+
+            
             return obj;
         }
 
-        public async Task<bool> BolsaReemplazoAdd(DocumentoRequestDto documentoRequestDto)
+        public async Task<bool> BolsaReemplazoAdd(DocumentoRequestDto documentoRequestDto, DatosUsuario usuario)
         {
             try
             {
@@ -119,6 +125,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
 
                     saveDocument(documentoRequestDto, guidId,resultado.CodigoProyecto);
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Documento";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el documento  {map.CodigoDocumento}";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                 }
                 return true;
             }
@@ -127,7 +148,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return false;
             }
         }
-        public async Task<bool> PlanAnualAdd(DocumentoRequestDto documentoRequestDto)
+        public async Task<bool> PlanAnualAdd(DocumentoRequestDto documentoRequestDto, DatosUsuario usuario)
         {
             try
             {
@@ -150,6 +171,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
 
                     saveDocument(documentoRequestDto, guidId,resultado.AnioPlan);
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Documento";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el documento  {map.CodigoDocumento}";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                 }
                 return true;
             }
@@ -161,7 +197,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
         }
-        public async Task<bool> QuinquenalAdd(DocumentoRequestDto documentoRequestDto)
+        public async Task<bool> QuinquenalAdd(DocumentoRequestDto documentoRequestDto, DatosUsuario usuario)
         {
             try
             {
@@ -184,7 +220,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     _context.Add(map);
                     await _context.SaveChangesAsync();
 
+
                     saveDocument(documentoRequestDto, guidId, resultado.AnioPlan);
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Documento";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el documento  {map.CodigoDocumento}";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
+
                 }
                 return true;
             }
@@ -196,7 +249,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
         }
-        public async Task<bool> ProyectosAdd(DocumentoRequestDto documentoRequestDto)
+        public async Task<bool> ProyectosAdd(DocumentoRequestDto documentoRequestDto, DatosUsuario usuario)
         {
             try
             {
@@ -219,6 +272,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
                    
                     saveDocument(documentoRequestDto, guidId,resultado.CodigoProyecto);
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Documento";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el documento  {map.CodigoDocumento}";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                     return true;
                 }
                 else
@@ -398,7 +466,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
         }
 
-        public async Task<ResponseDTO> Delete(int id, string modulo, int idUser)
+        public async Task<ResponseDTO> Delete(int id, string modulo,DatosUsuario usuario)
         {
             ResponseDTO obj = new ResponseDTO();
             try
@@ -413,6 +481,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
                         obj.Valid = true;
                         obj.Message = Constantes.EliminacionSatisfactoria;
+
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Eliminar").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Documento";
+                            trazabilidad.Evento = "Eliminar";
+                            trazabilidad.DescripcionEvento = $"Se eliminó correctamente el docuento {dato.CodigoDocumento} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
+
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return obj;
 
                     }
@@ -424,6 +508,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
                         obj.Valid = true;
                         obj.Message = Constantes.EliminacionSatisfactoria;
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Eliminar").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Documento";
+                            trazabilidad.Evento = "Eliminar";
+                            trazabilidad.DescripcionEvento = $"Se eliminó correctamente el docuento {dato.CodigoDocumento} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
+
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return obj;
                     }
                     else if (modulo.Equals("PQ"))
@@ -434,7 +533,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
                         obj.Valid = true;
                         obj.Message = Constantes.EliminacionSatisfactoria;
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Eliminar").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Documento";
+                            trazabilidad.Evento = "Eliminar";
+                            trazabilidad.DescripcionEvento = $"Se eliminó correctamente el docuento {dato.CodigoDocumento} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
 
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return obj;
                     }
                     else if (modulo.Equals("BR"))
@@ -445,9 +558,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
                         obj.Valid = true;
                         obj.Message = Constantes.EliminacionSatisfactoria;
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Documento , Eliminar").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Documento";
+                            trazabilidad.Evento = "Eliminar";
+                            trazabilidad.DescripcionEvento = $"Se eliminó correctamente el docuento {dato.CodigoDocumento} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
 
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return obj;
                     }
+
                     obj.Valid = true;
                     obj.Message = Constantes.ErrorSistema;
                     return obj;

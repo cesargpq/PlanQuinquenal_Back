@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+﻿using PlanQuinquenal.Core.DTOs;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
@@ -11,10 +12,10 @@ namespace PlanQuinquenal.Core.Interfaces
 {
     public interface IPermisosProyectoRepository
     {
-        Task<ResponseDTO> Add(PermisoRequestDTO permisoRequestDTO, int idUser);
+        Task<ResponseDTO> Add(PermisoRequestDTO permisoRequestDTO, DatosUsuario usuario);
         Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(int idProyecto, string TipoPermiso);
-        Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO,int idUser);
-        Task<ResponseDTO> Delete(int id, int idUser);
+        Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO,DatosUsuario usuario);
+        Task<ResponseDTO> Delete(int id, DatosUsuario usuario);
         Task<PaginacionResponseDto<DocumentoPermisosResponseDTO>> Listar(ListDocumentosRequestDto listDocumentosRequestDto);
         Task<ResponseEntidadDto<DocumentoPermisosResponseDTO>> Download(int id);
 

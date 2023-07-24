@@ -29,7 +29,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public int? TipoProyectoId { get; set; }
         public string? TipoProyecto { get; set; }
         public int? TipoRegistroId { get; set; }
-        public string    TipoRegistro { get; set; }
+        public string?    TipoRegistro { get; set; }
         public int? IngenieroResponsableId { get; set; }
         public string? IngenieroResponsable { get; set; }
         public Decimal? LongAprobPa { get; set; }

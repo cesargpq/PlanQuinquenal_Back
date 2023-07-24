@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.DTOs.ResponseDTO;
+﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface ITrazabilidadRepository
     {
         Task<ResponseDTO> Add(List<Trazabilidad> t);
+        Task<PaginacionResponseDtoException<TrazabilidadDetalle>> Listar(RequestAuditDto r);
     }
 }

@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+﻿using PlanQuinquenal.Core.DTOs;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
@@ -16,9 +17,9 @@ namespace PlanQuinquenal.Core.Interfaces
 
         Task<PaginacionResponseDtoException<PQuinquenalResponseDto>> GetSeleccionados(PlanQuinquenalSelectedId p);
 
-        Task<ResponseDTO> Add(PQuinquenalReqDTO p,int id);
+        Task<ResponseDTO> Add(PQuinquenalReqDTO p,DatosUsuario usuario);
         Task<ResponseEntidadDto<PQuinquenalResponseDto>> GetById(int id);
-        Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id, int idUser);
+        Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id, DatosUsuario usuario);
         //Task<bool> CreatePQ(PQuinquenalReqDTO pQuinquenalReqDTO, int idUser);
         //Task<Object> ActualizarPQ(PQuinquenalReqDTO planquinquenal, int idUser);
         Task<Object> CrearComentario(Comentarios_proyecDTO comentario, int idUser, string modulo);

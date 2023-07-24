@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanQuinquenal.Core.Entities
+namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
-    public class Trazabilidad
+    public class TrazabilidadDetalle
     {
-        public int Id { get; set; }
+        public int? TOTAL { get; set; }
         public string? Tabla { get; set; }
         public string? Evento { get; set; }
         public string? DescripcionEvento { get; set; }
-        public int? UsuarioId { get; set; }
         public string? DireccionIp { get; set; }
         public DateTime? FechaRegistro { get; set; }
+        public string?  Usuario { get; set; }
     }
 }

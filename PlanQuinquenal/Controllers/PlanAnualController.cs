@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Repositories;
+using System.Net;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -37,10 +39,13 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
-            var resultado = await planAnualRepository.Add(p, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+
+            var resultado = await planAnualRepository.Add(p, usuario);
             return Ok(resultado);
         }
 
@@ -61,10 +66,13 @@ namespace PlanQuinquenal.Controllers
                 if (item.Type.Equals("$I$Us$@I@D"))
                 {
                     idUser = Convert.ToInt16(item.Value);
-
                 }
             }
-            var resultado = await planAnualRepository.Update(dto, id, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+
+            var resultado = await planAnualRepository.Update(dto, id, usuario);
             return Ok(resultado);
         }
     }

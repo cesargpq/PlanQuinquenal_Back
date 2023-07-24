@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+﻿using PlanQuinquenal.Core.DTOs;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
@@ -13,9 +14,9 @@ namespace PlanQuinquenal.Core.Interfaces
     {
         Task<ResponseDTO> GetUrl(int id, string modulo);
         Task<DocumentoResponseDto> Download(int id, string modulo);
-        Task<ResponseDTO> Add(DocumentoRequestDto documentoRequestDto, int idUser);
+        Task<ResponseDTO> Add(DocumentoRequestDto documentoRequestDto, DatosUsuario usuario);
 
         Task<PaginacionResponseDto<DocumentoResponseDto>> Listar(ListDocumentosRqDTO listDocumentosRequestDto);
-        Task<ResponseDTO> Delete(int id, string modulo, int idUser);
+        Task<ResponseDTO> Delete(int id, string modulo, DatosUsuario usuario);
     }
 }

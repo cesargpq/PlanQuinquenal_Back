@@ -18,8 +18,8 @@ namespace PlanQuinquenal.Core.Interfaces
         
         Task<PaginacionResponseDtoException<ProyectoDetalle>> GetAll2(FiltersProyectos filterProyectos);
         Task<PaginacionResponseDtoException<ProyectoEtapaResponseDto>> ListarEtapas(EtapasListDto filterProyectos);
-        Task<ResponseDTO> Update(ProyectoRequestUpdateDto p,int id, int idUser);
+        Task<ResponseDTO> Update(ProyectoRequestUpdateDto p,int id, DatosUsuario usuario);
         Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto,DatosUsuario usuario);
-        Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data);
+        Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data, DatosUsuario usuario);
     }
 }

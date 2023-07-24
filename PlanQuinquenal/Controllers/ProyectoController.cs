@@ -54,7 +54,20 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("ProyectoImport")]
         public async Task<IActionResult> ProyectoImport(RequestMasivo data)
         {
-            var resultado = await _proyectoRepository.ProyectoImport(data);
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _proyectoRepository.ProyectoImport(data,usuario);
+
             return Ok(resultado);
         }
         //[HttpPost("Listar")]
@@ -81,7 +94,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _proyectoRepository.Update(proyecto,id,idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _proyectoRepository.Update(proyecto,id, usuario);
             return Ok(resultado);
         }
         [HttpPost("ListarEtapas")]

@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Repositories;
+using System.Net;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -33,7 +35,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _impedimentoRepository.Add(p, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _impedimentoRepository.Add(p, usuario);
 
             return Ok(resultado);
         }
@@ -49,7 +54,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _impedimentoRepository.Update(p, idUser, id);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _impedimentoRepository.Update(p, usuario, id);
 
             return Ok(resultado);
         }
@@ -65,7 +73,6 @@ namespace PlanQuinquenal.Controllers
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
-
             foreach (var item in identity.Claims)
             {
                 if (item.Type.Equals("$I$Us$@I@D"))
@@ -73,7 +80,10 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
-            var resultado = await _impedimentoRepository.Documentos(p, idUser);
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _impedimentoRepository.Documentos(p, usuario);
 
             return Ok(resultado);
         }
@@ -107,7 +117,19 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("ImpedimentosImport")]
         public async Task<IActionResult> ProyectoImport(RequestMasivo data)
         {
-            var resultado = await _impedimentoRepository.ProyectoImport(data);
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _impedimentoRepository.ProyectoImport(data,usuario);
             return Ok(resultado);
         }
         [HttpDelete]
@@ -115,7 +137,6 @@ namespace PlanQuinquenal.Controllers
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
-
             foreach (var item in identity.Claims)
             {
                 if (item.Type.Equals("$I$Us$@I@D"))
@@ -123,8 +144,11 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
 
-            var resultado = await _impedimentoRepository.Delete(id, idUser);
+            var resultado = await _impedimentoRepository.Delete(id, usuario);
             return Ok(resultado);
         }
         [HttpDelete("DeleteDocumentos")]
@@ -132,7 +156,6 @@ namespace PlanQuinquenal.Controllers
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var idUser = 0;
-
             foreach (var item in identity.Claims)
             {
                 if (item.Type.Equals("$I$Us$@I@D"))
@@ -140,8 +163,11 @@ namespace PlanQuinquenal.Controllers
                     idUser = Convert.ToInt16(item.Value);
                 }
             }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
 
-            var resultado = await _impedimentoRepository.DeleteDocumentos(id, idUser);
+            var resultado = await _impedimentoRepository.DeleteDocumentos(id, usuario);
             return Ok(resultado);
         }
 

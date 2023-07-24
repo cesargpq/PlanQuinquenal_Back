@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -23,12 +24,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
         private readonly IRepositoryMantenedores _repositoryMantenedores;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public BaremoRepository(PlanQuinquenalContext context, IMapper mapper, IRepositoryMantenedores repositoryMantenedores) 
+        public BaremoRepository(PlanQuinquenalContext context, IMapper mapper, IRepositoryMantenedores repositoryMantenedores, ITrazabilidadRepository trazabilidadRepository) 
         {
             this._context = context;
             this.mapper = mapper;
             this._repositoryMantenedores = repositoryMantenedores;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
 
         public async Task<Baremo> GetById(int id)
@@ -42,7 +45,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var baremo = await _context.Baremo.Where(x => x.CodigoBaremo == codigo).FirstOrDefaultAsync();
             return baremo;
         }
-        public async Task<ImportResponseDto<Baremo>> BaremoImport(RequestMasivo data)
+        public async Task<ImportResponseDto<Baremo>> BaremoImport(RequestMasivo data, DatosUsuario usuario)
         {
             ImportResponseDto<Baremo> dto = new ImportResponseDto<Baremo>();
             var base64Content = data.base64;
@@ -160,6 +163,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
 
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Importar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Baremo";
+                    trazabilidad.Evento = "Importar";
+                    trazabilidad.DescripcionEvento = $"Se insertó correctamente {listaBaremoInsert.Count()} ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
+
                 dto.listaError = listaBaremoError;
                 dto.listaRepetidos = listaBaremoRepetidos;
                 dto.listaInsert = listaBaremoInsert;
@@ -183,7 +202,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return dto;
         }
 
-        public async Task<ResponseDTO> Editarbaremo(BaremoRequestDto data, int id)
+        public async Task<ResponseDTO> Editarbaremo(BaremoRequestDto data, int id, DatosUsuario usuario)
         {
             ResponseDTO dto = new ResponseDTO();
             try
@@ -212,6 +231,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
                     dto.Message = Constantes.ActualizacionSatisfactoria;
                     dto.Valid = true;
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Editar").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Baremo";
+                        trazabilidad.Evento = "Editar";
+                        trazabilidad.DescripcionEvento = $"Se editó correctamente el Baremo {baremoExiste.CodigoBaremo} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
 
                 }
                 else
@@ -243,7 +278,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return false;
             }
         }
-        public async Task<ResponseDTO> EliminarBaremo( int id)
+        public async Task<ResponseDTO> EliminarBaremo( int id, DatosUsuario usuario)
         {
             ResponseDTO dto = new ResponseDTO();
             try
@@ -260,6 +295,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     dto.Message = Constantes.EliminacionSatisfactoria;
                     dto.Valid = true;
 
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Eliminar").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Baremo";
+                        trazabilidad.Evento = "Eliminar";
+                        trazabilidad.DescripcionEvento = $"Se eliminó correctamente el Baremo {baremoExiste.CodigoBaremo} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                 }
                 else
                 {
@@ -278,7 +328,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         }
 
-        public async Task<ResponseDTO> CrearBaremo(BaremoRequestDto data)
+        public async Task<ResponseDTO> CrearBaremo(BaremoRequestDto data, DatosUsuario usuario)
         {
             ResponseDTO dto = new ResponseDTO();
             try
@@ -305,6 +355,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
                     dto.Message = Constantes.CreacionExistosa;
                     dto.Valid = true;
+
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Baremo";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó correctamente el Baremo {baremo.CodigoBaremo} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
 
                 }
             }

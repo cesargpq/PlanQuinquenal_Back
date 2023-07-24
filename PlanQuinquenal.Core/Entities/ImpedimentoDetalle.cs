@@ -31,5 +31,6 @@ namespace PlanQuinquenal.Core.Entities
         public int? QuintoEstrato { get; set; }
         public int? TotalPotencial { get; set; }
         public DateTime? FechaRegistro { get; set; }
+        public bool? Reemplazado { get; set; }
     }
 }

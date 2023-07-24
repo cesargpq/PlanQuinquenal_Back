@@ -1,4 +1,6 @@
-﻿using PlanQuinquenal.Core.DTOs.ResponseDTO;
+﻿using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Core.Utilities;
@@ -41,6 +43,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     Valid = false
                 };
             }
+        }
+
+        public async  Task<PaginacionResponseDtoException<TrazabilidadDetalle>> Listar(RequestAuditDto r)
+        {
+            var resultad = await _context.TrazabilidadDetalle.FromSqlInterpolated($"EXEC listartrazabilidad  {r.Pagina} , {r.RecordsPorPagina}").ToListAsync();
+
+            var dato = new PaginacionResponseDtoException<TrazabilidadDetalle>
+            {
+                Cantidad = resultad.Count(),
+                Model  = resultad
+            };
+            return dato;
         }
     }
 }

@@ -28,12 +28,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         
         private readonly IRepositoryMantenedores _repositoryMantenedores;
         private readonly ITrazabilidadRepository _trazabilidadRepository;
-
-        public ProyectoRepositorio(PlanQuinquenalContext context, IMapper mapper,  IRepositoryMantenedores repositoryMantenedores , ITrazabilidadRepository trazabilidadRepository)
+        private readonly IRepositoryNotificaciones _repositoryNotificaciones;
+        public ProyectoRepositorio(PlanQuinquenalContext context, IMapper mapper,  IRepositoryMantenedores repositoryMantenedores , ITrazabilidadRepository trazabilidadRepository, IRepositoryNotificaciones repositoryNotificaciones )
         {
             this._context = context;
             this.mapper = mapper;
-
+            this._repositoryNotificaciones = repositoryNotificaciones;
             this._repositoryMantenedores = repositoryMantenedores;
             this._trazabilidadRepository = trazabilidadRepository;
         }
@@ -45,6 +45,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
                 var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto).FirstOrDefaultAsync();
                 
                 if (existe != null)
@@ -109,18 +112,59 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         Trazabilidad obj = new Trazabilidad();
                         List<Trazabilidad> lista = new List<Trazabilidad>();
                         obj.Tabla = "Proyecto";
-                        obj.Evento = "Creación";
+                        obj.Evento = "Crear";
                         obj.DescripcionEvento = $"Creación de un nuevo proyecto {proyecto.CodigoProyecto}";
                         obj.UsuarioId = usuario.UsuaroId;
                         obj.DireccionIp = usuario.Ip;
-                        obj.CampoActual = "";
-                        obj.CampoAnterior = "";
                         obj.FechaRegistro = DateTime.Now;
 
                         lista.Add(obj);
                         await _trazabilidadRepository.Add(lista);
                     }
-                    
+
+
+
+
+                    #region Comparacion de estructuras y agregacion de cambios
+
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = proyecto.CodigoProyecto.ToString()
+                    };
+
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+
+                    foreach (var listaUsuInters in proyectoRequestDto.UsuariosInteresados)
+                    {
+                        int cod_usu = listaUsuInters;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "PROYECTOS";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = proyectoRequestDto.CodigoProyecto;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el proyecto {proyectoRequestDto.CodigoProyecto}";
+                            notifProyecto.codigo = proyecto.Id;
+                            notifProyecto.modulo = "P";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
+                        }
+                    }
+
+                    #endregion
                     return new ResponseDTO
                     {
                         Valid = true,
@@ -139,7 +183,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        public async Task<ResponseDTO> Update(ProyectoRequestUpdateDto p, int id, int idUser)
+        public async Task<ResponseDTO> Update(ProyectoRequestUpdateDto p, int id, DatosUsuario usuario)
         {
             try
             {
@@ -167,7 +211,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         existe.LongRealPend = p.LongRealPend;
                         existe.LongRealHab = p.LongRealHab;
                         existe.LongProyectos = p.LongProyectos;
-                        existe.UsuarioModificaId = idUser;
+                        existe.UsuarioModificaId = usuario.UsuaroId;
                         existe.fechamodifica = DateTime.Now;
                         _context.Update(existe);
                         await _context.SaveChangesAsync();
@@ -200,6 +244,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 await _context.SaveChangesAsync();
                             }
 
+                        }
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Proyectos , Crear").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Proyecto";
+                            trazabilidad.Evento = "Editar";
+                            trazabilidad.DescripcionEvento = $"Se actualizó correctamente el proyecto {existe.CodigoProyecto} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
+
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
                         }
                         var objeto = new ResponseDTO
                         {
@@ -272,7 +331,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return dato;
         }
 
-        public async Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data)
+        public async Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data, DatosUsuario usuario)
         {
 
             ImportResponseDto<Proyecto> dto = new ImportResponseDto<Proyecto>();
@@ -310,17 +369,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var codPQ = worksheet.Cells[row, 2].Value?.ToString();
                             var anioPQ = worksheet.Cells[row, 3].Value?.ToString();
                             var anioPA = worksheet.Cells[row, 4].Value?.ToString();
-                            var etapa = worksheet.Cells[row, 5].Value?.ToString();
-                            var material = worksheet.Cells[row, 6].Value?.ToString();
-                            var constructor = worksheet.Cells[row, 7].Value?.ToString();
-                            var tipoRegistro = worksheet.Cells[row, 8].Value?.ToString();
-                            var distrito = worksheet.Cells[row, 9].Value?.ToString();
-                            var tipoProyecto = worksheet.Cells[row, 10].Value?.ToString();
-                            var longAproPa = worksheet.Cells[row, 11].Value?.ToString();
-                            var longRealHab = worksheet.Cells[row, 12].Value?.ToString();
-                            var longRealPend = worksheet.Cells[row, 13].Value?.ToString();
-                            var codMalla = worksheet.Cells[row, 14].Value?.ToString();
-                            var codVNR = worksheet.Cells[row, 15].Value?.ToString();
+                            var material = worksheet.Cells[row, 5].Value?.ToString();
+                            var constructor = worksheet.Cells[row, 6].Value?.ToString();
+                            var tipoRegistro = worksheet.Cells[row, 7].Value?.ToString();
+                            var distrito = worksheet.Cells[row, 8].Value?.ToString();
+                            var tipoProyecto = worksheet.Cells[row, 9].Value?.ToString();
+                            var longAproPa = worksheet.Cells[row, 10].Value?.ToString();
+                            var longRealHab = worksheet.Cells[row, 11].Value?.ToString();
+                            var longRealPend = worksheet.Cells[row, 12].Value?.ToString();
+                            var codMalla = worksheet.Cells[row, 13].Value?.ToString();
+                            var codVNR = worksheet.Cells[row, 14].Value?.ToString();
 
                             var dPQ = PlanQuin.Where(x => x.Descripcion == codPQ).FirstOrDefault();
                             var PlanAnualId = PlanAnu.Where(x => x.Descripcion == anioPA).FirstOrDefault();
@@ -373,7 +431,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CodigoMalla = codMalla,
                                         BaremoId = codigoVNR,
                                         FechaRegistro = DateTime.Now,
-                                        fechamodifica = DateTime.Now
+                                        fechamodifica = DateTime.Now,
+                                        UsuarioRegisterId = usuario.UsuaroId,
+                                        UsuarioModificaId = usuario.UsuaroId
 
                                     };
                                     lista.Add(entidad);
@@ -424,7 +484,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     existe.UsuarioRegisterId = existes.UsuarioRegisterId;
                                     existe.UsuarioModificaId = existes.UsuarioModificaId;
                                     existe.FechaRegistro = existes.FechaRegistro;
-                                    existe.fechamodifica = existes.fechamodifica;
+                                    existe.fechamodifica = DateTime.Now;
                                     existe.FechaGasificacion = existes.FechaGasificacion;
                                     existe.LongAprobPa = item.LongAprobPa;
                                     existe.LongRealHab = item.LongRealHab;
@@ -432,7 +492,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     //existe.LongImpedimentos = existes.LongImpedimentos;
                                     //existe.LongReemplazada = existes.LongReemplazada;
                                     existe.LongProyectos = existes.LongProyectos;
-
+                                    existe.UsuarioModificaId = usuario.UsuaroId;
                                     listaRepetidosInsert.Add(existe);
 
                                 }
@@ -477,7 +537,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                 }
 
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Proyectos , Crear").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Proyecto";
+                    trazabilidad.Evento = "Crear Masivo";
+                    trazabilidad.DescripcionEvento = $"Se insertó masivamente {listaInsert.Count()} proyectos, se actualizó correctamente {listaRepetidos.Count()} proyectos , se insertó con error {listaError.Count()} proyectos";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
 
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
                 dto.listaError = listaError;
                 dto.listaRepetidos = listaRepetidos;
                 dto.listaInsert = listaInsert;

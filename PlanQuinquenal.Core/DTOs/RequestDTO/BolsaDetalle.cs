@@ -29,7 +29,8 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public DateTime? FechaModifica { get; set; }
         public string? UsuarioRegister { get; set; }
         public string? UsuarioModifica { get; set; }
-        
-        
+        public bool? Reemplazado { get; set; }
+        public int? NumeroReemplazo { get; set; }
+
     }
 }

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using iTextSharp.text.pdf.security;
 using static iTextSharp.text.pdf.AcroFields;
 using ApiDavis.Core.Utilidades;
+using PlanQuinquenal.Core.DTOs;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -26,15 +27,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
         private readonly HashService hashService;
+        private readonly ITrazabilidadRepository _trazabilidadRepository;
 
-        public InforemesActasRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, HashService hashService)
+        public InforemesActasRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, HashService hashService, ITrazabilidadRepository trazabilidadRepository)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
             this.hashService = hashService;
+            this._trazabilidadRepository = trazabilidadRepository;
         }
-        public async Task<ResponseDTO> Crear(InformeReqDTO informeReqDTO, int id)
+        public async Task<ResponseDTO> Crear(InformeReqDTO informeReqDTO, DatosUsuario usuario)
         {
 
             try
@@ -111,16 +114,32 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var informe = mapper.Map<Informe>(informeReqDTO);
                 
                 informe.TipoSeguimiento = tipoSeguimiento;
-                informe.UsuarioRegister = id;
+                informe.UsuarioRegister = usuario.UsuaroId;
                 informe.FechaReunion = informeReqDTO.FechaReunion != null ? DateTime.Parse(informeReqDTO.FechaReunion) : null;
                 informe.FechaInforme = informeReqDTO.FechaInforme != null ? DateTime.Parse(informeReqDTO.FechaInforme) : null;
                 informe.FechaCompromiso = informeReqDTO.FechaCompromiso != null ? DateTime.Parse(informeReqDTO.FechaCompromiso) : null;
-                informe.UsuarioModifica = id;
+                informe.UsuarioModifica = usuario.UsuaroId;
                 informe.FechaCreacion = DateTime.Now;
                 informe.FechaModificacion = DateTime.Now;
                 informe.Tipo = tipoInforme.Descripcion;
                 informe.TipoInformeId = tipoInforme.Id;
                 informe.Activo = true;
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Crear").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Actas";
+                    trazabilidad.Evento = "Crear";
+                    trazabilidad.DescripcionEvento = $"Se creó correctamente el Acta o Informe {informe.Id} del proyecto {informe.CodigoProyecto} ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
 
 
 
@@ -500,7 +519,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         }
 
 
-        public async Task<ResponseDTO> Update(InformeReqDTO informeReqDTO, int id,int idUser)
+        public async Task<ResponseDTO> Update(InformeReqDTO informeReqDTO, int id, DatosUsuario usuario)
         {
 
             try
@@ -578,7 +597,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 getInforme.FechaReunion = informeReqDTO.FechaReunion != null ? DateTime.Parse(informeReqDTO.FechaReunion) : null;
                 getInforme.FechaInforme = informeReqDTO.FechaInforme != null ? DateTime.Parse(informeReqDTO.FechaInforme) : null;
                 getInforme.FechaCompromiso = informeReqDTO.FechaCompromiso != null ? DateTime.Parse(informeReqDTO.FechaCompromiso) : null;
-                getInforme.UsuarioModifica = idUser;
+                getInforme.UsuarioModifica = usuario.UsuaroId;
                 getInforme.FechaModificacion = DateTime.Now;
                 getInforme.Tipo = tipoInforme.Descripcion;
                 getInforme.TipoInformeId = tipoInforme.Id;
@@ -591,6 +610,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 getInforme.Responsable = informeReqDTO.Responsable != null ? informeReqDTO.Responsable : null;
                 _context.Update(getInforme);
                 await _context.SaveChangesAsync();
+
+
+                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Editar").ToListAsync();
+                if (resultad.Count > 0)
+                {
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Actas";
+                    trazabilidad.Evento = "Editar";
+                    trazabilidad.DescripcionEvento = $"Se editó correctamente acta {getInforme.Id} del proyecto {getInforme.CodigoProyecto}";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                }
 
 
                 string ruta = "";
@@ -816,19 +852,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return obj;
         }
 
-        public async Task<ResponseDTO> AprobarActa(AprobarActaDto a,int idUser)
+        public async Task<ResponseDTO> AprobarActa(AprobarActaDto a, DatosUsuario usuario)
         {
             try
             {
                 var resultado = await _context.Informe.Where(x => x.Id == a.CodigoActa).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
-                    var actaParticipante = await _context.ActaParticipantes.Where(x => x.UsuarioId == idUser && x.InformeId == a.CodigoActa).FirstOrDefaultAsync();
+                    var actaParticipante = await _context.ActaParticipantes.Where(x => x.UsuarioId == usuario.UsuaroId && x.InformeId == a.CodigoActa).FirstOrDefaultAsync();
                     if(actaParticipante != null)
                     {
                         actaParticipante.Activo = true;
                         _context.Update(actaParticipante);
                         await _context.SaveChangesAsync();
+
+
+                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Eliminar").ToListAsync();
+                        if (resultad.Count > 0)
+                        {
+                            Trazabilidad trazabilidad = new Trazabilidad();
+                            List<Trazabilidad> listaT = new List<Trazabilidad>();
+                            trazabilidad.Tabla = "Actas";
+                            trazabilidad.Evento = "Eliminar";
+                            trazabilidad.DescripcionEvento = $"Se eliminó correctamente el acta {resultado.Id} del proyecto {resultado.CodigoProyecto} ";
+                            trazabilidad.UsuarioId = usuario.UsuaroId;
+                            trazabilidad.DireccionIp = usuario.Ip;
+                            trazabilidad.FechaRegistro = DateTime.Now;
+
+                            listaT.Add(trazabilidad);
+                            await _trazabilidadRepository.Add(listaT);
+                        }
                         return new ResponseDTO
                         {
                             Valid = false,
@@ -866,13 +919,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
 
-        public async Task<ResponseDTO> Delete(int id)
+        public async Task<ResponseDTO> Delete(int id,DatosUsuario usuario)
         {
             var infomre = await _context.Informe.Where(x => x.Id == id).FirstOrDefaultAsync();
             infomre.Activo = false;
             _context.Update(infomre);
             await _context.SaveChangesAsync();
+            var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Eliminar").ToListAsync();
+            if (resultad.Count > 0)
+            {
+                Trazabilidad trazabilidad = new Trazabilidad();
+                List<Trazabilidad> listaT = new List<Trazabilidad>();
+                trazabilidad.Tabla = "Actas";
+                trazabilidad.Evento = "Eliminar";
+                trazabilidad.DescripcionEvento = $"Se eliminó correctamente el acta {infomre.Id} del proyecto {infomre.CodigoProyecto}";
+                trazabilidad.UsuarioId = usuario.UsuaroId;
+                trazabilidad.DireccionIp = usuario.Ip;
+                trazabilidad.FechaRegistro = DateTime.Now;
 
+                listaT.Add(trazabilidad);
+                await _trazabilidadRepository.Add(listaT);
+            }
             return new ResponseDTO { Valid = true, Message = Constantes.EliminacionSatisfactoria };
         }
     }
