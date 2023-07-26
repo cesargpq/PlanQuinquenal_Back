@@ -466,14 +466,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var codMalla = worksheet.Cells[row, 13].Value?.ToString();
                             var codVNR = worksheet.Cells[row, 14].Value?.ToString();
 
-                            var dPQ = PlanQuin.Where(x => x.Descripcion == codPQ).FirstOrDefault();
-                            var PlanAnualId = PlanAnu.Where(x => x.Descripcion == anioPA).FirstOrDefault();
-                            var dMaterial = Material.Where(x => x.Descripcion == material).FirstOrDefault();
-                            var dConstructor = Constructor.Where(x => x.Descripcion == constructor).FirstOrDefault();
-                            var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion == tipoProyecto).FirstOrDefault();
-                            var dDistrito = Distrito.Where(x => x.Descripcion == distrito).FirstOrDefault();
-                            var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion == tipoRegistro).FirstOrDefault();
-                            var dCodigoVNR = Baremos.Where(x => x.Descripcion == codVNR).FirstOrDefault();
+                            var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
+                            var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
+                            var dMaterial = Material.Where(x => x.Descripcion.Contains(material)).FirstOrDefault();
+                            var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor)).FirstOrDefault();
+                            var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto)).FirstOrDefault();
+                            var dDistrito = Distrito.Where(x => x.Descripcion.Contains(distrito)).FirstOrDefault();
+                            var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion.Contains(tipoRegistro)).FirstOrDefault();
+                            var dCodigoVNR = Baremos.Where(x => x.Descripcion.Contains(codVNR)).FirstOrDefault();
                             int codigoVNR = 0;
                             if (dCodigoVNR != null)
                             {
