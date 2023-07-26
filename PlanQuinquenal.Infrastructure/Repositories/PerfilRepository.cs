@@ -29,81 +29,48 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                // Crear primero el registro en la tabla de roles
-                var nuevoRol = new Roles
+
+                var nPerfil = new Perfil
                 {
-                    nom_rol = nvoPerfil.nombre_perfil,
-                    estado_rol = "A"
+                    cod_rol = 0,
+                    Perm_viz_modulocodMod_permiso = 1,
+                    Permisos_viz_seccioncodSec_permViz = 1,
+                    nombre_perfil = nvoPerfil.nombre_perfil,
+                    estado_perfil = nvoPerfil.estado_perfil,
+                    cod_unidadNeg = nvoPerfil.cod_unidadNeg
                 };
 
-                _context.Roles.Add(nuevoRol);
+                // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
+                _context.Perfil.Add(nPerfil);
                 _context.SaveChanges();
 
-                // Consulta del Rol creado
+                //Se crea los permisos de los campos para ese prefil
 
-                var queryable = _context.Roles
-                                     .Where(x => x.nom_rol == nvoPerfil.nombre_perfil)
-                                     .AsQueryable();
-                double cantidad = await queryable.CountAsync();
-                if (cantidad == 1)
+                var QuerylistaCampos = _context.CamposModulo_Permisos.AsQueryable();
+                var listaCampos = await QuerylistaCampos.ToListAsync();
+                foreach (var campo in listaCampos)
                 {
-                    var queryCons = await _context.Roles
-                                     .Where(x => x.nom_rol == nvoPerfil.nombre_perfil)
-                                     .ToListAsync();
-                    // Crear una nueva instancia de la entidad
-                    var nPerfil = new Perfil
+                    var nuevoPermiso = new TablaPermisos_viz_seccion
                     {
-                        cod_rol = queryCons[0].cod_rol,
-                        Perm_viz_modulocodMod_permiso = 1,
-                        Permisos_viz_seccioncodSec_permViz = 1,
-                        nombre_perfil = nvoPerfil.nombre_perfil,
-                        estado_perfil = nvoPerfil.estado_perfil,
-                        cod_unidadNeg = nvoPerfil.cod_unidadNeg
+                        codSec_permViz = nPerfil.cod_perfil,
+                        visib_campo = false,
+                        edit_campo = false,
+                        cod_campo = campo.id
                     };
-
-                    // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
-                    _context.Perfil.Add(nPerfil);
+                    _context.Permisos_viz_seccion.Add(nuevoPermiso);
                     _context.SaveChanges();
-
-                    //Se crea los permisos de los campos para ese prefil
-
-                    var QuerylistaCampos = _context.CamposModulo_Permisos.AsQueryable();
-                    var listaCampos = await QuerylistaCampos.ToListAsync();
-                    foreach (var campo in listaCampos)
-                    {
-                        var nuevoPermiso = new TablaPermisos_viz_seccion
-                        {
-                            codSec_permViz = queryCons[0].cod_rol,
-                            visib_campo = false,
-                            edit_campo = false,
-                            cod_campo = campo.id
-                        };
-                        _context.Permisos_viz_seccion.Add(nuevoPermiso);
-                        _context.SaveChanges();
-                    }
-
-                    var resp = new
-                    {
-                        idMensaje = "1",
-                        mensaje = "Se creo el perfil correctamente"
-                    };
-
-                    var json = JsonConvert.SerializeObject(resp);
-                    return json;
                 }
-                else
+
+                var resp = new
                 {
-                    var resp = new
-                    {
-                        idMensaje = "0",
-                        mensaje = "Hubo un error al crear el perfil"
-                    };
+                    idMensaje = "1",
+                    mensaje = "Se creo el perfil correctamente"
+                };
 
-                    var json = JsonConvert.SerializeObject(resp);
-                    return json;
-                }
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
 
-                
+
             }
             catch (Exception ex)
             {
