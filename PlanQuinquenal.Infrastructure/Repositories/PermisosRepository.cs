@@ -209,8 +209,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 dynamic obj = new ExpandoObject();
                 obj.nom_seccion = campo.descripcion;
+                int count = 0;
                 foreach (var perfilItem in listaPerfiles)
                 {
+                    count++;
                     int perfil_sec = perfilItem.cod_perfil;
                     var listapermisos = await _context.Permisos_viz_seccion.Where(x => x.codSec_permViz == perfil_sec)
                         .Where(x => x.cod_campo == campo.id).ToListAsync();
@@ -218,7 +220,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     perfil.id = listapermisos[0].cod_perm_campo;
                     perfil.edit_campo = listapermisos[0].edit_campo;
                     perfil.nombre = perfilItem.nombre_perfil;
-                    string perfilNombre = "Perfil" + perfilItem.cod_perfil;
+                    string perfilNombre = "Perfil" + count;
                     ((IDictionary<string, object>)obj)[perfilNombre] = perfil;
                 }
 
