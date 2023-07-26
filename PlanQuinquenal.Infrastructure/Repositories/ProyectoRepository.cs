@@ -792,7 +792,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             List<CorreoTabla> camposModificados = new List<CorreoTabla>();
             DateTime fechaActual = DateTime.Today;
             string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
-            Type tipo = typeof(object);
+            Type tipo = valOriginal.GetType();
 
             // Obtener las propiedades del tipo
             PropertyInfo[] propiedades = tipo.GetProperties();

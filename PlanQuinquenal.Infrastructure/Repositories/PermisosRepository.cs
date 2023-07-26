@@ -209,16 +209,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 dynamic obj = new ExpandoObject();
                 obj.nom_seccion = campo.descripcion;
+                int count = 0;
                 foreach (var perfilItem in listaPerfiles)
                 {
-                    int perfil_sec = perfilItem.Permisos_viz_seccioncodSec_permViz;
+                    count++;
+                    int perfil_sec = perfilItem.cod_perfil;
                     var listapermisos = await _context.Permisos_viz_seccion.Where(x => x.codSec_permViz == perfil_sec)
                         .Where(x => x.cod_campo == campo.id).ToListAsync();
                     dynamic perfil = new ExpandoObject();
                     perfil.id = listapermisos[0].cod_perm_campo;
                     perfil.edit_campo = listapermisos[0].edit_campo;
                     perfil.nombre = perfilItem.nombre_perfil;
-                    string perfilNombre = "Perfil" + perfilItem.cod_perfil;
+                    string perfilNombre = "Perfil" + count;
                     ((IDictionary<string, object>)obj)[perfilNombre] = perfil;
                 }
 
@@ -240,7 +242,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             List<dynamic> listaPermisos = new List<dynamic>();
             var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == idUser).ToListAsync();
-            int codigoPerm = Usuario[0].Perfil.Permisos_viz_seccioncodSec_permViz;
+            int codigoPerm = Usuario[0].Perfil.cod_perfil;
 
             var lstCamposPermiso = await _context.Permisos_viz_seccion.Include(y => y.campo).Where(y => y.codSec_permViz == codigoPerm)
                 .Where(y => y.campo.pagina == nombrePagina).ToListAsync();

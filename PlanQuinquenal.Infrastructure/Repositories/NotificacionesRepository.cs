@@ -35,7 +35,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resp = new
             {
                 idMensaje = "1",
-                mensaje = "Se modifico el proyecto correctamente"
+                mensaje = "Se modifico el estado de la notificacion"
             };
 
             var json = JsonConvert.SerializeObject(resp);
@@ -55,7 +55,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 cantidad = cantidad,
                 idMensaje = "1",
-                mensaje = "Se modifico el proyecto correctamente"
+                mensaje = "Se realizo la consulta correctamente correctamente\""
             };
 
             var json = JsonConvert.SerializeObject(resp);
