@@ -39,7 +39,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var proy = await _context.Proyecto.Where(x =>x.CodigoProyecto.Equals(p.codProyecto)).FirstOrDefaultAsync();
+                var proy = await _context.Proyecto.Where(x =>x.Id == p.codProyecto).FirstOrDefaultAsync();
                 var baremo = await _context.Baremo.Where(x=>x.Id  == proy.BaremoId).FirstOrDefaultAsync();
                 Impedimento obj = new Impedimento();
                 obj.ProyectoId = proy.Id;
@@ -567,7 +567,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                     var resultado = new ResponseDTO
                     {
-                        Valid = false,
+                        Valid = true,
                         Message = Constantes.EliminacionSatisfactoria
                     };
                     return resultado;
@@ -623,7 +623,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                     var resultado = new ResponseDTO
                     {
-                        Valid = false,
+                        Valid = true,
                         Message = Constantes.EliminacionSatisfactoria
                     };
 

@@ -13,10 +13,10 @@ namespace PlanQuinquenal.Core.Entities
         [Key]
         public int id { get; set; }
         public bool seleccion { get; set; }
-        public int iduser { get; set; }
-        public int idColum { get; set; }
+        public int? iduser { get; set; }
+        public int? idColum { get; set; }
 
         [ForeignKey("idColum")]
-        public ColumnasTablas columTabla { get; set; }
+        public ColumnasTablas? columTabla { get; set; }
     }
 }

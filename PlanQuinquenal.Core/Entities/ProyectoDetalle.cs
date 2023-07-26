@@ -45,7 +45,6 @@ namespace PlanQuinquenal.Core.Entities
         public DateTime? FechaGasificacion { get; set; }
 
         public string? EstadoGeneral { get; set; }
-        
-        
+        public Decimal? CostoInversion { get; set; }
     }
 }

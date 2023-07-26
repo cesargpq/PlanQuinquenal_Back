@@ -11,7 +11,7 @@ namespace PlanQuinquenal.Core.Entities
     {
         [Key]
         public int id { get; set; }
-        public int cod_usu { get; set; }
+        public int? cod_usu { get; set; }
         public string seccion { get; set; }
         public string nombreComp_usu { get; set; }
         public string cod_reg { get; set; }

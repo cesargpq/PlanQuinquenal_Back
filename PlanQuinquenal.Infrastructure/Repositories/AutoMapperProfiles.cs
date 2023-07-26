@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -30,6 +31,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<MaestroResponseDto, Reemplazo>();
             CreateMap<Reemplazo, MaestroResponseDto>();
 
+            CreateMap<ProyectoRequestUpdateDto, Proyecto>();
+            CreateMap<Proyecto, ProyectoRequestUpdateDto>();
+
+            
 
             CreateMap<MaestroResponseDto, EstadoAprobacion>();
             CreateMap<EstadoAprobacion, MaestroResponseDto>();

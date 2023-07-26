@@ -76,5 +76,14 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
+
+        [HttpGet("GetAvance({id:int})")]
+        public async Task<IActionResult> GetAvance(int id)
+        {
+            var resultado = await planQuinquenalesRepository.GetAvance(id);
+
+            return Ok(resultado);
+        }
+
     }
 }

@@ -25,7 +25,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._repositoryMantenedores = repositoryMantenedores;
         }
 
-        public async Task<LongMesesResponseDto> ListarAvanceMensual(AvanceMensualDto o)
+        public async Task<List<ListaPqMensual>> ListarAvanceMensual(AvanceMensualDto o)
         {
             var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIO  {o.Anio} , {o.MaterialId}").ToListAsync();
 
@@ -34,201 +34,231 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var countQuinquenal = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
 
             
-            List<MensualDtoResponse> listaMensual = new List<MensualDtoResponse>();
-
-            List<string> categorias = new List<string>();
-            #region categorias
-            categorias.Add("Enero");
-            categorias.Add("Febrero");
-            categorias.Add("Marzo");
-            categorias.Add("Abril");
-            categorias.Add("Mayo");
-            categorias.Add("Junio");
-            categorias.Add("Julio");
-            categorias.Add("Agosto");
-            categorias.Add("Septiembre");
-            categorias.Add("Octubre");
-            categorias.Add("Novimebre");
-            categorias.Add("Diciembre");
-            #endregion  
-
-            List<Decimal> enero = new List<Decimal>();
-            List<Decimal> febrero = new List<Decimal>();
-            List<Decimal> marzo = new List<Decimal>();
-            List<Decimal> abril = new List<Decimal>();
-            List<Decimal> mayo = new List<Decimal>();
-            List<Decimal> junio = new List<Decimal>();
-            List<Decimal> julio = new List<Decimal>();
-            List<Decimal> agosto = new List<Decimal>();
-            List<Decimal> setiembre = new List<Decimal>();
-            List<Decimal> octubre = new List<Decimal>();
-            List<Decimal> noviembre = new List<Decimal>();
-            List<Decimal> diciembre = new List<Decimal>();
-
+            List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
             for (int i = 0; i < countQuinquenal.Count(); i++)
             {
                 foreach (var item in data)
                 {
                     var exist = item.Where(x => x.pquinquenalId == countQuinquenal.ElementAt(i).Id).FirstOrDefault();
+                    ListaPqMensual obj = new ListaPqMensual();
+                    
+                    HabilitadoDto habilitado = new HabilitadoDto();
                     if (exist != null && exist.pquinquenalId == countQuinquenal.ElementAt(i).Id)
                     {
-                        
-                        
+
                         var existeE = item.Where(x => x.Mes.Equals("Enero")).FirstOrDefault();
                         if (existeE != null)
                         {
-                            enero.Add(exist.LongitudConstruida);
-                        }
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
+                        }   
                         else
                         {
-                            enero.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
                         var existeF = item.Where(x => x.Mes.Equals("Febrero")).FirstOrDefault();
                         if (existeF != null)
                         {
-                            febrero.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            febrero.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
                         var existeM = item.Where(x => x.Mes.Equals("Marzo")).FirstOrDefault();
-                        if (existeF != null)
+                        if (existeM != null)
                         {
-                            marzo.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            marzo.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
                         var existeA = item.Where(x => x.Mes.Equals("Abril")).FirstOrDefault();
-                        if (existeF != null)
+                        if (existeA != null)
                         {
-                            abril.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            abril.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existeMa = item.Where(x => x.Mes.Equals("Mayo")).FirstOrDefault();
-                        if (existeMa != null)
+                        var existeMay = item.Where(x => x.Mes.Equals("Mayo")).FirstOrDefault();
+                        if (existeMay != null)
                         {
-                            mayo.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            mayo.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existeJ = item.Where(x => x.Mes.Equals("Junio")).FirstOrDefault();
-                        if (existeJ != null)
+                        var existeJuni = item.Where(x => x.Mes.Equals("Junio")).FirstOrDefault();
+                        if (existeJuni != null)
                         {
-                            junio.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            junio.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existejul = item.Where(x => x.Mes.Equals("Julio")).FirstOrDefault();
-                        if (existejul != null)
+                        var existeJuli = item.Where(x => x.Mes.Equals("Julio")).FirstOrDefault();
+                        if (existeJuli != null)
                         {
-                            julio.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            julio.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existeag = item.Where(x => x.Mes.Equals("Agosto")).FirstOrDefault();
-                        if (existeag != null)
+                        var existeAg = item.Where(x => x.Mes.Equals("Agosto")).FirstOrDefault();
+                        if (existeAg != null)
                         {
-                            agosto.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            agosto.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existes = item.Where(x => x.Mes.Equals("Septiembre")).FirstOrDefault();
-                        if (existes != null)
+                        var existeSep = item.Where(x => x.Mes.Equals("Septiembre")).FirstOrDefault();
+                        if (existeSep != null)
                         {
-                            setiembre.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            setiembre.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existeo = item.Where(x => x.Mes.Equals("Octubre")).FirstOrDefault();
-                        if (existeo != null)
+                        var existeOc = item.Where(x => x.Mes.Equals("Octubre")).FirstOrDefault();
+                        if (existeOc != null)
                         {
-                            octubre.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            octubre.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existeN = item.Where(x => x.Mes.Equals("Noviembre")).FirstOrDefault();
-                        if (existeN != null)
+                        var existeNo = item.Where(x => x.Mes.Equals("Noviembre")).FirstOrDefault();
+                        if (existeNo != null)
                         {
-                            noviembre.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            noviembre.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-                        var existeD = item.Where(x => x.Mes.Equals("Diciembre")).FirstOrDefault();
-                        if (existeD != null)
+                        var existeDi = item.Where(x => x.Mes.Equals("Diciembre")).FirstOrDefault();
+                        if (existeDi != null)
                         {
-                            diciembre.Add(exist.LongitudConstruida);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(exist.LongitudConstruida);
                         }
                         else
                         {
-                            diciembre.Add(0);
+                            PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                            name.name = exist.anioplan;
+                            obj.PlanQuinquenal = name;
+                            obj.Habilitado.data.Add(0);
                         }
-
+                        
                     }
                     else
                     {
-                        
-                        var datao = countQuinquenal.ElementAt(i).Id;
-                        enero.Add(0);
-                        febrero.Add(0);
-                        marzo.Add(0);
-                        abril.Add(0);
-                        mayo.Add(0);
-                        junio.Add(0);
-                        julio.Add(0);
-                        agosto.Add(0);
-                        setiembre.Add(0);
-                        octubre.Add(0);
-                        noviembre.Add(0);
-                        diciembre.Add(0);
-                       
+
+                        PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal name = new PlanQuinquenal.Core.DTOs.ResponseDTO.PlanQuinquenal();
+                        name.name = countQuinquenal.ElementAt(i).Descripcion;
+                        obj.PlanQuinquenal = name;
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+                        obj.Habilitado.data.Add(0);
+
                     }
-                    if (i < countQuinquenal.Count()-1)
+                    if (i < countQuinquenal.Count() - 1)
                     {
                         i++;
                     }
+                  
+                    listaMensual.Add(obj);
 
                 }
-
             }
-                
-            var result = new LongMesesResponseDto 
-            { 
-                categorias= categorias,
-                enero   = enero,
-                febrero = febrero,
-                marzo = marzo,
-                abril   = abril,
-                mayo = mayo,
-                junio = junio,
-                julio = julio,
-                agosto = agosto,
-                septiembre =setiembre,
-                octubre = octubre,
-                noviembre =noviembre,
-                diciembre = diciembre
-            };
 
-            return result;
+            return listaMensual;
         }
 
         public async Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o)
