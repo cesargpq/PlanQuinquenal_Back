@@ -23,9 +23,10 @@ namespace PlanQuinquenal.Infrastructure.Data
         {
 
         }
-        
 
-            public virtual DbSet<TrazabilidadDetalle> TrazabilidadDetalle { get; set; }
+        
+        public virtual DbSet<AvancePQDto> AvancePQDto { get; set; }
+        public virtual DbSet<TrazabilidadDetalle> TrazabilidadDetalle { get; set; }
         public virtual DbSet<ReemplazoMaxDTO> ReemplazoMaxDTO { get; set; }
         public virtual DbSet<MensualDtoResponse> MensualDtoResponse { get; set; }
         public virtual DbSet<TrazabilidadVerifica> TrazabilidadVerifica { get; set; }
@@ -193,8 +194,12 @@ namespace PlanQuinquenal.Infrastructure.Data
               {
                   eb.HasNoKey();
               });
+            modelbuilder.Entity<AvancePQDto>(
+              eb =>
+              {
+                  eb.HasNoKey();
+              });
             
-
 
         }
 

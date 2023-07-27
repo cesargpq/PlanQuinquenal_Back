@@ -19,7 +19,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public string? CodigoMalla { get; set; }
         public int? PlanAnualId { get; set; }
         public string? AñoPA { get; set; }
-        public int? ProblematicaRealId { get; set; }
+        public string? ProblematicaRealId { get; set; }
         public int? MaterialId { get; set; }
         public string? Material { get; set; }
         public int? DistritoId { get; set; }
@@ -47,6 +47,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public int? BaremoId { get; set; }
         public string? EstadoGeneral { get; set; }
         public Decimal? Avance { get; set; }
+        public Decimal? CostoInversion { get; set; }
         [NotMapped]
         public List<UsuarioResponseDto> UsuariosInteresados { get; set; }
 

@@ -456,9 +456,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 if(maxReemplaxo.ElementAt(0).Numero != null)
                 {
                     bolsa.NumeroReemplazo = maxReemplaxo.ElementAt(0).Numero + 1;
+                    bolsa.ReemplazoId = p.NumeroReemplazo;
+                    bolsa.FechaPresenacionReemplazo = p.FechaPresenacionReemplazo;
                 }
                 else
                 {
+                    bolsa.ReemplazoId = p.NumeroReemplazo;
+                    bolsa.FechaPresenacionReemplazo = p.FechaPresenacionReemplazo;
                     bolsa.NumeroReemplazo = 1;
                 }
                 

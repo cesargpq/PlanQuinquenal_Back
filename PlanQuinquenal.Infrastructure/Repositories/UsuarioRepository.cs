@@ -73,7 +73,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      .Where(x => entidad.cod_perfil != 0 ? x.Perfilcod_perfil == entidad.cod_perfil : true)
                                      .AsQueryable();
 
-                var entidades = await queryable.OrderBy(e => e.nombre_usu).Paginar(entidad)
+                var entidades = await queryable.OrderBy(e => e.cod_usu).Paginar(entidad)
                                    .ToListAsync();
                 int cantidad = queryable.Count();
                 var objeto = new PaginacionResponseDto<Usuario>

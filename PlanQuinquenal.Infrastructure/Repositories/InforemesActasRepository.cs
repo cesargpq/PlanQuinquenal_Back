@@ -340,12 +340,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
             hashService.Parrafo(doc, $"Objetivo de la Reunión", _standardFont, false);
-            hashService.GenerarTextAreaLista(informe.Objetivos, doc);
-
+            hashService.Parrafo(doc, informe.Objetivos, _standardFont, false);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Agenda", _standardFont, false);
-            hashService.GenerarTextAreaLista(informe.Agenda, doc);
-
-
+            hashService.Parrafo(doc, informe.Agenda, _standardFont, false);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Acuerdos:", _standardFont, false);
 
             List<string> acuerdos = new List<string>();
@@ -353,8 +352,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 acuerdos.Add(item);
             }
-
-            hashService.GenerarLista(acuerdos, doc);
+            string cadenaAcuerdos = "";
+            foreach (var item in acuerdos)
+            {
+                cadenaAcuerdos += item +" ";
+            }
+            hashService.Parrafo(doc, cadenaAcuerdos, _standardFont, false);
+            doc.Add(Chunk.NEWLINE);
 
 
 

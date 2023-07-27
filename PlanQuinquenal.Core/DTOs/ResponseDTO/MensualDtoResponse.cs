@@ -10,6 +10,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
     {
         public string Mes { get; set; }
         public int pquinquenalId { get; set; }
+        public string anioplan { get; set; }
         public Decimal LongitudConstruida { get; set; }
     }
 }
