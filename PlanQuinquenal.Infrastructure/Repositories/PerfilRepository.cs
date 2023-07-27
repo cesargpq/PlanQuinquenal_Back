@@ -48,6 +48,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var QuerylistaCampos = _context.CamposModulo_Permisos.AsQueryable();
                 var listaCampos = await QuerylistaCampos.ToListAsync();
+                List<TablaPermisos_viz_seccion> listaInsert = new List<TablaPermisos_viz_seccion>();
                 foreach (var campo in listaCampos)
                 {
                     var nuevoPermiso = new TablaPermisos_viz_seccion
@@ -57,9 +58,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         edit_campo = false,
                         cod_campo = campo.id
                     };
-                    _context.Permisos_viz_seccion.Add(nuevoPermiso);
-                    _context.SaveChanges();
+
+                    listaInsert.Add(nuevoPermiso);
+                    //_context.Permisos_viz_seccion.Add(nuevoPermiso);
+                    //_context.SaveChanges();
                 }
+
+                await _context.BulkInsertAsync(listaInsert);
+                await _context.SaveChangesAsync();
 
                 var resp = new
                 {

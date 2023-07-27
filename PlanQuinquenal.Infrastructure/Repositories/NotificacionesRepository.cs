@@ -83,7 +83,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     modCom = config.modCom,
                     regInfActas = config.regInfActas,
                     modInfActas = config.modInfActas
-            };
+                };
 
                 // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
                 _context.Config_notificaciones.Add(nuevaConfNotificacion);

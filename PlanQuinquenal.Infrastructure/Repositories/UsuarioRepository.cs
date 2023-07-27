@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -20,12 +21,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
         private readonly HashService hashService;
+        private readonly IRepositoryNotificaciones _repositoryNotificaciones;
 
-        public UsuarioRepository(PlanQuinquenalContext context, IMapper mapper, HashService hashService) 
+        public UsuarioRepository(PlanQuinquenalContext context, IMapper mapper, HashService hashService, IRepositoryNotificaciones repositoryNotificaciones) 
         {
             this._context = context;
             this.mapper = mapper;
             this.hashService = hashService;
+            this._repositoryNotificaciones = repositoryNotificaciones;
         }
 
         public async Task<PaginacionResponseDto<Usuario>> GetAll(UsuarioListDTO entidad)
@@ -196,6 +199,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             var QuerylistaColums = _context.ColumnasTablas.AsQueryable();
             var listaColums = await QuerylistaColums.ToListAsync();
+            List<ColumTablaUsu> listaInsert = new List<ColumTablaUsu>();
             foreach (var campo in listaColums)
             {
                 var nuevoPermiso = new ColumTablaUsu
@@ -204,10 +208,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     iduser = usuarioDto.cod_usu,
                     idColum = campo.id
                 };
-                _context.ColumTablaUsu.Add(nuevoPermiso);
-                _context.SaveChanges();
-            }
 
+                listaInsert.Add(nuevoPermiso);
+                //_context.ColumTablaUsu.Add(nuevoPermiso);
+                //_context.SaveChanges();
+            }
+            await _context.BulkInsertAsync(listaInsert);
+            await _context.SaveChangesAsync();
+
+            #endregion
+
+            #region creacion de permisos de notificaciones 
+            var nuevaConfNotificacion = new Config_notificaciones
+            {
+                cod_usu = usuarioDto.cod_usu,
+                regPQ = true,
+                modPQ = true,
+                regPry = true,
+                modPry = true,
+                regImp = true,
+                modImp = true,
+                regPer = true,
+                modPer = true,
+                regEviReemp = true,
+                modEviReemp = true,
+                regCom = true,
+                modCom = true,
+                regInfActas = true,
+                modInfActas = true
+            };
+            await _repositoryNotificaciones.CrearConfigNotif(nuevaConfNotificacion);
             #endregion
             return resp;
         }
