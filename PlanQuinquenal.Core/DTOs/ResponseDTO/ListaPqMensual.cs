@@ -8,7 +8,8 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
     public class ListaPqMensual
     {
-        public PlanQuinquenal PlanQuinquenal { get; set; }
-        public HabilitadoDto Habilitado { get; set; } = new HabilitadoDto();
+        public string type { get; set; } = "column";
+        public string name { get; set; }
+        public List<decimal> data { get; set; } = new List<decimal>();
     }
 }

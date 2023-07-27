@@ -13,6 +13,6 @@ namespace PlanQuinquenal.Core.Interfaces
     {
         Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o);
         Task<ResposeDistritosDetalleDTO> ListarPermisos(RequestDashboradDTO o);
-        Task<List<ListaPqMensual>> ListarAvanceMensual(AvanceMensualDto o);
+        Task<MensualidadDTO> ListarAvanceMensual(AvanceMensualDto o);
     }
 }

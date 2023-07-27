@@ -28,7 +28,7 @@ namespace PlanQuinquenal.Controllers
             {
                 var worksheet = workbook.Worksheets.Add("Plan Quinquenal");
                 var currentRow = 1;
-                for (int i = 1; i <= 8; i++)
+                for (int i = 1; i <= 9; i++)
                 {
                     //worksheet.Cell(currentRow, i).Style.Fill.BackgroundColor = XLColor.FromHtml("#2ec6ff");
                     //worksheet.Cell(currentRow, i).Style.Font.SetBold();
@@ -86,7 +86,7 @@ namespace PlanQuinquenal.Controllers
             {
                 var worksheet = workbook.Worksheets.Add("Plan Quinquenal");
                 var currentRow = 1;
-                for (int i = 1; i <= 7; i++)
+                for (int i = 1; i <= 9; i++)
                 {
                     //worksheet.Cell(currentRow, i).Style.Fill.BackgroundColor = XLColor.FromHtml("#2ec6ff");
                     //worksheet.Cell(currentRow, i).Style.Font.SetBold();
