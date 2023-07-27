@@ -101,7 +101,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         .Where(x => entidad.UnidadNegocioId != 0 ? x.cod_unidadNeg == entidad.UnidadNegocioId : true)
                                         .AsQueryable();
 
-                var entidades = await queryable.OrderBy(e => e.nombre_perfil).Paginar(entidad).ToListAsync();
+                var entidades = await queryable.OrderBy(e => e.cod_perfil).Paginar(entidad).ToListAsync();
                 var unidad_negocio = await _context.Unidad_negocio.ToListAsync();
                 foreach (var perfil in entidades)
                 {
