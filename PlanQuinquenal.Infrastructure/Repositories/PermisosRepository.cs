@@ -205,6 +205,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             int cantRegist = QuerylistaCampos.Count();
             var listaCampos = await QuerylistaCampos.Paginar(paginacion).ToListAsync();
 
+            var listapermisos = await _context.Permisos_viz_seccion.ToListAsync();
+
             foreach (var campo in listaCampos)
             {
                 dynamic obj = new ExpandoObject();
@@ -214,11 +216,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     count++;
                     int perfil_sec = perfilItem.cod_perfil;
-                    var listapermisos = await _context.Permisos_viz_seccion.Where(x => x.codSec_permViz == perfil_sec)
-                        .Where(x => x.cod_campo == campo.id).ToListAsync();
+                    var lstPermXusu = listapermisos.Where(x => x.codSec_permViz == perfil_sec)
+                        .Where(x => x.cod_campo == campo.id).ToList();
                     dynamic perfil = new ExpandoObject();
-                    perfil.id = listapermisos[0].cod_perm_campo;
-                    perfil.edit_campo = listapermisos[0].edit_campo;
+                    perfil.id = lstPermXusu[0].cod_perm_campo;
+                    perfil.edit_campo = lstPermXusu[0].edit_campo;
                     perfil.nombre = perfilItem.nombre_perfil;
                     string perfilNombre = "Perfil" + count;
                     ((IDictionary<string, object>)obj)[perfilNombre] = perfil;
