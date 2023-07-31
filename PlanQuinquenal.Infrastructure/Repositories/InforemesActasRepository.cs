@@ -54,7 +54,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
                         return new ResponseDTO
                         {
-                            Valid = true,
+                            Valid = false,
                             Message = "No existe el proyecto ingresado"
                         };
                     }
@@ -151,7 +151,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string ruta = "";
                 string rutaFisica = "";
                 string rutadirectory = "";
-                informe.CodigoExpediente = "N°" + informe.Id.ToString("D7");
+                string tipoDocumentoEnum = "";
+
+                tipoDocumentoEnum = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "I" : "A";
+                informe.CodigoExpediente = tipoDocumentoEnum + informe.Id.ToString("D7");
 
                 string tipo = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "Informe" : "Acta";
                 if (tipoSeg.Descripcion.Equals("Proyectos"))
@@ -330,6 +333,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             hashService.Titulo(doc);
             hashService.Parrafo(doc, "ACTA DE REUNIÓN "+informe.CodigoExpediente, negrita, true);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Fecha: {informe.FechaReunion?.ToString("dd/MM/yyyy")}", _standardFont, false);
 
             hashService.Parrafo(doc, "Participantes:", _standardFont, false);
@@ -347,30 +351,51 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Acuerdos:", _standardFont, false);
 
-            List<string> acuerdos = new List<string>();
-            foreach (var item in informe.Acuerdos.Split("\n"))
+            if(informe.Acuerdos != null)
             {
-                acuerdos.Add(item);
+                List<string> acuerdos = new List<string>();
+                foreach (var item in informe.Acuerdos.Split("\n"))
+                {
+                    acuerdos.Add(item);
+                }
+                string cadenaAcuerdos = "";
+                foreach (var item in acuerdos)
+                {
+                    cadenaAcuerdos += item + " ";
+                }
+                hashService.Parrafo(doc, cadenaAcuerdos, _standardFont, false);
+                doc.Add(Chunk.NEWLINE);
             }
-            string cadenaAcuerdos = "";
-            foreach (var item in acuerdos)
+            else
             {
-                cadenaAcuerdos += item +" ";
+                hashService.Parrafo(doc, "", _standardFont, false);
+                doc.Add(Chunk.NEWLINE);
             }
-            hashService.Parrafo(doc, cadenaAcuerdos, _standardFont, false);
-            doc.Add(Chunk.NEWLINE);
 
 
 
             hashService.Parrafo(doc, $"Compromisos:", _standardFont, false);
 
-            List<string> compromisos = new List<string>();
-            foreach (var item in informe.Compromisos.Split("\n"))
+            if(informe.Compromisos != null)
             {
-                compromisos.Add(item);
-            }
+                List<string> compromisos = new List<string>();
+                foreach (var item in informe.Compromisos.Split("\n"))
+                {
+                    compromisos.Add(item);
+                }
 
-            hashService.GenerarLista(compromisos, doc);
+                hashService.GenerarLista(compromisos, doc);
+            }
+            else
+            {
+                List<string> compromisos = new List<string>();
+
+                compromisos.Add("");
+
+
+                hashService.GenerarLista(compromisos, doc);
+            }
+           
 
 
             hashService.Parrafo(doc, $"Responsable: {responsable}", _standardFont, false);
@@ -413,6 +438,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
             hashService.Titulo(doc);
             hashService.Parrafo(doc,"INFORME "+informe.CodigoExpediente,negrita,true);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Fecha: {informe.FechaInforme?.ToString("dd/MM/yyyy")}", _standardFont, false);
             hashService.Parrafo(doc, $"Resumen general", _standardFont, false);
             hashService.Parrafo(doc, informe.ResumenGeneral, _standardFont, false);
@@ -636,6 +662,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string ruta = "";
                 string rutaFisica = "";
                 string rutadirectory = "";
+                string tipoDocumentoEnum = "";
+                tipoDocumentoEnum = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "I" : "A";
                 getInforme.CodigoExpediente = "N°" + getInforme.Id.ToString("D7");
 
                 string tipo = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "Informe" : "Acta";

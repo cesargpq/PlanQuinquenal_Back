@@ -207,7 +207,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             mensual.categorias.Add("Agosto");
             mensual.categorias.Add("Septiembre");
             mensual.categorias.Add("Octubre");
-            mensual.categorias.Add("Novimebre");
+            mensual.categorias.Add("Noviembre");
             mensual.categorias.Add("Diciembre");
             mensual.ListaPqMensual = listaMensual;
             return mensual;

@@ -8,6 +8,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
     public class TrazabilidadDetalle
     {
+        public string Id { get; set; }
         public int? TOTAL { get; set; }
         public string? Tabla { get; set; }
         public string? Evento { get; set; }

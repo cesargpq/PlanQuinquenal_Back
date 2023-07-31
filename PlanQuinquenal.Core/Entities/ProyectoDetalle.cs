@@ -20,6 +20,7 @@ namespace PlanQuinquenal.Core.Entities
         public string? AnioPlanPA { get; set; }
         public int? MaterialId { get; set; }
         public string? Material { get; set; }
+        public string? ProblematicaReal { get; set; }
         public int? DistritoId { get; set; }
         public string? Distrito { get; set; }
         public int? ConstructorId { get; set; }
@@ -46,5 +47,6 @@ namespace PlanQuinquenal.Core.Entities
 
         public string? EstadoGeneral { get; set; }
         public Decimal? CostoInversion { get; set; }
+
     }
 }

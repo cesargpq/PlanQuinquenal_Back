@@ -61,9 +61,7 @@ namespace PlanQuinquenal.Controllers
                     return Ok(resultado);
                 }
             }
-
             return Ok("Hubo un error en la consulta");
-            
         }
 
         [HttpPost("ObtenerListaNotif")]
