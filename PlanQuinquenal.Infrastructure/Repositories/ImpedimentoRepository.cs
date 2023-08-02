@@ -3,6 +3,7 @@ using AutoMapper;
 using iTextSharp.text.pdf.codec.wmf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
@@ -13,7 +14,9 @@ using PlanQuinquenal.Core.Utilities;
 using PlanQuinquenal.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,17 +29,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IConfiguration configuration;
         private readonly IRepositoryMantenedores _repositoryMantenedores;
         private readonly ITrazabilidadRepository _trazabilidadRepository;
+        private readonly IRepositoryNotificaciones _repositoryNotificaciones;
 
-        public ImpedimentoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, IRepositoryMantenedores repositoryMantenedores, ITrazabilidadRepository trazabilidadRepository)
+        public ImpedimentoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, IRepositoryMantenedores repositoryMantenedores, ITrazabilidadRepository trazabilidadRepository, IRepositoryNotificaciones repositoryNotificaciones)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
             this._repositoryMantenedores = repositoryMantenedores;
             this._trazabilidadRepository = trazabilidadRepository;
+            this._repositoryNotificaciones = repositoryNotificaciones;
         }
         public async Task<ResponseDTO> Add(ImpedimentoRequestDTO p, DatosUsuario usuario)
         {
+            var UsuarioReg = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+            string nomPerfil = UsuarioReg[0].Perfil.nombre_perfil;
+            string NomCompleto = UsuarioReg[0].nombre_usu.ToString() + " " + UsuarioReg[0].apellido_usu.ToString();
             try
             {
                 var proy = await _context.Proyecto.Where(x =>x.Id == p.codProyecto).FirstOrDefaultAsync();
@@ -89,6 +97,52 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
                 }
+
+                #region Comparacion de estructuras y agregacion de cambios
+
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = obj.Id.ToString()
+                };
+
+                composCorreo.Add(correoDatos);
+                #endregion
+
+                #region Envio de notificacion
+
+                var ConstPerfilUsu = await _context.Constantes.Where(x => x.codigo == "USU_IMP_NOTIF").ToListAsync();
+                List<int> codigosPerfil = ConstPerfilUsu[0].valor1.Split(',')
+                                       .Select(numero => int.Parse(numero))
+                                       .ToList();
+                var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => codigosPerfil.Contains(x.Perfil.cod_perfil)).ToListAsync();
+
+                foreach (var listaUsuInters in UsuarioInt)
+                {
+                    int cod_usu = listaUsuInters.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                    string correo = listaUsuInters.correo_usu;
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifProyecto = new Notificaciones();
+                        notifProyecto.cod_usu = cod_usu;
+                        notifProyecto.seccion = "IMPEDIMENTOS";
+                        notifProyecto.nombreComp_usu = NomCompleto;
+                        notifProyecto.cod_reg = obj.Id.ToString();
+                        notifProyecto.area = nomPerfil;
+                        notifProyecto.fechora_not = DateTime.Now;
+                        notifProyecto.flag_visto = false;
+                        notifProyecto.tipo_accion = "C";
+                        notifProyecto.mensaje = $"Se creó el impedimento {obj.Id}";
+                        notifProyecto.codigo = obj.Id;
+                        notifProyecto.modulo = "IMP";
+
+                        await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Impedimentos");
+                    }
+                }
+
+                #endregion
                 var dato = new ResponseDTO
                 {
                     Valid = true,
@@ -237,8 +291,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
+                var UsuarioReg = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                string nomPerfil = UsuarioReg[0].Perfil.nombre_perfil;
+                string NomCompleto = UsuarioReg[0].nombre_usu.ToString() + " " + UsuarioReg[0].apellido_usu.ToString();
+
                 var existe = await _context.Impedimento.Where(x => x.Id == id).FirstOrDefaultAsync();
-                if(existe == null)
+                var impAnterior = mapper.Map<ImpedimentoUpdateDto>(existe);
+                if (existe == null)
                 {
                     var re = new ResponseDTO
                     {
@@ -291,6 +350,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
+
+                    #region notificacion
+
+                    List<CorreoTabla> camposModificados = CompararPropiedades(impAnterior, p, p.Id.ToString(), NomCompleto);
+
+                    var ConstPerfilUsu = await _context.Constantes.Where(x => x.codigo == "USU_IMP_NOTIF").ToListAsync();
+                    List<int> codigosPerfil = ConstPerfilUsu[0].valor1.Split(',')
+                                           .Select(numero => int.Parse(numero))
+                                           .ToList();
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => codigosPerfil.Contains(x.Perfil.cod_perfil)).ToListAsync();
+                    foreach (var listaUsuInters in UsuarioInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                        string correo = listaUsuInters.correo_usu;
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "IMPEDIMENTOS";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = p.Id.ToString();
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "M";
+                            notifProyecto.mensaje = $"Se modificó el impedimento {p.Id}";
+                            notifProyecto.codigo = existe.Id;
+                            notifProyecto.modulo = "IMP";
+
+                            var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                            int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Impedimentos");
+                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            _context.CorreoTabla.AddRange(camposModificados);
+                            _context.SaveChanges();
+                        }
+                    }
+
+                    #endregion
 
                     var resultado = new ResponseDTO
                     {
@@ -649,6 +749,44 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
                 return resultado;
             }
+        }
+        public static List<CorreoTabla> CompararPropiedades(object valOriginal, object valModificado, string cod_mod, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            DateTime fechaActual = DateTime.Today;
+            string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+            Type tipo = valOriginal.GetType();
+
+            // Obtener las propiedades del tipo
+            PropertyInfo[] propiedades = tipo.GetProperties();
+            // Comparar las propiedades 
+            foreach (PropertyInfo propiedad in propiedades)
+            {
+                object valor1 = propiedad.GetValue(valOriginal);
+                object valor2 = propiedad.GetValue(valModificado);
+                string desCampo = "";
+                var descriptionAttribute = propiedad.GetCustomAttribute<DescriptionAttribute>();
+                if (descriptionAttribute != null)
+                {
+                    desCampo = descriptionAttribute.Description;
+                }
+
+                if (!valor1.Equals(valor2))
+                {
+                    CorreoTabla fila = new CorreoTabla
+                    {
+                        codigo = cod_mod,
+                        campoModificado = desCampo,
+                        valorModificado = propiedad.GetValue(valModificado).ToString(),
+                        fechaMod = fechaFormateada,
+                        usuModif = nomCompleto,
+
+                    };
+                    camposModificados.Add(fila);
+                }
+            }
+
+            return camposModificados;
         }
     }
 }

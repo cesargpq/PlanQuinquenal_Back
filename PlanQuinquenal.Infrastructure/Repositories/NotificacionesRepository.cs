@@ -15,16 +15,21 @@ using static System.Collections.Specialized.BitVector32;
 using System.Net.Mime;
 using ApiDavis.Core.Utilidades;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
     public class NotificacionesRepository : IRepositoryNotificaciones
     {
         private readonly PlanQuinquenalContext _context;
+        private readonly IConfiguration configuration;
 
-        public NotificacionesRepository(PlanQuinquenalContext context)
+        public NotificacionesRepository(PlanQuinquenalContext context, IServiceScopeFactory factory)
         {
             _context = context;
+            configuration = factory.CreateScope().ServiceProvider.GetRequiredService<IConfiguration>();
         }
 
         public async Task<object> CambiarEstadoNotif(int cod_notif, bool flagVisto)
@@ -162,21 +167,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             try
             {
                 // Configurar el correo electrónico
-                string remitente = "erick2402199501@gmail.com";
+                string correoEnvioConf = configuration.GetSection("EmailSettings").GetSection("CorreoEnvio").Value;
+                string smtp = configuration.GetSection("EmailSettings").GetSection("Smtp").Value;
+                string port = configuration.GetSection("EmailSettings").GetSection("Port").Value;
                 string destinatario = correoUsu;
                 string asunto = "Notificacion de modficacion";
                 string cuerpo = ConstruirCuerpoCorreo(lstModif, modulo, tipoOperacion);
 
                 // Configurar el cliente SMTP
-                SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com", 587);
-                clienteSmtp.EnableSsl = true;
-                clienteSmtp.UseDefaultCredentials = false;
-                clienteSmtp.Credentials = new NetworkCredential("", "");
+                SmtpClient clienteSmtp = new SmtpClient(smtp, Convert.ToInt32(port));
+                clienteSmtp.Port = Convert.ToInt32(port);
+                clienteSmtp.EnableSsl = false;
+                clienteSmtp.UseDefaultCredentials = true;
 
                 // Crear el correo
 
                 MailMessage correo = new MailMessage();
-                correo.From = new MailAddress(remitente);
+                correo.From = new System.Net.Mail.MailAddress(correoEnvioConf);
                 correo.To.Add(destinatario);
                 correo.Subject = asunto;
                 correo.IsBodyHtml = true;
@@ -212,11 +219,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             
         }
 
-        public async Task<object> ModificarConfigNotif(Config_notificaciones config)
+        public async Task<object> ModificarConfigNotif(Config_notificacionesRequestDTO config, int codUsu)
         {
             try
             {
-                var modNotif = _context.Config_notificaciones.FirstOrDefault(p => p.id == config.id);
+                var modNotif = _context.Config_notificaciones.FirstOrDefault(p => p.cod_usu == codUsu);
                 modNotif.regPQ = config.regPQ;
                 modNotif.modPQ = config.modPQ;
                 modNotif.regPry = config.regPry;

@@ -86,10 +86,21 @@ namespace PlanQuinquenal.Controllers
         }
 
         [HttpPost("ModificarConfigNotif")]
-        public async Task<IActionResult> ModificarConfigNotif(Config_notificaciones config)
+        public async Task<IActionResult> ModificarConfigNotif(Config_notificacionesRequestDTO config)
         {
-            var resultado = await _repositoryNotificaciones.ModificarConfigNotif(config);
-            return Ok(resultado);
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    var codUsu = int.Parse(item.Value);
+                    var resultado = await _repositoryNotificaciones.ModificarConfigNotif(config, codUsu);
+                    return Ok(resultado);
+                }
+            }
+
+            return Ok("Hubo un error en la consulta");
+            
         }
 
         [HttpPost("CrearNotificacion")]

@@ -62,6 +62,7 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<COMENTARIOPQ> COMENTARIOPQ { get; set; }
         public virtual DbSet<COMENTARIOPA> COMENTARIOPA { get; set; }
         public virtual DbSet<COMENTARIOBR> COMENTARIOBR { get; set; }
+        public virtual DbSet<TablaConstantes> Constantes { get; set; }
 
         public virtual DbSet<TipoInforme> TipoInforme { get; set; }
         public virtual DbSet<TipoSeguimiento> TipoSeguimiento { get; set; }
