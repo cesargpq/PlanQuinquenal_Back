@@ -35,6 +35,7 @@ namespace PlanQuinquenal.Core.Entities
         public Decimal? LongRealPend { get; set; }
         public Decimal? LongAprobPa { get; set; }
         public Decimal? LongReemplazada { get; set; }
+        public Decimal? LongConstruida { get; set; }
         public Decimal? LongRealHab { get; set; }
         
         public Decimal? LongImpedimentos { get; set; }
@@ -47,6 +48,7 @@ namespace PlanQuinquenal.Core.Entities
 
         public string? EstadoGeneral { get; set; }
         public Decimal? CostoInversion { get; set; }
+        public Decimal? InversionEjecutada { get; set; }
 
     }
 }

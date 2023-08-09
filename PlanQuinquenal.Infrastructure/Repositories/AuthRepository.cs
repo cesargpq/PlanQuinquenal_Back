@@ -67,7 +67,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             JwtResponse jwt = new JwtResponse();
             
-            var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user).Include(s => s.Perfil).FirstOrDefaultAsync();
+            var userResult = await _context.Usuario.Where(u => u.correo_usu == usuario.user && u.estado_user =="A").Include(s => s.Perfil).FirstOrDefaultAsync();
            if(userResult != null)
             {
                 //if (userResult.Conectado)

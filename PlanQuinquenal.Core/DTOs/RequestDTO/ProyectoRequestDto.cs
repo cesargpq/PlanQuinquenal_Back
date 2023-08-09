@@ -18,10 +18,10 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int TipoRegistroId { get; set; }
         public int DistritoId { get; set; }
         public Decimal LongAprobPa { get; set; }
+        public Decimal InversionEjecutada { get; set; }
         public int TipoProyectoId { get; set; }
         public List<int> UsuariosInteresados { get; set; } = null;
         public string CodigoMalla { get; set; }
-        public int BaremoId { get; set; }
 
     }
 }

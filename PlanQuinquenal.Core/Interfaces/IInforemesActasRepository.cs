@@ -15,7 +15,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ResponseDTO> Crear(InformeReqDTO informeReqDTO,DatosUsuario usuario);
 
         Task<ResponseDTO> Update(InformeReqDTO informeReqDTO, int id, DatosUsuario usuario);
-        Task<ResponseEntidadDto<InformeResponseDto>> GetById(int id);
+        Task<ResponseEntidadDto<InformeResponseDto>> GetById(int id, DatosUsuario usuario);
         Task<PaginacionResponseDto<InformeResponseDto>> GetAll(PaginationFilterActaDto pag);
         Task<DocumentoResponseDto> Download(int id);
 

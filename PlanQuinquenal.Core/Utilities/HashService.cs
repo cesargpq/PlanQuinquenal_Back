@@ -153,6 +153,25 @@ namespace PlanQuinquenal.Core.Utilities
           
         }
 
+        public void ParrafoJustified(iTextSharp.text.Document doc, string tit, iTextSharp.text.Font _standardFont, bool align)
+        {
+
+            Paragraph titulo = new Paragraph($"{tit}", _standardFont);
+            if (align)
+            {
+                titulo.IndentationLeft = 53;
+                titulo.IndentationRight = 53;
+                titulo.Alignment = Element.ALIGN_JUSTIFIED;
+            }
+            else
+            {
+                titulo.IndentationLeft = 53;
+                titulo.IndentationRight = 53;
+            }
+
+            doc.Add(titulo);
+            doc.Add(Chunk.SPACETABBING);
+        }
         public  void Parrafo(iTextSharp.text.Document doc, string tit, iTextSharp.text.Font _standardFont, bool align)
         {
 

@@ -292,7 +292,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var queryable = _context.Distrito
                                  .Where(x => entidad.Descripcion != "" ? x.Descripcion == entidad.Descripcion : true)
-                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true).AsQueryable();
+                                 .Where(x => entidad.Estado != null ? x.Estado == entidad.Estado : true)
+                                 .OrderByDescending(x=>x.Descripcion)
+                                 .AsQueryable();
 
                 int cantidad = await queryable.CountAsync();
                 var entidades = await queryable.OrderBy(e => e.Descripcion).Paginar(entidad)

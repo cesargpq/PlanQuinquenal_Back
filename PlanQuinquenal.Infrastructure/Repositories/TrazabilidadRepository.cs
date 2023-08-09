@@ -51,7 +51,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             var dato = new PaginacionResponseDtoException<TrazabilidadDetalle>
             {
-                Cantidad = resultad.Count(),
+                Cantidad = resultad.Count() == 0 ? 0 : resultad.ElementAt(0).TOTAL,
                 Model  = resultad
             };
             return dato;

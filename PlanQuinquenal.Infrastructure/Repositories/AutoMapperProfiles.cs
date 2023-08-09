@@ -183,6 +183,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<UsuariosInteresadosPy, UsuariosInteresadosPyResponseDto>();
             CreateMap<UsuariosInteresadosPyResponseDto, UsuariosInteresadosPy > ();
 
+            CreateMap<UsuariosInteresadosInformesResponseDto, UsuarioResponseDto>()
+            .ForMember(x => x.Activo, y => y.MapFrom(src => src.Usuario.Activo));
+            CreateMap<UsuarioResponseDto, UsuariosInteresadosInformesResponseDto>()
+            .ForPath(x => x.Usuario.Activo, y => y.MapFrom(src => src.Activo));
+
+
 
             CreateMap<UsuariosInteresadosInformesResponseDto, UsuariosInteresadosInformes>();
             CreateMap<UsuariosInteresadosInformes, UsuariosInteresadosInformesResponseDto>();
@@ -191,8 +197,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<ActaAsistentes, UsuariosInteresadosInformesResponseDto>();
 
 
-            CreateMap<UsuariosInteresadosInformesResponseDto, ActaParticipantes>();
+            CreateMap<UsuariosInteresadosInformesResponseDto, ActaParticipantes>()
+                .ForMember(x => x.Activo, y => y.MapFrom(src => (src.Usuario.Activo)));
             CreateMap<ActaParticipantes, UsuariosInteresadosInformesResponseDto>();
+              
 
 
             CreateMap<Usuario, UsuarioResponseDto>()
@@ -218,10 +226,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
             CreateMap<ActaParticipantes, UsuarioResponseDto>();
-            CreateMap<UsuarioResponseDto, ActaParticipantes>();
+
+            CreateMap<UsuarioResponseDto, ActaParticipantes>()
+                .ForMember(dest => dest.Activo, opt => opt.MapFrom(src => src.Activo));
 
             CreateMap<ActaAsistentes, UsuarioResponseDto>();
-            CreateMap<UsuarioResponseDto, ActaAsistentes>();
+            CreateMap<UsuarioResponseDto, ActaAsistentes>()
+                .ForMember(dest => dest.Activo, opt => opt.MapFrom(src => src.Activo));
 
             CreateMap<UsuariosInteresadosInformes, UsuarioResponseDto>();
             CreateMap<UsuarioResponseDto, UsuariosInteresadosInformes>();
@@ -236,8 +247,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 .ForMember(dest => dest.FechaModificacion, opt => opt.MapFrom(src => DateOnly(src.FechaModificacion)))
                 .ForMember(dest => dest.FechaReunion, opt => opt.MapFrom(src => DateOnly(src.FechaReunion)))
                 .ForMember(dest => dest.FechaCompromiso, opt => opt.MapFrom(src => DateOnly(src.FechaCompromiso)))
+                
                 .ForMember(
                     dest => dest.Participantes, opt => opt.MapFrom(src => src.Participantes))
+
                 .ForMember(
                     dest => dest.Asistentes, opt => opt.MapFrom(src => src.Asistentes))
                 .ForMember(

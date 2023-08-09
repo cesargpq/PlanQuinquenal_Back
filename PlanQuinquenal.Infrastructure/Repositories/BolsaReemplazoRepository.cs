@@ -446,6 +446,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var impedimentos = await _context.Impedimento.Where(x => x.Id == item).FirstOrDefaultAsync();
                 impedimentos.FechaPresentacionReemplazo = p.FechaPresenacionReemplazo;
                 impedimentos.Reemplazado = true;
+                impedimentos.LongitudReemplazo = impedimentos.LongImpedimento;
                 _context.Update(impedimentos);
             
             }
@@ -455,6 +456,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var bolsa = await _context.BolsaReemplazo.Where(x => x.Id == item).FirstOrDefaultAsync();
                 if(maxReemplaxo.ElementAt(0).Numero != null)
                 {
+                    
                     bolsa.NumeroReemplazo = maxReemplaxo.ElementAt(0).Numero + 1;
                     bolsa.ReemplazoId = p.NumeroReemplazo;
                     bolsa.FechaPresenacionReemplazo = p.FechaPresenacionReemplazo;
@@ -477,8 +479,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 proyecto.ConstructorId = bolsa.ConstructorId;
                 proyecto.TipoRegistroId = null;
                 proyecto.LongAprobPa = 0;
+                proyecto.LongConstruida = 0;
                 proyecto.TipoProyectoId = null;
-                proyecto.BaremoId = null;
+                proyecto.InversionEjecutada = bolsa.CostoInversion;
                 proyecto.descripcion = "";
                 proyecto.CodigoMalla = bolsa.CodigoMalla;
                 proyecto.IngenieroResponsableId = null;
@@ -496,6 +499,30 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 _context.Update(bolsa);
                 await _context.SaveChangesAsync();
 
+                var documentos = await _context.DocumentosBR.Where(x=>x.BolsaReemplazoId.Equals(bolsa.Id)).ToListAsync();
+
+                List<DocumentosPy> doc = new List<DocumentosPy>();
+
+                
+                foreach (var itemdoc in documentos)
+                {
+                    DocumentosPy docuobjeto = new DocumentosPy();
+
+                    docuobjeto.ProyectoId = proyecto.Id;
+                    docuobjeto.CodigoDocumento = itemdoc.CodigoDocumento;
+                    docuobjeto.NombreDocumento = itemdoc.NombreDocumento;
+                    docuobjeto.FechaEmision = itemdoc.FechaEmision;
+                    docuobjeto.TipoDocumento = itemdoc.TipoDocumento;
+                    docuobjeto.Ruta = itemdoc.ruta;
+                    docuobjeto.Estado = itemdoc.Estado;
+                    docuobjeto.rutafisica = itemdoc.rutaFisica;
+                    docuobjeto.Aprobaciones = itemdoc.Aprobaciones;
+                    doc.Add(docuobjeto);
+                }
+                if(doc.Count > 0) 
+                {
+                    await _context.BulkInsertAsync(doc);
+                }
 
                 var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Gestionar").ToListAsync();
                 if (resultad.Count > 0)

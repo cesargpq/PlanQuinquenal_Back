@@ -33,6 +33,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public int? IngenieroResponsableId { get; set; }
         public string? IngenieroResponsable { get; set; }
         public Decimal? LongAprobPa { get; set; }
+        public Decimal? LongConstruida { get; set; }
         public Decimal? LongRealPend { get; set; }
 
         public Decimal? LongImpedimentos { get; set; }
@@ -43,10 +44,10 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public DateTime? FechaRegistro { get; set; }
         public DateTime? fechamodifica { get; set; }
         public DateTime? FechaGasificacion { get; set; }
-        public string? CodigoBaremo { get; set; }
-        public int? BaremoId { get; set; }
+        
         public string? EstadoGeneral { get; set; }
         public Decimal? Avance { get; set; }
+        public Decimal? InversionEjecutada { get; set; }
         public Decimal? CostoInversion { get; set; }
         [NotMapped]
         public List<UsuarioResponseDto> UsuariosInteresados { get; set; }

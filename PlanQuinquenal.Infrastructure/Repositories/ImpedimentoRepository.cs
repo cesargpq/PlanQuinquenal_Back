@@ -40,7 +40,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             try
             {
                 var proy = await _context.Proyecto.Where(x =>x.Id == p.codProyecto).FirstOrDefaultAsync();
-                var baremo = await _context.Baremo.Where(x=>x.Id  == proy.BaremoId).FirstOrDefaultAsync();
                 Impedimento obj = new Impedimento();
                 obj.ProyectoId = proy.Id;
                 obj.ProblematicaRealId = p.ProblematicaRealId;
@@ -65,7 +64,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 obj.FechaRegistro = DateTime.Now;
                 obj.UsuarioRegisterId = usuario.UsuaroId;
                 obj.UsuarioModificaId = usuario.UsuaroId;
-                obj.CostoInversion = baremo.Precio * p.LongImpedimento;
+                obj.CostoInversion = proy.InversionEjecutada;
                 obj.Reemplazado = false;
                 obj.estado = true;
 
@@ -414,13 +413,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             int baremoId = 0;
                             if (dCodPry != null)
                             {
-                                var baremoAdd = Baremos.Where(x => x.Id == dCodPry.BaremoId).FirstOrDefault();
-                                baremoId = baremoAdd.Id;
+                                //var baremoAdd = Baremos.Where(x => x.Id == dCodPry.BaremoId).FirstOrDefault();
+                                //baremoId = baremoAdd.Id;
                             }
                            
 
 
-                            if (dCodPry == null || dProReal == null || baremoId==0 )
+                            if (dCodPry == null || dProReal == null /*|| baremoId==0*/ )
                             {
                                 var entidadError = new Impedimento
                                 {
@@ -459,7 +458,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         FechaRegistro = DateTime.Now,
                                         UsuarioRegisterId = null,
                                         UsuarioModificaId = null,
-                                        CostoInversion = baremoId,
+                                        CostoInversion = 0,
                                         estado = true,
                                         Reemplazado = false
 

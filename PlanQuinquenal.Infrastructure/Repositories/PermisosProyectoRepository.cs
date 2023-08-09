@@ -328,7 +328,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 if (dato!= null)
                 {
                     var queryable = _context.DocumentosPermisos
-                                .Where(x => listDocumentosRequestDto.Buscar != "" ? x.Expediente.Contains(listDocumentosRequestDto.Buscar) : true)
+                                .Where(x => listDocumentosRequestDto.Buscar != "" ? x.Expediente.Contains(listDocumentosRequestDto.Buscar) || x.NombreDocumento.Contains(listDocumentosRequestDto.Buscar) : true)
                                 .Where(x=>x.TipoPermisosProyectoId == dato.Id)
                                 .Where(x => x.ProyectoId == listDocumentosRequestDto.ProyectoId)
                                 .Where(x=>x.Estado ==true)

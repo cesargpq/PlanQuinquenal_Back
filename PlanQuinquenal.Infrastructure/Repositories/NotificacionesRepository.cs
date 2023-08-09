@@ -270,7 +270,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<PaginacionResponseDto<Notificaciones>> ObtenerListaNotif(RequestNotificacionDTO r, int cod_usu)
         {
             //List<Notificaciones> lstNotificaciones = new List<Notificaciones>();
-            var queryable =  _context.Notificaciones.Where(x => x.cod_usu == cod_usu).AsQueryable();
+            var queryable =  _context.Notificaciones.Where(x => x.cod_usu == cod_usu).OrderByDescending(x => x.fechora_not).AsQueryable();
             int cantidad = queryable.Count();
 
             var dato = await queryable.Paginar(r).ToListAsync();

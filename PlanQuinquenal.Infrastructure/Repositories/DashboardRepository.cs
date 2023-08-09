@@ -182,16 +182,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
 
                         listaMensual.Add(obj);
-
-                    }
-                    
-                
-                    if (i < countQuinquenal.Count() - 1)
-                    {
                         i++;
                     }
-                  
-
                 }
             }
 

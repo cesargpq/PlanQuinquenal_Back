@@ -68,7 +68,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      .Where(x => entidad.nombre_usu != "" ? x.nombre_usu == entidad.nombre_usu : true)
                                      .Where(x => entidad.apellido_usu != "" ? x.apellido_usu == entidad.apellido_usu : true)
                                      .Where(x => entidad.correo_usu != "" ? x.correo_usu == entidad.correo_usu : true)
-                                     .Where(x => entidad.estado != "" ? x.estado_user == entidad.estado : true)
+                                     .Where(x =>  x.estado_user.Equals("A"))
                                      .Where(x => entidad.cod_rol != 0 ? x.cod_rol == entidad.cod_rol : true)
                                      .Where(x => entidad.cod_perfil != 0 ? x.Perfilcod_perfil == entidad.cod_perfil : true)
                                      .AsQueryable();
@@ -89,7 +89,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<Usuario> GetById(int id)
         {
             var resultado = await _context.Usuario.FirstOrDefaultAsync( x => x.cod_usu == id);
-            resultado.passw_user = hashService.Desencriptar(resultado.passw_user);
+            if (!resultado.Interno)
+            {
+                resultado.passw_user = hashService.Desencriptar(resultado.passw_user);
+            }
+            
             return resultado;
         }
 
@@ -101,11 +105,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 resultado.nombre_usu = usuario.nombre_usu;
                 resultado.apellido_usu = usuario.apellido_usu;
-                resultado.passw_user = hashService.Encriptar(usuario.passw_user);
+                if (!usuario.Interno)
+                {
+                    resultado.passw_user = hashService.Encriptar(usuario.passw_user);
+                }
+                
                 resultado.correo_usu = usuario.correo_usu;
                 resultado.cod_rol = usuario.cod_rol;
                 resultado.Perfilcod_perfil = usuario.Perfilcod_perfil;
                 resultado.Interno = usuario.Interno;
+                resultado.estado_user = usuario.Estado.ToUpper();
+                resultado.Estado = usuario.Estado.ToUpper().Equals("A") ? true : false;
                 var perfil = await _context.Perfil.Where(x=>x.cod_perfil== usuario.Perfilcod_perfil).FirstOrDefaultAsync();
                 resultado.DobleFactor = usuario.DobleFactor;
                 resultado.Unidad_negociocod_und = perfil.cod_unidadNeg;
@@ -150,7 +160,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (resultado != null)
             {
                 resultado.estado_user = resultado.estado_user == "A" ? "D" : "A";
-                resultado.passw_user = hashService.Desencriptar(resultado.passw_user);
+                resultado.Estado = resultado.Estado == true ? false : true;
                 _context.Update(resultado);
                 await _context.SaveChangesAsync();
                 resp.Message = Constantes.EliminacionSatisfactoria;

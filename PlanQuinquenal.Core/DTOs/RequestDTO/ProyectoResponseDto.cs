@@ -38,7 +38,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int ConstructorId { get; set; }
         public int UsuarioRegisterId { get; set; }
         public string EstadoGeneralDesc { get; set; }
-        public int BaremoId { get; set; }
 
         public Decimal LongAprobPa { get; set; }
         public Decimal LongRealHab { get; set; }

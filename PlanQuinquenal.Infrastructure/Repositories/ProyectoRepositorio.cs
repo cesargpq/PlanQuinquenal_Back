@@ -71,8 +71,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     proyecto.ConstructorId = proyectoRequestDto.ConstructorId == 0 ? null : proyectoRequestDto.ConstructorId;
                     proyecto.TipoRegistroId = proyectoRequestDto.TipoRegistroId == 0 ? null : proyectoRequestDto.TipoRegistroId;
                     proyecto.LongAprobPa = proyectoRequestDto.LongAprobPa;
+                    proyecto.InversionEjecutada = proyectoRequestDto.InversionEjecutada == null ? 0: proyectoRequestDto.InversionEjecutada;
                     proyecto.TipoProyectoId = proyectoRequestDto.TipoProyectoId == 0 ? null : proyectoRequestDto.TipoProyectoId;
-                    proyecto.BaremoId = proyectoRequestDto.BaremoId == 0 ? null : proyectoRequestDto.BaremoId;
                     proyecto.descripcion = "";
                     proyecto.CodigoMalla = proyectoRequestDto.CodigoMalla;
                     proyecto.IngenieroResponsableId = null;
@@ -82,6 +82,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     proyecto.FechaRegistro = DateTime.Now;
                     proyecto.fechamodifica = DateTime.Now;
                     //proyecto.LongImpedimentos = 0;
+                    proyecto.LongConstruida = 0;
                     proyecto.LongRealHab = 0;
                     proyecto.LongRealPend = 0;
                     proyecto.LongProyectos = 0;
@@ -209,7 +210,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         existe.TipoRegistroId = p.TipoRegistroId == null || p.TipoRegistroId == 0 ? null : p.TipoRegistroId;
                         existe.IngenieroResponsableId = p.IngenieroResponsableId == null || p.IngenieroResponsableId == 0 ? null : p.IngenieroResponsableId;
                         existe.ConstructorId = p.ConstructorId == null || p.ConstructorId == 0 ? null : p.ConstructorId;
-                        existe.BaremoId = p.BaremoId == null || p.BaremoId == 0 ? null : p.BaremoId;
+                        existe.InversionEjecutada = p.InversionEjecutada;
                         existe.FechaGasificacion = p.FechaGacificacion != "" ? DateTime.Parse(p.FechaGacificacion) : null;
                         existe.LongAprobPa = p.LongAprobPa;
                         existe.LongRealPend = p.LongRealPend;
@@ -428,7 +429,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var TipoRegistroPY = await _repositoryMantenedores.GetAllByAttribute(Constantes.TipoRegistroPY);
             var PlanQuin = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
             var PlanAnu = await _repositoryMantenedores.GetAllByAttribute("PlanAnual");
-            var Baremos = await _repositoryMantenedores.GetAllByAttribute("Baremo");
             var proyectosMasivos = await _context.ProyectoMasivoDetalle.FromSqlInterpolated($"EXEC listaMasiva").ToListAsync();
 
             var base64Content = data.base64;
@@ -464,7 +464,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var longRealHab = worksheet.Cells[row, 11].Value?.ToString();
                             var longRealPend = worksheet.Cells[row, 12].Value?.ToString();
                             var codMalla = worksheet.Cells[row, 13].Value?.ToString();
-                            var codVNR = worksheet.Cells[row, 14].Value?.ToString();
+                            var InversionEjecutada = worksheet.Cells[row, 14].Value?.ToString();
 
                             var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
                             var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
@@ -473,15 +473,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto)).FirstOrDefault();
                             var dDistrito = Distrito.Where(x => x.Descripcion.Contains(distrito)).FirstOrDefault();
                             var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion.Contains(tipoRegistro)).FirstOrDefault();
-                            var dCodigoVNR = Baremos.Where(x => x.Descripcion.Contains(codVNR)).FirstOrDefault();
-                            int codigoVNR = 0;
-                            if (dCodigoVNR != null)
-                            {
-                                codigoVNR = dCodigoVNR.Id;
-                            }
+
+                         
+                            
 
 
-                            if (dPQ == null || codigoVNR == 0 || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            if (dPQ == null  || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
                             {
                                 var entidadError = new Proyecto
                                 {
@@ -510,12 +507,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         LongRealHab = longRealHab == null ? 0 : Decimal.Parse(longRealHab),
                                         LongRealPend = longRealPend == null ? 0 : Decimal.Parse(longRealPend),
                                         LongProyectos = 0,
+                                        LongConstruida=0,
                                         //LongImpedimentos=0,
                                         //LongReemplazada=0,
                                         //LongImpedimentos = Decimal.Parse(longImpedimentos),
                                         //LongReemplazada = Decimal.Parse(longReemplazada),
                                         CodigoMalla = codMalla,
-                                        BaremoId = codigoVNR,
+                                        InversionEjecutada = InversionEjecutada==null?0:Decimal.Parse(InversionEjecutada),
                                         FechaRegistro = DateTime.Now,
                                         fechamodifica = DateTime.Now,
                                         UsuarioRegisterId = usuario.UsuaroId,
@@ -567,7 +565,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     existe.TipoRegistroId = item.TipoRegistroId;
                                     existe.IngenieroResponsableId = existes.IngenieroResponsableId;
                                     existe.ConstructorId = item.ConstructorId;
-                                    existe.BaremoId = item.BaremoId;
+                                    existe.InversionEjecutada = item.InversionEjecutada;
                                     existe.UsuarioRegisterId = existes.UsuarioRegisterId;
                                     existe.UsuarioModificaId = existes.UsuarioModificaId;
                                     existe.FechaRegistro = existes.FechaRegistro;
@@ -576,6 +574,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     existe.LongAprobPa = item.LongAprobPa;
                                     existe.LongRealHab = item.LongRealHab;
                                     existe.LongRealPend = item.LongRealPend;
+                                    existe.LongConstruida = existe.LongConstruida;
                                     //existe.LongImpedimentos = existes.LongImpedimentos;
                                     //existe.LongReemplazada = existes.LongReemplazada;
                                     existe.LongProyectos = existes.LongProyectos;

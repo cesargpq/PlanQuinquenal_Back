@@ -36,6 +36,6 @@ namespace PlanQuinquenal.Core.Utilities
         public const string CreacionExistosa = "Se creó el registro satisfactoriamente";
         public const string BusquedaExitosa = "Se encontró el registro satisfactoriamente";
         public const string BusquedaNoExitosa = "No se encontró el registro";
-
+        public const string AprobarActa = "Se aprobò correctamente el acta";
     }
 }

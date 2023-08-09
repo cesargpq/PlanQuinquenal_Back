@@ -12,10 +12,11 @@ using Microsoft.AspNetCore.Authorization;
 using PlanQuinquenal.Core.Interfaces;
 using System.Security.Claims;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
+using PlanQuinquenal.Core.DTOs;
 
 namespace PlanQuinquenal.Controllers
 {
-    
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class AuditoriaController : ControllerBase
@@ -76,6 +77,21 @@ namespace PlanQuinquenal.Controllers
             var resultado = await trazabilidadRepository.Listar(r);
 
             return Ok(resultado);
+        }
+        [AllowAnonymous]
+        [HttpGet("CrearIP")]
+        public async Task<IActionResult> CrearIp()
+        {
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+
+            Logs log = new Logs();
+
+            log.servicio = usuario.Ip;
+
+            _context.Add(log);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 }

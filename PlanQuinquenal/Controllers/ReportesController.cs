@@ -1,4 +1,6 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
@@ -7,6 +9,7 @@ using PlanQuinquenal.Core.Interfaces;
 
 namespace PlanQuinquenal.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class ReportesController : ControllerBase
@@ -111,14 +114,14 @@ namespace PlanQuinquenal.Controllers
                         currentRow++;
                         worksheet.Cell(currentRow, 1).Value = item.AnioPlan;
                         worksheet.Cell(currentRow, 2).Value = item.EstadoAprobacion;
-                        worksheet.Cell(currentRow, 3).Style.DateFormat.Format = "dd/MM/yyyy hh:mm";
+                        worksheet.Cell(currentRow, 3).Style.DateFormat.Format = "dd/MM/yyyy";
                         worksheet.Cell(currentRow, 3).Value = item.FechaRegistro;
-                        worksheet.Cell(currentRow, 4).Style.DateFormat.Format = "dd/MM/yyyy hh:mm";
+                        worksheet.Cell(currentRow, 4).Style.DateFormat.Format = "dd/MM/yyyy";
                         worksheet.Cell(currentRow, 4).Value = item.FechaModifica;
                         worksheet.Cell(currentRow, 5).Value = item.UsuarioRegister;
                         worksheet.Cell(currentRow, 6).Value = item.UsuarioModifica;
                         worksheet.Cell(currentRow, 7).Value = item.Avance;
-                        worksheet.Cell(currentRow, 8).Style.DateFormat.Format = "dd/MM/yyyy hh:mm";
+                        worksheet.Cell(currentRow, 8).Style.DateFormat.Format = "dd/MM/yyyy";
                         worksheet.Cell(currentRow, 8).Value = item.FechaAprobacion;
                         worksheet.Cell(currentRow, 9).Value = item.Descripcion;
                     }
@@ -210,7 +213,8 @@ namespace PlanQuinquenal.Controllers
 
 
 
-                        worksheet.Cell(currentRow, 4).Style.DateFormat.Format = "dd/MM/yyyy hh:mm";
+                        worksheet.Cell(currentRow, 22).Style.DateFormat.Format = "dd/MM/yyyy";
+                        worksheet.Cell(currentRow, 23).Style.DateFormat.Format = "dd/MM/yyyy";
                     }
                     worksheet.Columns().AdjustToContents();
 
@@ -274,28 +278,30 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 2).Value = item.descripcion;
                         worksheet.Cell(currentRow, 3).Value = item.AnioPlanPQ;
                         worksheet.Cell(currentRow, 4).Value = item.AnioPlanPA;
-                        worksheet.Cell(currentRow, 6).Value = item.CodigoMalla;
-                        worksheet.Cell(currentRow, 7).Value = item.Material;
-                        worksheet.Cell(currentRow, 8).Value = item.Distrito;
-                        worksheet.Cell(currentRow, 9).Value = item.Constructor;
-                        worksheet.Cell(currentRow, 10).Value = item.TipoProyecto;
-                        worksheet.Cell(currentRow, 11).Value = item.TipoRegistro;
-                        worksheet.Cell(currentRow, 12).Value = item.IngenieroResponsable;
-                        worksheet.Cell(currentRow, 13).Value = item.LongAprobPa;
-                        worksheet.Cell(currentRow, 14).Value = item.LongRealPend;
-                        worksheet.Cell(currentRow, 15).Value = item.LongImpedimentos;
-                        worksheet.Cell(currentRow, 16).Value = item.LongRealHab;
-                        worksheet.Cell(currentRow, 17).Value = item.LongReemplazada;
-                        worksheet.Cell(currentRow, 18).Value = item.longPendienteEjecucion;
-                        worksheet.Cell(currentRow, 19).Value = item.LongProyectos;
-                        worksheet.Cell(currentRow, 20).Value = item.FechaGasificacion;
-                        worksheet.Cell(currentRow, 21).Value = item.EstadoGeneral;
-                        worksheet.Cell(currentRow, 22).Value = item.PorcentajeAvance;
-                        worksheet.Cell(currentRow, 23).Value = item.FechaRegistro;
-                        worksheet.Cell(currentRow, 24).Value = item.fechamodifica;
-                        worksheet.Cell(currentRow, 25).Value = item.AñosPQ;
+                        worksheet.Cell(currentRow, 5).Value = item.CodigoMalla;
+                        worksheet.Cell(currentRow, 6).Value = item.Material;
+                        worksheet.Cell(currentRow, 7).Value = item.Distrito;
+                        worksheet.Cell(currentRow, 8).Value = item.Constructor;
+                        worksheet.Cell(currentRow, 9).Value = item.TipoProyecto;
+                        worksheet.Cell(currentRow, 10).Value = item.TipoRegistro;
+                        worksheet.Cell(currentRow, 11).Value = item.IngenieroResponsable;
+                        worksheet.Cell(currentRow, 12).Value = item.LongAprobPa;
+                        worksheet.Cell(currentRow, 13).Value = item.LongRealPend;
+                        worksheet.Cell(currentRow, 14).Value = item.LongImpedimentos;
+                        worksheet.Cell(currentRow, 15).Value = item.LongRealHab;
+                        worksheet.Cell(currentRow, 16).Value = item.LongReemplazada;
+                        worksheet.Cell(currentRow, 17).Value = item.longPendienteEjecucion;
+                        worksheet.Cell(currentRow, 18).Value = item.LongProyectos;
+                        worksheet.Cell(currentRow, 19).Value = item.FechaGasificacion;
+                        worksheet.Cell(currentRow, 20).Value = item.EstadoGeneral;
+                        worksheet.Cell(currentRow, 21).Value = item.PorcentajeAvance;
+                        worksheet.Cell(currentRow, 22).Value = item.FechaRegistro;
+                        worksheet.Cell(currentRow, 23).Value = item.fechamodifica;
+                        worksheet.Cell(currentRow, 24).Value = item.AñosPQ;
                         worksheet.Cell(currentRow, 25).Value = item.ProblematicaReal;
-                        worksheet.Cell(currentRow, 4).Style.DateFormat.Format = "dd/MM/yyyy hh:mm";
+
+                        worksheet.Cell(currentRow, 22).Style.DateFormat.Format = "dd/MM/yyyy";
+                        worksheet.Cell(currentRow, 23).Style.DateFormat.Format = "dd/MM/yyyy";
                     }
                     worksheet.Columns().AdjustToContents();
 

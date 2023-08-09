@@ -24,8 +24,6 @@ namespace PlanQuinquenal.Core.Entities
         public int? IngenieroResponsableId { get; set; }
         public int? ConstructorId { get; set; }
         
-
-        public int? BaremoId { get; set; }
         public int? UsuarioRegisterId { get; set; }
         public int? UsuarioModificaId { get; set; }
 

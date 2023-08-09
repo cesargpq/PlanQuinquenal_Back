@@ -18,6 +18,7 @@ using iTextSharp.text.pdf.security;
 using static iTextSharp.text.pdf.AcroFields;
 using ApiDavis.Core.Utilidades;
 using PlanQuinquenal.Core.DTOs;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -335,7 +336,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             hashService.Parrafo(doc, "ACTA DE REUNIÓN "+informe.CodigoExpediente, negrita, true);
             doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Fecha: {informe.FechaReunion?.ToString("dd/MM/yyyy")}", _standardFont, false);
-
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, "Participantes:", _standardFont, false);
             hashService.GenerarLista(listaParticipantes, doc);
 
@@ -344,10 +345,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
             hashService.Parrafo(doc, $"Objetivo de la Reunión", _standardFont, false);
-            hashService.Parrafo(doc, informe.Objetivos, _standardFont, false);
+            hashService.ParrafoJustified(doc, informe.Objetivos, _standardFont, true);
             doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Agenda", _standardFont, false);
-            hashService.Parrafo(doc, informe.Agenda, _standardFont, false);
+            hashService.ParrafoJustified(doc, informe.Agenda, _standardFont, true);
             doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Acuerdos:", _standardFont, false);
 
@@ -363,7 +364,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     cadenaAcuerdos += item + " ";
                 }
-                hashService.Parrafo(doc, cadenaAcuerdos, _standardFont, false);
+                hashService.ParrafoJustified(doc, cadenaAcuerdos, _standardFont, true);
                 doc.Add(Chunk.NEWLINE);
             }
             else
@@ -440,10 +441,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             hashService.Parrafo(doc,"INFORME "+informe.CodigoExpediente,negrita,true);
             doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Fecha: {informe.FechaInforme?.ToString("dd/MM/yyyy")}", _standardFont, false);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Resumen general", _standardFont, false);
-            hashService.Parrafo(doc, informe.ResumenGeneral, _standardFont, false);
+            hashService.ParrafoJustified(doc, informe.ResumenGeneral, _standardFont, true);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc,$"Actividades a realizar:",_standardFont, false);
-            hashService.Parrafo(doc,informe.ActividadesRealizadas, _standardFont, false);
+            hashService.ParrafoJustified(doc,informe.ActividadesRealizadas, _standardFont, true);
+            doc.Add(Chunk.NEWLINE);
             hashService.Parrafo(doc, $"Próximos pasos:", _standardFont, false);
 
             List<string> proximosPasos = new List<string>();
@@ -460,7 +464,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<ResponseEntidadDto<InformeResponseDto>> GetById(int id)
+        public async Task<ResponseEntidadDto<InformeResponseDto>> GetById(int id, DatosUsuario usuario)
         {
             try
             {
@@ -478,9 +482,43 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var responseInforme = mapper.Map<InformeResponseDto>(Informe);
 
-                var tipoSeguimiento = await _context.TipoSeguimiento.Where(x => x.Descripcion.Equals(responseInforme.TipoSeguimiento)).FirstOrDefaultAsync();
 
-                responseInforme.TipoSeguimientoId = tipoSeguimiento.Id;
+
+
+
+
+                    var tipoSeguimiento = await _context.TipoSeguimiento.Where(x => x.Descripcion.Equals(responseInforme.TipoSeguimiento)).FirstOrDefaultAsync();
+
+                    responseInforme.TipoSeguimientoId = tipoSeguimiento.Id;
+
+                    foreach (var item in responseInforme.Participantes)
+                    {
+                        var parti = await _context.ActaParticipantes.Where(x => x.InformeId == responseInforme.Id && x.UsuarioId == item.Usuario.Id).FirstOrDefaultAsync();
+
+                        item.Usuario.Activo = parti.Activo;
+                    }
+                
+                    var dato = await _context.ActaParticipantes.Where(x => x.InformeId == responseInforme.Id && x.UsuarioId == usuario.UsuaroId).FirstOrDefaultAsync();
+                    
+                    if (dato != null)
+                    {
+                        if(dato.Activo == true)
+                        {
+                            responseInforme.actaEstadoUser = true;
+                            
+                        }
+                        else
+                        {
+                            responseInforme.actaEstadoUser = false;
+                        }
+                    }
+                    else
+                    {
+                        responseInforme.actaEstadoUser = true;
+                    }
+
+                
+
                 if (Informe != null)
                 {
                     var response = new ResponseEntidadDto<InformeResponseDto>
@@ -538,7 +576,45 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     .AsQueryable();
             int cantidad = queryable.Count();
             var listaPaginada = await queryable.OrderByDescending(e => e.FechaCreacion).Paginar(pag).ToListAsync();
+
+            
             var proyectoDto = mapper.Map<List<InformeResponseDto>>(listaPaginada);
+            var informesPArt = await _context.ActaParticipantes.ToListAsync();
+            foreach (var item in proyectoDto)
+            {
+                
+                 var dato = informesPArt.Where(x => x.InformeId == item.Id).ToList();
+
+                foreach (var part in item.Participantes)
+                {
+                   var usu = dato.Where(x => x.UsuarioId == part.Usuario.Id).FirstOrDefault();
+                    part.Usuario.Activo = usu.Activo;
+                }
+                
+            }
+
+            foreach (var item in proyectoDto)
+            {
+                //item.actaEstado = proyectoDto. participante => participante.Participantes.es)
+                if (item.Tipo.Equals("Informe"))
+                {
+                    item.actaEstado =null;
+                }
+                else
+                {
+                    var dato = item.Participantes.Any(x => x.Usuario.Activo == false);
+                    if (dato)
+                    {
+                        item.actaEstado = false;
+                    }
+                    else
+                    {
+                        item.actaEstado = true;
+                    }
+                }
+                
+                
+            }
 
             var pagination = new PaginacionResponseDto<InformeResponseDto>
             {
@@ -664,7 +740,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string rutadirectory = "";
                 string tipoDocumentoEnum = "";
                 tipoDocumentoEnum = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "I" : "A";
-                getInforme.CodigoExpediente = "N°" + getInforme.Id.ToString("D7");
+                getInforme.CodigoExpediente = tipoDocumentoEnum + getInforme.Id.ToString("D7");
 
                 string tipo = tipoInforme.Descripcion.ToUpper() == "Informe".ToUpper() ? "Informe" : "Acta";
                 if (tipoSeg.Descripcion.Equals("Proyectos"))
@@ -916,8 +992,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                         return new ResponseDTO
                         {
-                            Valid = false,
-                            Message = Constantes.BusquedaNoExitosa
+                            Valid = true,
+                            Message = Constantes.AprobarActa
                         };
                     }
                     else
