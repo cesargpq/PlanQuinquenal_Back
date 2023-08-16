@@ -22,6 +22,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int TipoProyectoId { get; set; }
         public List<int> UsuariosInteresados { get; set; } = null;
         public string CodigoMalla { get; set; }
+        public int TipoProy { get; set; }
 
     }
 }

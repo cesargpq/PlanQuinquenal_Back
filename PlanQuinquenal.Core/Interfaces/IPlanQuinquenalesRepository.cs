@@ -18,7 +18,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<PaginacionResponseDtoException<PQuinquenalResponseDto>> GetSeleccionados(PlanQuinquenalSelectedId p);
 
         Task<ResponseDTO> Add(PQuinquenalReqDTO p,DatosUsuario usuario);
-        Task<ResponseEntidadDto<PQuinquenalResponseDto>> GetById(int id);
+        Task<ResponseEntidadDto<PQuinquenalResponseDtoID>> GetById(int id);
 
         Task<PaginacionResponseDtoException<AvancePQDto>> GetAvance(int id);
         Task<ResponseDTO> Update(UpdatePlanQuinquenalDto dto, int id, DatosUsuario usuario);

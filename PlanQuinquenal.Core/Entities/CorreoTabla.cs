@@ -9,13 +9,13 @@ namespace PlanQuinquenal.Core.Entities
 {
     public class CorreoTabla
     {
-        [Key]
-        public int id { get; set; }
-        public int idNotif { get; set; }
-        public string codigo { get; set; }
-        public string campoModificado { get; set; }
-        public string valorModificado { get; set; }
-        public string fechaMod { get; set; }
-        public string usuModif { get; set; }
+       
+        public int? id { get; set; }
+        public int? idNotif { get; set; }
+        public string? codigo { get; set; }
+        public string? campoModificado { get; set; }
+        public string? valorModificado { get; set; }
+        public string? fechaMod { get; set; }
+        public string? usuModif { get; set; }
     }
 }

@@ -119,10 +119,25 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var perfil = await _context.Perfil.Where(x=>x.cod_perfil== usuario.Perfilcod_perfil).FirstOrDefaultAsync();
                 resultado.DobleFactor = usuario.DobleFactor;
                 resultado.Unidad_negociocod_und = perfil.cod_unidadNeg;
+
+                
+
+                //var compara = _context.Entry(resultado).Properties.Where(p=>p.IsModified).ToList();
+
+                //foreach (var item in compara)
+                //{
+                //    Console.WriteLine(item.Metadata.Name);
+                //    Console.WriteLine(item.OriginalValue);
+                //    Console.WriteLine(item.CurrentValue);
+                //}
+
                 _context.Update(resultado);
                 await _context.SaveChangesAsync();
                 resp.Message = Constantes.ActualizacionSatisfactoria;
                 resp.Valid = true;
+
+
+                
                 return resp;
             }
             else

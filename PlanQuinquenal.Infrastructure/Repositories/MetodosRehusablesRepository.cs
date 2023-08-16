@@ -1151,7 +1151,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                             int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
                             await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Actas");
-                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
                             _context.CorreoTabla.AddRange(camposModificados);
                             _context.SaveChanges();
 
@@ -1327,7 +1327,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                             int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
                             await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Actas");
-                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
                             _context.CorreoTabla.AddRange(camposModificados);
                             _context.SaveChanges();
 
@@ -1462,7 +1462,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                             int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
                             await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Informe");
-                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
                             _context.CorreoTabla.AddRange(camposModificados);
                             _context.SaveChanges();
                         }
@@ -1578,7 +1578,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                             int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
                             await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Informe");
-                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
                             _context.CorreoTabla.AddRange(camposModificados);
                             _context.SaveChanges();
                         }

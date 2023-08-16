@@ -37,9 +37,9 @@ namespace PlanQuinquenal.Core.Entities
         public Decimal? LongRealPend { get; set; }
         
         public Decimal? LongProyectos { get; set; }
-        
-            
-            
+
+        public int TipoProy { get; set; }
+
 
     }
 }

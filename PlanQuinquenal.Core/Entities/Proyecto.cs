@@ -43,6 +43,7 @@ namespace PlanQuinquenal.Core.Entities
         //public Decimal? LongReemplazada { get; set; }
         public Decimal? LongProyectos { get; set; }
         public Decimal? CostoInversion { get; set; }
+        public bool TipoProy { get; set; }
 
         //Impedimentos unificado
 

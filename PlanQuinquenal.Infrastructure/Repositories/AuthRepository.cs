@@ -143,7 +143,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         Model = message,
                         HtmlTemplateName = Constantes.DobleFactor
                     };
-                    var resultDobleFactror = await hashService.EnviarDobleFactor(obj,message, templateKey);
+                    //var resultDobleFactror = await hashService.EnviarDobleFactor(obj,message, templateKey);
+                    var resultDobleFactror = true;
                     if (resultDobleFactror)
                     {
                         DobleFactor db = new DobleFactor();

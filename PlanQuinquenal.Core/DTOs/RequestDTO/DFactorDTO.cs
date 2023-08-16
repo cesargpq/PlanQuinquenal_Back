@@ -8,7 +8,8 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
     public class DFactorDTO
     {
-        public int cod_usu { get; set; }
+
+        public string Token { get; set; }
         public string codigo { get; set; }
     }
 }

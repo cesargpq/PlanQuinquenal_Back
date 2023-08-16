@@ -6,6 +6,7 @@ using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Interfaces;
 using PlanQuinquenal.Infrastructure.Repositories;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace PlanQuinquenal.Controllers
@@ -100,8 +101,24 @@ namespace PlanQuinquenal.Controllers
         [HttpPost("VerificaDobleFactor")]
         public async Task<IActionResult> VerificaDobleFactor(DFactorDTO dFactorDTO)
         {
+
+            var stream = dFactorDTO.Token;
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(stream);
+            var tokenS = jsonToken as JwtSecurityToken;
+            var idUser = 0;
+            foreach (var item in tokenS.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+                
+            }
+        
+            
             ResponseDTO rp = new ResponseDTO();
-            var resultado = await _repositoryLogin.VerificaDobleFactor(dFactorDTO);
+            var resultado = await _repositoryLogin.VerificaDobleFactor(dFactorDTO, idUser);
             if (resultado)
             {
                 rp.Valid = true;

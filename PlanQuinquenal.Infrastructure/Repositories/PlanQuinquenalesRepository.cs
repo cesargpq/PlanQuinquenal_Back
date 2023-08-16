@@ -190,7 +190,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         //                dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
         //                int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
         //                await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Plan Quinquenal");
-        //                camposModificados.ForEach(item => item.id = codigoNotifCreada);
+        //                camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
         //                _context.CorreoTabla.AddRange(camposModificados);
         //                _context.SaveChanges();
         //            }
@@ -539,19 +539,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
         }
         
-        public async Task<ResponseEntidadDto<PQuinquenalResponseDto>> GetById(int Id)
+        public async Task<ResponseEntidadDto<PQuinquenalResponseDtoID>> GetById(int Id)
         {
 
 
             try
             {
 
-                var resultad = await _context.PQuinquenalResponseDto.FromSqlRaw($"EXEC quinquenalbyid  {Id}").ToListAsync();
+                var resultad = await _context.PQuinquenalResponseDtoID.FromSqlRaw($"EXEC quinquenalbyid  {Id}").ToListAsync();
 
 
                 if (resultad.Count > 0)
                 {
-                    var result = new ResponseEntidadDto<PQuinquenalResponseDto>
+                    var result = new ResponseEntidadDto<PQuinquenalResponseDtoID>
                     {
                         Message = Constantes.BusquedaExitosa,
                         Valid = true,
@@ -561,7 +561,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 else
                 {
-                   var result = new ResponseEntidadDto<PQuinquenalResponseDto>
+                   var result = new ResponseEntidadDto<PQuinquenalResponseDtoID>
                     {
                         Message = Constantes.BusquedaNoExitosa,
                         Valid = false,
@@ -578,7 +578,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             catch (Exception e)
             {
 
-                var result = new ResponseEntidadDto<PQuinquenalResponseDto>
+                var result = new ResponseEntidadDto<PQuinquenalResponseDtoID>
                 {
                     Message = Constantes.ErrorSistema,
                     Valid = false,

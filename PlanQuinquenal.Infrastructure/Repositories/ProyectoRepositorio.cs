@@ -50,9 +50,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
-                var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto).FirstOrDefaultAsync();
+                var existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto
+                && x.TipoProy == (proyectoRequestDto.TipoProy == 1?true:false)
+                && x.DistritoId == proyectoRequestDto.DistritoId
+                && x.MaterialId == proyectoRequestDto.MaterialId
+                ).AnyAsync();
                 
-                if (existe != null)
+                if (existe)
                 {
                     return new ResponseDTO
                     {
@@ -87,6 +91,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     proyecto.LongRealPend = 0;
                     proyecto.LongProyectos = 0;
                     proyecto.DistritoId = proyectoRequestDto.DistritoId;
+                    proyecto.TipoProy = proyectoRequestDto.TipoProy==1?true:false;
                     _context.Add(proyecto);
                     await _context.SaveChangesAsync();
 
@@ -195,7 +200,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
 
                 var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
-
+                    
                     var pryAnterior = mapper.Map<ProyectoRequestUpdateDto>(existe);
                     if (existe != null)
                     {
@@ -218,10 +223,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         existe.LongProyectos = p.LongProyectos;
                         existe.UsuarioModificaId = usuario.UsuaroId;
                         existe.fechamodifica = DateTime.Now;
+                       
                         _context.Update(existe);
                         await _context.SaveChangesAsync();
 
-                        if (p.UsuariosInteresados.Count > 0)
+
+
+                    
+                   
+                    if (p.UsuariosInteresados.Count > 0)
                         {
                             var userInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == id).ToListAsync();
 
@@ -296,8 +306,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                             dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                             int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
-                            camposModificados.ForEach(item => item.id = codigoNotifCreada);
+                            //await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
+                            camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
                             _context.CorreoTabla.AddRange(camposModificados);
                             _context.SaveChanges();
                         }
@@ -350,28 +360,32 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             // Comparar las propiedades 
             foreach (PropertyInfo propiedad in propiedades)
             {
-                object valor1 = propiedad.GetValue(valOriginal);
-                object valor2 = propiedad.GetValue(valModificado);
-                string desCampo = "";
-                var descriptionAttribute = propiedad.GetCustomAttribute<DescriptionAttribute>();
-                if (descriptionAttribute != null)
-                {
-                    desCampo = descriptionAttribute.Description;
-                }
-
-                if (!valor1.Equals(valor2))
-                {
-                    CorreoTabla fila = new CorreoTabla
+                
+                    object valor1 = propiedad.GetValue(valOriginal);
+                    object valor2 = propiedad.GetValue(valModificado);
+                    string desCampo = "";
+                    var descriptionAttribute = propiedad.GetCustomAttribute<DescriptionAttribute>();
+                    if (descriptionAttribute != null)
                     {
-                        codigo = cod_mod,
-                        campoModificado = desCampo,
-                        valorModificado = propiedad.GetValue(valModificado).ToString(),
-                        fechaMod = fechaFormateada,
-                        usuModif = nomCompleto,
+                        desCampo = descriptionAttribute.Description;
+                    }
 
-                    };
-                    camposModificados.Add(fila);
-                }
+                    if (!valor1.Equals(valor2))
+                    {
+                        CorreoTabla fila = new CorreoTabla
+                        {
+                            codigo = cod_mod,
+                            campoModificado = desCampo,
+                            valorModificado = propiedad.GetValue(valModificado).ToString(),
+                            fechaMod = fechaFormateada,
+                            usuModif = nomCompleto,
+
+                        };
+                        camposModificados.Add(fila);
+                    }
+               
+               
+                
             }
 
             return camposModificados;
@@ -541,7 +555,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             try
                             {
-                                var existes = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(item.CodigoProyecto) ).FirstOrDefault();
+                                var existes = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(item.CodigoProyecto) 
+                                && x.TipoProy == (item.TipoProy ==true ?1:0)
+                                && x.MaterialId == item.MaterialId
+                                && x.DistritoId == item.DistritoId
+                                ).FirstOrDefault();
 
                                 if (existes != null)
                                 {
@@ -584,6 +602,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 }
                                 else
                                 {
+                                    item.TipoProy = data.TipoProy == 1 ? true : false;
                                     listaInsert.Add(item);
                                 }
                             }
@@ -603,19 +622,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             await _context.BulkInsertAsync(listaInsert);
                             await _context.SaveChangesAsync();
-
                         }
                         if (listaRepetidosInsert.Count > 0)
                         {
                             _context.BulkUpdate(listaRepetidosInsert);
-
-                            //var numerosParam = new SqlParameter("@ObjectList", SqlDbType.Structured)
-                            //{
-                            //    TypeName = "dbo.Proyecto", // Reemplaza dbo.NumeroTableType por el nombre de tu tipo de tabla definido en SQL Server
-                            //    Value = ToDataTable(listaRepetidosInsert)
-                            //};
-                            //var proyectosMasivoss = _context.ProyectoMasivoDetalle.FromSqlRaw($"EXEC UpdateObjectList {numerosParam}");
-                            //// Crea un parámetro de tipo tabla en SQL Server
 
                         }
 

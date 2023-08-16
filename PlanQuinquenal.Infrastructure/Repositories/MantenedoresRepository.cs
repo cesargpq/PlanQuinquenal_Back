@@ -145,7 +145,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             else if (attribute.Equals("Distrito"))
             {
-                var dato = await _context.Distrito.Where(x => x.Estado == true).ToListAsync();
+                var dato = await _context.Distrito.Where(x => x.Estado == true).OrderBy(x=>x.Descripcion).ToListAsync();
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;

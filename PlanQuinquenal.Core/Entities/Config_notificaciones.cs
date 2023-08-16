@@ -26,5 +26,6 @@ namespace PlanQuinquenal.Core.Entities
         public bool modCom { get; set; }
         public bool regInfActas { get; set; }
         public bool modInfActas { get; set; }
+        public bool regBR { get; set; }
     }
 }

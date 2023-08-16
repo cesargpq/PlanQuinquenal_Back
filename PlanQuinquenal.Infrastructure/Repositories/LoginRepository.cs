@@ -60,9 +60,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
         }
-        public async Task<bool> VerificaDobleFactor(DFactorDTO dFactorDTO)
+        public async Task<bool> VerificaDobleFactor(DFactorDTO dFactorDTO, int idUser)
         {
-            var resultado = await _context.DobleFactor.Where(x => x.cod_usu == dFactorDTO.cod_usu && x.Codigo.Equals(dFactorDTO.codigo)).FirstOrDefaultAsync();
+            var resultado = await _context.DobleFactor.Where(x => x.cod_usu == idUser && x.Codigo.Equals(dFactorDTO.codigo)).FirstOrDefaultAsync();
             if(resultado!= null)
             {
                 return true;

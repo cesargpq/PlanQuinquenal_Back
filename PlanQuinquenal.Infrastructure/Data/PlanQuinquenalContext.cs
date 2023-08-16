@@ -56,6 +56,8 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<BolsaReemplazo> BolsaReemplazo { get; set; }
         public virtual DbSet<ProyectoMasivoDetalle> ProyectoMasivoDetalle { get; set; }
         public virtual DbSet<PQuinquenalResponseDto> PQuinquenalResponseDto { get; set; }
+        public virtual DbSet<PQuinquenalResponseDtoID> PQuinquenalResponseDtoID { get; set; }
+        
         public virtual DbSet<UsuariosInteresadosPA> UsuariosInteresadosPA { get; set; }
         public virtual DbSet<Informe> Informe { get; set; }
         public virtual DbSet<ComentarioPY> ComentarioPY { get; set; }

@@ -29,14 +29,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IConfiguration configuration;
         private readonly HashService hashService;
         private readonly ITrazabilidadRepository _trazabilidadRepository;
+        private readonly IRepositoryNotificaciones _repositoryNotificaciones;
 
-        public InforemesActasRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, HashService hashService, ITrazabilidadRepository trazabilidadRepository)
+        public InforemesActasRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, HashService hashService, ITrazabilidadRepository trazabilidadRepository, IRepositoryNotificaciones repositoryNotificaciones)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
             this.hashService = hashService;
             this._trazabilidadRepository = trazabilidadRepository;
+            this._repositoryNotificaciones = repositoryNotificaciones;
         }
         public async Task<ResponseDTO> Crear(InformeReqDTO informeReqDTO, DatosUsuario usuario)
         {
@@ -142,12 +144,61 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _trazabilidadRepository.Add(listaT);
                 }
 
+               
+
+
 
 
 
                 _context.Add(informe);
                 await _context.SaveChangesAsync();
 
+
+
+                #region Comparacion de estructuras y agregacion de cambios
+
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = informe.CodigoProyecto.ToString()
+                };
+
+                composCorreo.Add(correoDatos);
+                #endregion
+
+                #region Envio de notificacion
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                var py = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(informe.CodigoProyecto)).FirstOrDefaultAsync();
+                var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == py.Id).ToListAsync();
+                foreach (var listaUsuInters in usuInt)
+                {
+                    int cod_usu = listaUsuInters.UsuarioId;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    string correo = UsuarioInt[0].correo_usu.ToString();
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifProyecto = new Notificaciones();
+                        notifProyecto.cod_usu = cod_usu;
+                        notifProyecto.seccion = "PROYECTOS";
+                        notifProyecto.nombreComp_usu = NomCompleto;
+                        notifProyecto.cod_reg = informe.CodigoProyecto;
+                        notifProyecto.area = nomPerfil;
+                        notifProyecto.fechora_not = DateTime.Now;
+                        notifProyecto.flag_visto = false;
+                        notifProyecto.tipo_accion = "C";
+                        notifProyecto.mensaje = $"Se creó el {informe.Tipo} del proyecto {informe.CodigoProyecto}";
+                        notifProyecto.codigo = py.Id;
+                        notifProyecto.modulo = "I";
+
+                        await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "I");
+                    }
+                }
+
+                #endregion
 
                 string ruta = "";
                 string rutaFisica = "";

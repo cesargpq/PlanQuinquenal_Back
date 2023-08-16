@@ -14,6 +14,6 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ModulosResponse> ObtenerModulos(string correo);
         Task<ModulosResponse> ObtenerSecciones(string modulo, string seccion);
 
-        Task<bool> VerificaDobleFactor(DFactorDTO dFactorDTO);
+        Task<bool> VerificaDobleFactor(DFactorDTO dFactorDTO,int idUser);
     }
 }

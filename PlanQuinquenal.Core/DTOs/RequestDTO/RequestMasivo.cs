@@ -9,5 +9,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class RequestMasivo
     {
         public string base64 { get; set; }
+
+        public int TipoProy { get; set; }
     }
 }
