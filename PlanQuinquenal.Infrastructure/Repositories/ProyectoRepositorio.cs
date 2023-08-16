@@ -228,9 +228,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
 
 
-
-                    
-                   
                     if (p.UsuariosInteresados.Count > 0)
                         {
                             var userInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == id).ToListAsync();
