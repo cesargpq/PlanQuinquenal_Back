@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using PlanQuinquenal.Core.DTOs;
@@ -62,7 +63,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 brUpdate.PermisoId = p.PermisoId==0 ?null : p.PermisoId;
                 brUpdate.UsuarioModifica = usuario.UsuaroId;
                 brUpdate.FechaModifica = DateTime.Now;
-                List<CorreoTabla> camposModificados = CompararPropiedades(mapBR, p, p.CodigoProyecto.ToString(), NomCompleto);
+                List<CorreoTabla> camposModificados = CompararPropiedadesAsync(brUpdate.CodigoProyecto,brUpdate, NomCompleto).GetAwaiter().GetResult();
                 _context.Update(brUpdate);
                 await _context.SaveChangesAsync();
 
@@ -85,11 +86,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
                 #region notificacion
-
-             
-
-                
-                var UsuarioInt = await _context.Usuario.Where(x=>x.Perfil.nombre_perfil.Equals("Administrador")).ToListAsync();
+                var UsuarioInt = await _context.Usuario.Where(x=>x.estado_user == "A").Where(x=>x.Perfil.nombre_perfil.Equals("Administrador")).ToListAsync();
                 foreach (var listaUsuInters in UsuarioInt)
                 {
                     int cod_usu = listaUsuInters.cod_usu;
@@ -114,7 +111,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                         int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
                         await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Bolsa Reemplazo");
-                        camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
+                        camposModificados.ForEach(item => {
+                                    item.idNotif = codigoNotifCreada;
+                                    item.id = null;
+                                    });
                         _context.CorreoTabla.AddRange(camposModificados);
                         _context.SaveChanges();
                     }
@@ -139,43 +139,126 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return result;
             }
         }
-        public static List<CorreoTabla> CompararPropiedades(object valOriginal, object valModificado, string cod_mod, string nomCompleto)
+        public async Task<List<CorreoTabla>> CompararPropiedadesAsync(string codigo, object valOriginal, string nomCompleto)
         {
             List<CorreoTabla> camposModificados = new List<CorreoTabla>();
-            DateTime fechaActual = DateTime.Today;
-            string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
-            Type tipo = valOriginal.GetType();
-
-            // Obtener las propiedades del tipo
-            PropertyInfo[] propiedades = tipo.GetProperties();
-            // Comparar las propiedades 
-            foreach (PropertyInfo propiedad in propiedades)
+            if (valOriginal!= null)
             {
-                object valor1 = propiedad.GetValue(valOriginal);
-                object valor2 = propiedad.GetValue(valModificado);
-                string desCampo = "";
-                var descriptionAttribute = propiedad.GetCustomAttribute<DescriptionAttribute>();
-                if (descriptionAttribute != null)
-                {
-                    desCampo = descriptionAttribute.Description;
-                }
+                DateTime fechaActual = DateTime.Today;
+                string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+                var compara = _context.Entry(valOriginal).Properties.Where(p=>p.IsModified).ToList();
 
-                if (!valor1.Equals(valor2))
+                foreach (var item in compara)
                 {
-                    CorreoTabla fila = new CorreoTabla
+                    if (item.Metadata.Name.Equals("FechaModifica") || item.Metadata.Name.Equals("UsuarioModifica"))
                     {
-                        codigo = cod_mod,
-                        campoModificado = desCampo,
-                        valorModificado = propiedad.GetValue(valModificado).ToString(),
-                        fechaMod = fechaFormateada,
-                        usuModif = nomCompleto,
-
-                    };
-                    camposModificados.Add(fila);
+                        continue;
+                    }
+                    else if (item.Metadata.Name.Equals("DistritoId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("Distrito");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Distrito");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ConstructorId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("Constructor");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Constructor");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ReemplazoId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("Reemplazo");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Reemplazo");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("PermisoId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("ZonaPermiso");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Zona con Permiso");
+                        camposModificados.Add(fila);
+                    }
+                    else
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
                 }
             }
 
             return camposModificados;
+        }
+
+        private string SepararPalabrasConMayusculas(string input)
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                char currentChar = input[i];
+                if (char.IsUpper(currentChar) && i > 0)
+                {
+                    result.Append(' ');
+                }
+                result.Append(currentChar);
+            }
+
+            return result.ToString().Replace("ion","ión");
+        }
+
+        private static CorreoTabla CrearCorreoTablaManualFecha(string codigo,PropertyEntry? item, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = item.OriginalValue!= null ? ((DateTime)item.OriginalValue).ToString("dd/MM/yyyy"): "",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue!= null ?((DateTime)item.CurrentValue).ToString("dd/MM/yyyy"): "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaManual(string codigo,string valorActual,string valorModificado, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = valorActual,
+                campoModificado = nombreColumna,
+                valorModificado = valorModificado,
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTabla(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, IEnumerable<MaestroResponseDto> enumerable, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual = item.OriginalValue!= null ? enumerable.Where(x => x.Id == (int)item.OriginalValue).FirstOrDefault().Descripcion: "",
+                campoModificado = nombreColumna,
+                valorModificado =item.CurrentValue!=null? enumerable.Where(x => x.Id == (int)item.CurrentValue).FirstOrDefault().Descripcion: "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaDirecto(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual =item.OriginalValue != null ? (item.OriginalValue is bool?( (bool)item.OriginalValue? "Marcado" : "Desmarcado"):  item.OriginalValue +"" ):"",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue != null ? (item.CurrentValue is bool?( (bool)item.CurrentValue? "Marcado" : "Desmarcado"): item.CurrentValue +"" ):"",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
         }
         public async Task<ResponseDTO> Add(RequestBolsaDto p, DatosUsuario usuario)
         {
@@ -233,7 +316,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     #endregion
 
                     #region Envio de notificacion
-                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                     string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                     string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
                     var py = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(map.CodigoProyecto)).FirstOrDefaultAsync();

@@ -14,6 +14,7 @@ namespace PlanQuinquenal.Core.Entities
         public int? idNotif { get; set; }
         public string? codigo { get; set; }
         public string? campoModificado { get; set; }
+        public string? valorActual { get; set; }
         public string? valorModificado { get; set; }
         public string? fechaMod { get; set; }
         public string? usuModif { get; set; }

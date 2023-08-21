@@ -104,6 +104,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
                 dto = resultadoMap;
+            }else if (attribute.Equals("Usuario"))
+            {
+                var dato = await _context.Usuario.Where(x => x.Estado == true).ToListAsync();
+
+                var resultadoMap = mapper.Map<List<MaestroResponseDto>>(dato);
+                dto = resultadoMap;
             }
             else if (attribute.Equals("TipoUsuario"))
             {

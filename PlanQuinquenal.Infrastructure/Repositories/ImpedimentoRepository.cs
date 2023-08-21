@@ -2,6 +2,7 @@
 using AutoMapper;
 using iTextSharp.text.pdf.codec.wmf;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OfficeOpenXml;
@@ -97,41 +98,36 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
                 #region Comparacion de estructuras y agregacion de cambios
-
+                var proyecto = await _context.Proyecto.Where(x => x.Id == obj.ProyectoId).FirstOrDefaultAsync();
                 List<CorreoTabla> composCorreo = new List<CorreoTabla>();
                 CorreoTabla correoDatos = new CorreoTabla
                 {
-                    codigo = obj.Id.ToString()
+                    codigo = proyecto.CodigoProyecto +" - "+ obj.Id.ToString()
                 };
 
                 composCorreo.Add(correoDatos);
                 #endregion
 
                 #region Envio de notificacion
-
-                var ConstPerfilUsu = await _context.Constantes.Where(x => x.codigo == "USU_IMP_NOTIF").ToListAsync();
-                List<int> codigosPerfil = ConstPerfilUsu[0].valor1.Split(',')
-                                       .Select(numero => int.Parse(numero))
-                                       .ToList();
-                var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => codigosPerfil.Contains(x.Perfil.cod_perfil)).ToListAsync();
-
+                var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").ToListAsync();
+                var lstpermisos = await _context.Config_notificaciones.Where(x => x.regImp == true).ToListAsync();
                 foreach (var listaUsuInters in UsuarioInt)
                 {
                     int cod_usu = listaUsuInters.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
                     string correo = listaUsuInters.correo_usu;
-                    if (lstpermisos.Count() == 1)
+                    var permiso = lstpermisos.Where(x => x.cod_usu == cod_usu);
+                    if (permiso.Count() == 1)
                     {
                         Notificaciones notifProyecto = new Notificaciones();
                         notifProyecto.cod_usu = cod_usu;
                         notifProyecto.seccion = "IMPEDIMENTOS";
                         notifProyecto.nombreComp_usu = NomCompleto;
-                        notifProyecto.cod_reg = obj.Id.ToString();
+                        notifProyecto.cod_reg = proyecto.CodigoProyecto +" - "+ obj.Id.ToString();
                         notifProyecto.area = nomPerfil;
                         notifProyecto.fechora_not = DateTime.Now;
                         notifProyecto.flag_visto = false;
                         notifProyecto.tipo_accion = "C";
-                        notifProyecto.mensaje = $"Se creó el impedimento {obj.Id}";
+                        notifProyecto.mensaje = $"Se creó el impedimento {proyecto.CodigoProyecto +" - "+ obj.Id}";
                         notifProyecto.codigo = obj.Id;
                         notifProyecto.modulo = "IMP";
 
@@ -148,7 +144,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
                 return dato;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 var dato = new ResponseDTO
                 {
@@ -306,6 +302,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 else
                 {
+                    List<CorreoTabla> camposModificados;
+
                     existe.ProblematicaRealId = p.ProblematicaRealId==0?null:p.ProblematicaRealId;
                     existe.LongImpedimento = p.LongImpedimento==null?0:p.LongImpedimento;
                     existe.CausalReemplazoId = p.CausalReemplazoId==0 || p.CausalReemplazoId == null?null:p.CausalReemplazoId;
@@ -328,7 +326,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     existe.UsuarioModificaId = usuario.UsuaroId;
                     existe.CostoInversion = p.CostoInversion == null ? 0 : p.CostoInversion;
 
-
+                    var proyecto = await _context.Proyecto.Where(x => x.Id == existe.ProyectoId).FirstOrDefaultAsync();
+                    camposModificados = CompararPropiedadesAsync(proyecto.CodigoProyecto,existe, NomCompleto).GetAwaiter().GetResult();
 
 
                     var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Editar").ToListAsync();
@@ -349,45 +348,42 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
 
-                    #region notificacion
-
-                    List<CorreoTabla> camposModificados = CompararPropiedades(impAnterior, p, p.Id.ToString(), NomCompleto);
-
-                    var ConstPerfilUsu = await _context.Constantes.Where(x => x.codigo == "USU_IMP_NOTIF").ToListAsync();
-                    List<int> codigosPerfil = ConstPerfilUsu[0].valor1.Split(',')
-                                           .Select(numero => int.Parse(numero))
-                                           .ToList();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => codigosPerfil.Contains(x.Perfil.cod_perfil)).ToListAsync();
-                    foreach (var listaUsuInters in UsuarioInt)
+                    #region Notificacion
+                    if (camposModificados.Count>0)
                     {
-                        int cod_usu = listaUsuInters.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
-                        string correo = listaUsuInters.correo_usu;
-                        if (lstpermisos.Count() == 1)
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.modImp == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).ToListAsync();
+                        if (UsuarioInt!=null && proyecto!=null)
                         {
-                            Notificaciones notifProyecto = new Notificaciones();
-                            notifProyecto.cod_usu = cod_usu;
-                            notifProyecto.seccion = "IMPEDIMENTOS";
-                            notifProyecto.nombreComp_usu = NomCompleto;
-                            notifProyecto.cod_reg = p.Id.ToString();
-                            notifProyecto.area = nomPerfil;
-                            notifProyecto.fechora_not = DateTime.Now;
-                            notifProyecto.flag_visto = false;
-                            notifProyecto.tipo_accion = "M";
-                            notifProyecto.mensaje = $"Se modificó el impedimento {p.Id}";
-                            notifProyecto.codigo = existe.Id;
-                            notifProyecto.modulo = "IMP";
+                            lstpermisos.ForEach(async per => {
+                                string correo = UsuarioInt.Find(usu => usu.cod_usu == per.cod_usu).correo_usu.ToString();
+                                Notificaciones notifProyecto = new Notificaciones();
+                                notifProyecto.cod_usu = per.cod_usu;
+                                notifProyecto.seccion = "IMPEDIMENTO";
+                                notifProyecto.nombreComp_usu = NomCompleto;
+                                notifProyecto.cod_reg = proyecto.CodigoProyecto + " - "+ existe.Id;
+                                notifProyecto.area = nomPerfil;
+                                notifProyecto.fechora_not = DateTime.Now;
+                                notifProyecto.flag_visto = false;
+                                notifProyecto.tipo_accion = "M";
+                                notifProyecto.mensaje = $"Se modificó el Impedimento {proyecto.CodigoProyecto}";
+                                notifProyecto.codigo = existe.Id;
+                                notifProyecto.modulo = "IMP";
 
-                            var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
-                            int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Impedimentos");
-                            camposModificados.ForEach(item => item.idNotif = codigoNotifCreada);
-                            _context.CorreoTabla.AddRange(camposModificados);
-                            _context.SaveChanges();
+                                var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                                dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                                int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                                await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Impedimento");
+                                camposModificados.ForEach(item => {
+                                    item.idNotif = codigoNotifCreada;
+                                    item.id = null;
+                                    });
+                                _context.CorreoTabla.AddRange(camposModificados);
+                                _context.SaveChanges();
+                            });
+                        
                         }
                     }
-
                     #endregion
 
                     var resultado = new ResponseDTO
@@ -409,6 +405,132 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
                 return resultado;
             }
+        }
+
+        public async Task<List<CorreoTabla>> CompararPropiedadesAsync(string codigo, object valOriginal, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            if (valOriginal!= null)
+            {
+                DateTime fechaActual = DateTime.Today;
+                string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+                var compara = _context.Entry(valOriginal).Properties.Where(p=>p.IsModified).ToList();
+
+                foreach (var item in compara)
+                {
+                    if (item.Metadata.Name.Equals("fechamodifica") || item.Metadata.Name.Equals("UsuarioModificaId"))
+                    {
+                        continue;
+                    }
+                    else if (item.Metadata.Name.Equals("ProblematicaRealId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("ProblematicaReal");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Problematica Real");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("CausalReemplazoId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("CausalReemplazo");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Causal Reemplazo");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ValidacionLegalId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("ValidacionLegal");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Causal Reemplazo");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("FechaPresentacion"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaManualFecha(codigo,  item, nomCompleto, fechaFormateada, "Fecha Presentación");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("FechaPresentacionReemplazo"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaManualFecha(codigo,  item, nomCompleto, fechaFormateada, "Fecha Presentación Reemplazo");
+                        camposModificados.Add(fila);
+                    }
+                    else
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                }
+            }
+
+            return camposModificados;
+        }
+
+        private string SepararPalabrasConMayusculas(string input)
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                char currentChar = input[i];
+                if (char.IsUpper(currentChar) && i > 0)
+                {
+                    result.Append(' ');
+                }
+                result.Append(currentChar);
+            }
+
+            return result.ToString().Replace("ion","ión");
+        }
+
+        private static CorreoTabla CrearCorreoTablaManualFecha(string codigo,PropertyEntry? item, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = item.OriginalValue!= null ? ((DateTime)item.OriginalValue).ToString("dd/MM/yyyy"): "",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue!= null ?((DateTime)item.CurrentValue).ToString("dd/MM/yyyy"): "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaManual(string codigo,string valorActual,string valorModificado, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = valorActual,
+                campoModificado = nombreColumna,
+                valorModificado = valorModificado,
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTabla(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, IEnumerable<MaestroResponseDto> enumerable, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual = item.OriginalValue!= null ? enumerable.Where(x => x.Id == (int)item.OriginalValue).FirstOrDefault().Descripcion: "",
+                campoModificado = nombreColumna,
+                valorModificado =item.CurrentValue!=null? enumerable.Where(x => x.Id == (int)item.CurrentValue).FirstOrDefault().Descripcion: "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaDirecto(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual =item.OriginalValue != null ? (item.OriginalValue is bool?( (bool)item.OriginalValue? "Marcado" : "Desmarcado"):  item.OriginalValue +"" ):"",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue != null ? (item.CurrentValue is bool?( (bool)item.CurrentValue? "Marcado" : "Desmarcado"): item.CurrentValue +"" ):"",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
         }
 
         public async Task<PaginacionResponseDtoException<Object>> ListarDocumentos(ListaDocImpedimentosDTO p)

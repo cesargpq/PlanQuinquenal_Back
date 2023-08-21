@@ -14,7 +14,7 @@ namespace PlanQuinquenal.Core.Entities
         [Key]
         public int id { get; set; }
         public string codigo { get; set; }
-        public string valor1 { get; set; }
-        public string valor2 { get; set; }
+        public string? valor1 { get; set; }
+        public string? valor2 { get; set; }
     }
 }
