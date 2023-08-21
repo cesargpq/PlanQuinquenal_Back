@@ -36,7 +36,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var existeProyecto = await _context.Proyecto.Where(x => x.Id == permisoRequestDTO.ProyectoId).FirstOrDefaultAsync();
+                var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto == permisoRequestDTO.CodigoProyecto).FirstOrDefaultAsync();
 
 
                 if (existeProyecto != null)
@@ -50,7 +50,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             Message = "El permiso envíado no existe"
                         };
                     }
-                    var permisoExiste = await _context.PermisosProyecto.Where(x => x.ProyectoId == existeProyecto.Id && x.TipoPermisosProyectoId == obtenerPermiso.Id).FirstOrDefaultAsync();
+                    var permisoExiste = await _context.PermisosProyecto.Where(x => x.CodigoProyecto == existeProyecto.CodigoProyecto && x.TipoPermisosProyectoId == obtenerPermiso.Id).FirstOrDefaultAsync();
                     if (permisoExiste!=null)
                     {
                         permisoExiste.Longitud = permisoRequestDTO.Longitud;
@@ -64,7 +64,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             List<Trazabilidad> listaT = new List<Trazabilidad>();
                             trazabilidad.Tabla = "Permisos";
                             trazabilidad.Evento = "Editar";
-                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {permisoExiste.Id} del proyecto {permisoExiste.ProyectoId} ";
+                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {permisoExiste.Id} del proyecto {permisoExiste.CodigoProyecto} ";
                             trazabilidad.UsuarioId = usuario.UsuaroId;
                             trazabilidad.DireccionIp = usuario.Ip;
                             trazabilidad.FechaRegistro = DateTime.Now;
@@ -82,7 +82,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
                         PermisosProyecto obj = new PermisosProyecto();
 
-                        obj.ProyectoId = existeProyecto.Id;
+                        obj.CodigoProyecto = existeProyecto.CodigoProyecto;
                         obj.TipoPermisosProyectoId = obtenerPermiso.Id;
                         obj.Longitud = permisoRequestDTO.Longitud;
                         obj.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
@@ -102,7 +102,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             List<Trazabilidad> listaT = new List<Trazabilidad>();
                             trazabilidad.Tabla = "Permisos";
                             trazabilidad.Evento = "Crear";
-                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {obj.Id} del proyecto {obj.ProyectoId} ";
+                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {obj.Id} del proyecto {obj.CodigoProyecto} ";
                             trazabilidad.UsuarioId = usuario.UsuaroId;
                             trazabilidad.DireccionIp = usuario.Ip;
                             trazabilidad.FechaRegistro = DateTime.Now;
@@ -137,7 +137,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
             }
         }
-        public async Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(int idProyecto, string TipoPermiso)
+        public async Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(string CodigoProyecto, string TipoPermiso)
         {
             var tipoPerm = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(TipoPermiso.ToUpper())).FirstOrDefaultAsync();
             if (tipoPerm == null)
@@ -151,7 +151,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else
             {
-                var resultado = await _context.PermisosProyecto.Where(x => x.ProyectoId == idProyecto && x.TipoPermisosProyectoId==tipoPerm.Id).FirstOrDefaultAsync();
+                var resultado = await _context.PermisosProyecto.Where(x => x.CodigoProyecto == CodigoProyecto && x.TipoPermisosProyectoId==tipoPerm.Id).FirstOrDefaultAsync();
 
                 if(resultado == null)
                 {
@@ -178,7 +178,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO, DatosUsuario usuario)
         {
-            var existeProyecto = await _context.Proyecto.Where(x => x.Id == documentosPermisosRequestDTO.ProyectoId).FirstOrDefaultAsync();
+            var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto == documentosPermisosRequestDTO.CodigoProyecto).FirstOrDefaultAsync();
 
             if(existeProyecto != null)
             {
@@ -188,7 +188,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var guidId = Guid.NewGuid();
                 var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
-                documentos.ProyectoId = existeProyecto.Id;
+                documentos.CodigoProyecto = existeProyecto.CodigoProyecto;
                 documentos.TipoPermisosProyectoId = tipoPerm.Id;
                 documentos.NombreDocumento = documentosPermisosRequestDTO.NombreDocumento;
                 documentos.CodigoDocumento = guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
@@ -213,7 +213,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Permisos";
                     trazabilidad.Evento = "CargarExpediente";
-                    trazabilidad.DescripcionEvento = $"Se cargó correctamente el expediente {documentos.NombreDocumento} en el proyecto {documentos.ProyectoId}";
+                    trazabilidad.DescripcionEvento = $"Se cargó correctamente el expediente {documentos.NombreDocumento} en el proyecto {documentos.CodigoProyecto}";
                     trazabilidad.UsuarioId = usuario.UsuaroId;
                     trazabilidad.DireccionIp = usuario.Ip;
                     trazabilidad.FechaRegistro = DateTime.Now;
@@ -297,7 +297,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Permisos";
                     trazabilidad.Evento = "Eliminar";
-                    trazabilidad.DescripcionEvento = $"Se elimnó correctamente el documento del proyecto  {dato.ProyectoId} ";
+                    trazabilidad.DescripcionEvento = $"Se elimnó correctamente el documento del proyecto  {dato.CodigoProyecto} ";
                     trazabilidad.UsuarioId = usuario.UsuaroId;
                     trazabilidad.DireccionIp = usuario.Ip;
                     trazabilidad.FechaRegistro = DateTime.Now;
@@ -330,7 +330,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var queryable = _context.DocumentosPermisos
                                 .Where(x => listDocumentosRequestDto.Buscar != "" ? x.Expediente.Contains(listDocumentosRequestDto.Buscar) || x.NombreDocumento.Contains(listDocumentosRequestDto.Buscar) : true)
                                 .Where(x=>x.TipoPermisosProyectoId == dato.Id)
-                                .Where(x => x.ProyectoId == listDocumentosRequestDto.ProyectoId)
+                                .Where(x => x.CodigoProyecto == listDocumentosRequestDto.CodigoProyecto)
                                 .Where(x=>x.Estado ==true)
                                 .AsQueryable();
 

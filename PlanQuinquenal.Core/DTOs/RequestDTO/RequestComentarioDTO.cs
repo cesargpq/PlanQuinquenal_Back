@@ -8,7 +8,8 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
     public class RequestComentarioDTO:PaginacionDTO
     {
-        public int Codigo { get; set; }
+        public int? Codigo { get; set; }
+        public string? CodigoProyecto { get; set; }
         public int TipoSeguimientoId { get; set; }
     }
 }

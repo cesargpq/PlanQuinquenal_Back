@@ -171,7 +171,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
                 var py = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(informe.CodigoProyecto)).FirstOrDefaultAsync();
-                var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == py.Id).ToListAsync();
+                var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto.Equals(py.CodigoProyecto)).ToListAsync();
                 foreach (var listaUsuInters in usuInt)
                 {
                     int cod_usu = listaUsuInters.UsuarioId;

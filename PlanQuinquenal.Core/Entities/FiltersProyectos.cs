@@ -30,7 +30,7 @@ namespace PlanQuinquenal.Core.Entities
         public string? ProblematicaReal { get; set; }
         public int? UsuarioRegisterId { get; set; }
         public string? FechaGasificacion { get; set; }
-
+        public int? TipoProy { get; set; }
 
     }
 }
