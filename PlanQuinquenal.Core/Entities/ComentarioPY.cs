@@ -10,8 +10,7 @@ namespace PlanQuinquenal.Core.Entities
     {
         public int Id { get; set; }
         public int TipoSeguimientoId { get; set; }
-        public int ProyectoId { get; set; }
-        public Proyecto Proyecto { get; set; }
+        public string CodigoProyecto { get; set; }
         public Usuario Usuario { get; set; }
         public int UsuarioId { get; set; }
         public string? Descripcion { get; set; }

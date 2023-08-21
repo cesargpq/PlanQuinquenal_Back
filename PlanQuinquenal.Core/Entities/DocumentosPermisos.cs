@@ -9,7 +9,7 @@ namespace PlanQuinquenal.Core.Entities
 	public class DocumentosPermisos
 	{
 		public int Id { get; set; }
-        public int ProyectoId { get; set; }
+        public string CodigoProyecto { get; set; }
         public int TipoPermisosProyectoId { get; set; }
         public string NombreDocumento { get; set; }
         public string CodigoDocumento { get; set; }

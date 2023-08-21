@@ -10,6 +10,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     {
         public int TipoSeguimientoId { get; set; }
         public int ProyectoId { get; set; }
+        public string CodigoProyecto { get; set; }
         public string Descripcion { get; set; }
         public int TipoComentario { get; set; }
     }

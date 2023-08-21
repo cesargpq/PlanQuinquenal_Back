@@ -730,7 +730,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     DocumentosPy docuobjeto = new DocumentosPy();
 
-                    docuobjeto.ProyectoId = proyecto.Id;
+                    docuobjeto.CodigoProyecto = proyecto.CodigoProyecto;
                     docuobjeto.CodigoDocumento = itemdoc.CodigoDocumento;
                     docuobjeto.NombreDocumento = itemdoc.NombreDocumento;
                     docuobjeto.FechaEmision = itemdoc.FechaEmision;
@@ -788,7 +788,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     composCorreo.Add(correoDatos);
 
-                    var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == py.Id).ToListAsync();
+                    var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == py.CodigoProyecto).ToListAsync();
                     foreach (var listaUsuInters in usuInt)
                     {
                         int cod_usu = listaUsuInters.UsuarioId;

@@ -24,7 +24,7 @@ namespace PlanQuinquenal.Core.Entities
         public TipoProyecto? TipoProyecto { get; set; }
         public TipoRegistro? TipoRegistro { get; set; }
         public Usuario? IngenieroResponsable { get; set; }
-        public List<UsuariosInteresadosPy> UsuariosInteresados { get; set;}
+        //public List<UsuariosInteresadosPy> UsuariosInteresados { get; set;}
         public int? TipoProyectoId { get; set; }
         public string? CodigoMalla { get; set; }
         public int? TipoRegistroId { get; set; }

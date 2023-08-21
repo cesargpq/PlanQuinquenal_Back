@@ -13,7 +13,7 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IPermisosProyectoRepository
     {
         Task<ResponseDTO> Add(PermisoRequestDTO permisoRequestDTO, DatosUsuario usuario);
-        Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(int idProyecto, string TipoPermiso);
+        Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(string CodigoProyecto, string TipoPermiso);
         Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO,DatosUsuario usuario);
         Task<ResponseDTO> Delete(int id, DatosUsuario usuario);
         Task<PaginacionResponseDto<DocumentoPermisosResponseDTO>> Listar(ListDocumentosRequestDto listDocumentosRequestDto);

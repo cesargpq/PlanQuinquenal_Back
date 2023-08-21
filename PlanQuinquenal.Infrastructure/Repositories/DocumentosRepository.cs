@@ -255,13 +255,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var resultado = await _context.Proyecto.Where(x => x.Id.Equals(documentoRequestDto.ProyectoId)).FirstOrDefaultAsync();
+                var resultado = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(documentoRequestDto.CodigoProyecto)).FirstOrDefaultAsync();
                 if (resultado != null)
                 {
                     var guidId = Guid.NewGuid();
                     var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
                     var map = mapper.Map<DocumentosPy>(documentoRequestDto);
-                    map.ProyectoId = resultado.Id;
+                    map.CodigoProyecto = resultado.CodigoProyecto;
                     map.CodigoDocumento = documentoRequestDto.NombreDocumento;
                     map.FechaEmision = DateTime.Now;
                     map.Aprobaciones = Convert.ToDateTime(documentoRequestDto.Aprobaciones);
@@ -297,7 +297,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                     string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
                     var proyectoSearch = await _context.Proyecto.Where(x => x.Id == documentoRequestDto.ProyectoId).FirstOrDefaultAsync();
-                    var usuariosInteresados = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == documentoRequestDto.ProyectoId).ToListAsync();
+                    var usuariosInteresados = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == documentoRequestDto.CodigoProyecto).ToListAsync();
                     List<CorreoTabla> composCorreo = new List<CorreoTabla>();
                     CorreoTabla correoDatos = new CorreoTabla
                     {
@@ -596,7 +596,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         ;
                         
                         var dato = await _context.DocumentosPy.Where(x => x.Id == id).FirstOrDefaultAsync();
-                        var proyecto = await _context.Proyecto.Where(x => x.Id == dato.ProyectoId).FirstOrDefaultAsync();
+                        var proyecto = await _context.Proyecto.Where(x => x.CodigoProyecto == dato.CodigoProyecto).FirstOrDefaultAsync();
                         dato.Estado = false;
                         _context.Update(dato);
                         await _context.SaveChangesAsync();
@@ -625,7 +625,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         };
                         composCorreo.Add(correoDatos);
 
-                        var usuarioInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == proyecto.Id).ToListAsync();
+                        var usuarioInt = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto.Equals(proyecto.CodigoProyecto)).ToListAsync();
                         foreach (var listaUsuInters in usuarioInt)
                         {
                             int cod_usu = listaUsuInters.UsuarioId;
@@ -775,10 +775,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 try
                 {
-                    var proyecto = await _context.Proyecto.Where(x => x.Id.Equals(listDocumentosRequestDto.ProyectoId) ).FirstOrDefaultAsync();
+                    var proyecto = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(listDocumentosRequestDto.CodigoProyecto) ).FirstOrDefaultAsync();
                     var queryable = _context.DocumentosPy
                                     .Where(x => listDocumentosRequestDto.Buscar != "" ? x.CodigoDocumento == listDocumentosRequestDto.Buscar : true)
-                                    .Where(x=>x.ProyectoId == proyecto.Id)
+                                    .Where(x=>x.CodigoProyecto == proyecto.CodigoProyecto)
                                     .Where(x=> x.Estado==true)
                                     .OrderBy(x=>x.FechaEmision)
                                     .AsQueryable();

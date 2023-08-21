@@ -55,6 +55,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 && x.TipoProy == (proyectoRequestDto.TipoProy == 1?true:false)
                 && x.DistritoId == proyectoRequestDto.DistritoId
                 && x.MaterialId == proyectoRequestDto.MaterialId
+                && x.AñosPQ == proyectoRequestDto.AñosPQ
                 ).AnyAsync();
                 
                 if (existe)
@@ -105,7 +106,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             if (existeUsu != null)
                             {
                                 UsuariosInteresadosPy pqUser = new UsuariosInteresadosPy();
-                                pqUser.ProyectoId = proyecto.Id;
+                                pqUser.CodigoProyecto = proyecto.CodigoProyecto;
                                 pqUser.UsuarioId = item;
                                 pqUser.Estado = true;
                                 listPqUser.Add(pqUser);
@@ -232,7 +233,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     if (p.UsuariosInteresados.Count > 0)
                         {
-                            var userInt = await _context.UsuariosInteresadosPy.Where(x => x.ProyectoId == id).ToListAsync();
+                            var userInt = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == existe.CodigoProyecto).ToListAsync();
 
                             bool todosExisten = p.UsuariosInteresados.All(valor => userInt.Any(objeto => objeto.UsuarioId  == valor));
                             bool hayValoresExtras = userInt.Any(objeto => !p.UsuariosInteresados.Contains(objeto.UsuarioId ));
@@ -260,7 +261,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 if (existeUsu != null)
                                 {
                                     UsuariosInteresadosPy pqUser = new UsuariosInteresadosPy();
-                                    pqUser.ProyectoId = id;
+                                    pqUser.CodigoProyecto = existe.CodigoProyecto;
                                     pqUser.UsuarioId = item;
                                     pqUser.Estado = true;
                                     listPqUser.Add(pqUser);
@@ -545,7 +546,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
 
-            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.TipoProy}, {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ProyectoDetalle>
@@ -686,6 +687,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 && x.TipoProy == (item.TipoProy ==true ?1:0)
                                 && x.MaterialId == item.MaterialId
                                 && x.DistritoId == item.DistritoId
+                                && x.AñosPQ == item.AñosPQ
                                 ).FirstOrDefault();
 
                                 if (existes != null)
@@ -885,7 +887,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var resultad = await _context.ProyectoResponseIdDTO.FromSqlRaw($"EXEC listarpybyid  {Id}").ToListAsync();
             var usuariosInteresados = await _context.UsuariosInteresadosPy
                                             .Include(x=>x.Usuario)    
-                                            .Where(x => x.ProyectoId == Id).ToListAsync();
+                                            .Where(x => x.CodigoProyecto.Equals(resultad.ElementAt(0).CodigoProyecto)).ToListAsync();
 
             List<UsuarioResponseDto> obj = new List<UsuarioResponseDto>();
 
