@@ -95,48 +95,49 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
                     }
-                }
-
-                #region Comparacion de estructuras y agregacion de cambios
-                var proyecto = await _context.Proyecto.Where(x => x.Id == obj.ProyectoId).FirstOrDefaultAsync();
-                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
-                CorreoTabla correoDatos = new CorreoTabla
-                {
-                    codigo = proyecto.CodigoProyecto +" - "+ obj.Id.ToString()
-                };
-
-                composCorreo.Add(correoDatos);
-                #endregion
-
-                #region Envio de notificacion
-                var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").ToListAsync();
-                var lstpermisos = await _context.Config_notificaciones.Where(x => x.regImp == true).ToListAsync();
-                foreach (var listaUsuInters in UsuarioInt)
-                {
-                    int cod_usu = listaUsuInters.cod_usu;
-                    string correo = listaUsuInters.correo_usu;
-                    var permiso = lstpermisos.Where(x => x.cod_usu == cod_usu);
-                    if (permiso.Count() == 1)
+                    #region Comparacion de estructuras y agregacion de cambios
+                    var proyecto = await _context.Proyecto.Where(x => x.Id == obj.ProyectoId).FirstOrDefaultAsync();
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
                     {
-                        Notificaciones notifProyecto = new Notificaciones();
-                        notifProyecto.cod_usu = cod_usu;
-                        notifProyecto.seccion = "IMPEDIMENTOS";
-                        notifProyecto.nombreComp_usu = NomCompleto;
-                        notifProyecto.cod_reg = proyecto.CodigoProyecto +" - "+ obj.Id.ToString();
-                        notifProyecto.area = nomPerfil;
-                        notifProyecto.fechora_not = DateTime.Now;
-                        notifProyecto.flag_visto = false;
-                        notifProyecto.tipo_accion = "C";
-                        notifProyecto.mensaje = $"Se creó el impedimento {proyecto.CodigoProyecto +" - "+ obj.Id}";
-                        notifProyecto.codigo = obj.Id;
-                        notifProyecto.modulo = "IMP";
+                        codigo = proyecto.CodigoProyecto + " - " + obj.Id.ToString()
+                    };
 
-                        await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Impedimentos");
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.estado_user == "A").ToListAsync();
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.regImp == true).ToListAsync();
+                    foreach (var listaUsuInters in UsuarioInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        string correo = listaUsuInters.correo_usu;
+                        var permiso = lstpermisos.Where(x => x.cod_usu == cod_usu);
+                        if (permiso.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "IMPEDIMENTOS";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = proyecto.CodigoProyecto + " - " + obj.Id.ToString();
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el impedimento {proyecto.CodigoProyecto + " - " + obj.Id}";
+                            notifProyecto.codigo = obj.Id;
+                            notifProyecto.modulo = "IMP";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Impedimentos");
+                        }
                     }
+
+                    #endregion
                 }
 
-                #endregion
+
                 var dato = new ResponseDTO
                 {
                     Valid = true,
