@@ -132,7 +132,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     fechora_not = notificacion.fechora_not,
                     flag_visto = notificacion.flag_visto,
                     tipo_accion = notificacion.tipo_accion,
-                    mensaje = notificacion.mensaje
+                    mensaje = notificacion.mensaje,
+                    codigo = notificacion.codigo,
+                    modulo = notificacion.modulo
                 };
 
                 // Agregar la entidad al objeto DbSet y guardar los cambios en la base de datos
@@ -322,12 +324,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     tablaHtml.Append("<div class=\"v270_5556\">");
                     tablaHtml.Append($"<span class=\"v270_5561\">{item.codigo}</span>");
                     tablaHtml.Append("</div>");
-                    tablaHtml.Append("<div class=\"v270_5557\">");
-                    tablaHtml.Append($"<span class=\"v270_5562\">{item.valorModificado}</span>");
-                    tablaHtml.Append("</div>");
                     tablaHtml.Append("<div class=\"v270_5558\">");
                     tablaHtml.Append($"<span class=\"v270_5563\">{item.campoModificado}</span>");
                     tablaHtml.Append("</div>");
+                    tablaHtml.Append("<div class=\"v270_5557\">");
+                    tablaHtml.Append($"<span class=\"v270_5562\">{item.valorActual}</span>");
+                    tablaHtml.Append("</div>");
+                    tablaHtml.Append("<div class=\"v270_5557\">");
+                    tablaHtml.Append($"<span class=\"v270_5562\">{item.valorModificado}</span>");
+                    tablaHtml.Append("</div>");
+                    
                     tablaHtml.Append("<div class=\"v270_5559\">");
                     tablaHtml.Append($"<span class=\"v270_5564\">{item.fechaMod}</span>");
                     tablaHtml.Append("</div>");
@@ -355,12 +361,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         <div class=""v270_5543"">
                             <span class=""v270_5550"">Código de proyecto o PQ</span>
                         </div>
-                        <div class=""v270_5546"">
-                            <span class=""v270_5551"">Valor modificado</span>
-                        </div>
                         <div class=""v270_5547"">
                             <span class=""v270_5552"">Campo modificado</span>
                         </div>
+                        <div class=""v270_5546"">
+                            <span class=""v270_5551"">Valor anterior</span>
+                        </div>
+                        <div class=""v270_5546"">
+                            <span class=""v270_5551"">Valor modificado</span>
+                        </div>
+                        
                         <div class=""v270_5548"">
                             <span class=""v270_5553"">Fecha de modificación</span>
                         </div>

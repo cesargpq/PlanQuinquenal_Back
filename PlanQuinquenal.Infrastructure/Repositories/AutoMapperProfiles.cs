@@ -127,6 +127,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             CreateMap<MaestroResponseDto, ProblematicaReal>();
             CreateMap<ProblematicaReal, MaestroResponseDto>();
 
+            CreateMap<Usuario, MaestroResponseDto>()
+               .ForMember(x => x.Descripcion , y => y.MapFrom(src => src.nombre_usu +" "+ src.apellido_usu))
+               .ForMember(x => x.Id, y => y.MapFrom(src => src.cod_usu));
+
             CreateMap<MaestroResponseDto, TipoUsuario>();
             CreateMap<TipoUsuario, MaestroResponseDto>();
             CreateMap<DocumentoRequestDto, DocumentosPy>();
