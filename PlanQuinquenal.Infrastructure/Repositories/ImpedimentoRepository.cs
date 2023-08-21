@@ -47,54 +47,53 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             string NomCompleto = UsuarioReg[0].nombre_usu.ToString() + " " + UsuarioReg[0].apellido_usu.ToString();
             try
             {
-                var proy = await _context.Proyecto.Where(x =>x.Id == p.codProyecto).FirstOrDefaultAsync();
-                Impedimento obj = new Impedimento();
-                obj.ProyectoId = proy.Id;
-                obj.ProblematicaRealId = p.ProblematicaRealId;
-                obj.LongImpedimento = p.LongImpedimento;
-                obj.CausalReemplazoId = null;
-                obj.Resuelto = false;
-                obj.PrimerEstrato = 0;
-                obj.SegundoEstrato = 0;
-                obj.TercerEstrato = 0;
-                obj.CuartoEstrato = 0;
-                obj.QuintoEstrato = 0;
-                obj.LongitudReemplazo = 0;
-                obj.ValidacionCargoPlano = false;
-                obj.ValidacionCargoSustentoRRCC = false;
-                obj.ValidacionCargoSustentoAmbiental = false;
-                obj.ValidacionCargoSustentoArqueologia = false;
-                obj.ValidacionLegalId = null;
-                obj.Comentario = "";
-                obj.FechaPresentacion = null;
-                obj.FechaPresentacionReemplazo = null;
-                obj.fechamodifica = DateTime.Now;
-                obj.FechaRegistro = DateTime.Now;
-                obj.UsuarioRegisterId = usuario.UsuaroId;
-                obj.UsuarioModificaId = usuario.UsuaroId;
-                obj.CostoInversion = proy.InversionEjecutada;
-                obj.Reemplazado = false;
-                obj.estado = true;
-
-
-                _context.Add(obj);
-                await _context.SaveChangesAsync();
-
-
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Crear").ToListAsync();
-                if (resultad.Count > 0)
+                var proyect = await _context.Proyecto.Where(x =>x.CodigoProyecto.Equals(p.codProyecto)).ToListAsync();
+                foreach (var proy in proyect)
                 {
-                    Trazabilidad trazabilidad = new Trazabilidad();
-                    List<Trazabilidad> listaT = new List<Trazabilidad>();
-                    trazabilidad.Tabla = "Impedimento";
-                    trazabilidad.Evento = "Crear";
-                    trazabilidad.DescripcionEvento = $"Se creó el impedimento del proyecto {proy.CodigoProyecto} correctamente ";
-                    trazabilidad.UsuarioId = usuario.UsuaroId;
-                    trazabilidad.DireccionIp = usuario.Ip;
-                    trazabilidad.FechaRegistro = DateTime.Now;
+                    Impedimento obj = new Impedimento();
+                    obj.ProyectoId = proy.Id;
+                    obj.ProblematicaRealId = p.ProblematicaRealId;
+                    obj.LongImpedimento = p.LongImpedimento;
+                    obj.CausalReemplazoId = null;
+                    obj.Resuelto = false;
+                    obj.PrimerEstrato = 0;
+                    obj.SegundoEstrato = 0;
+                    obj.TercerEstrato = 0;
+                    obj.CuartoEstrato = 0;
+                    obj.QuintoEstrato = 0;
+                    obj.LongitudReemplazo = 0;
+                    obj.ValidacionCargoPlano = false;
+                    obj.ValidacionCargoSustentoRRCC = false;
+                    obj.ValidacionCargoSustentoAmbiental = false;
+                    obj.ValidacionCargoSustentoArqueologia = false;
+                    obj.ValidacionLegalId = null;
+                    obj.Comentario = "";
+                    obj.FechaPresentacion = null;
+                    obj.FechaPresentacionReemplazo = null;
+                    obj.fechamodifica = DateTime.Now;
+                    obj.FechaRegistro = DateTime.Now;
+                    obj.UsuarioRegisterId = usuario.UsuaroId;
+                    obj.UsuarioModificaId = usuario.UsuaroId;
+                    obj.CostoInversion = proy.InversionEjecutada;
+                    obj.Reemplazado = false;
+                    obj.estado = true;
+                    _context.Add(obj);
+                    await _context.SaveChangesAsync();
+                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Crear").ToListAsync();
+                    if (resultad.Count > 0)
+                    {
+                        Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Impedimento";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se creó el impedimento del proyecto {proy.CodigoProyecto} correctamente ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
 
-                    listaT.Add(trazabilidad);
-                    await _trazabilidadRepository.Add(listaT);
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    }
                 }
 
                 #region Comparacion de estructuras y agregacion de cambios
