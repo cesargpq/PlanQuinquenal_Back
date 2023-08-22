@@ -40,6 +40,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var obj = new ResponseDTO();
                 var tipoSeguimiento = await _context.TipoSeguimiento.Where(x => x.Id == c.TipoSeguimientoId).FirstOrDefaultAsync();
                 string comentarioregister = "";
+                string idComentario = "";
+                int codigo = 0;
+                string nomTipo = "";
                 
                 if (tipoSeguimiento.Descripcion.Equals("Proyectos"))
                 {
@@ -55,6 +58,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.Message = Constantes.CreacionExistosa;
                     obj.Valid = true;
                     comentarioregister = c.Descripcion;
+                    idComentario = comentario.CodigoProyecto;
+                    codigo = comentario.Id;
+                    nomTipo = "Proyecto";
                 }
                 else if (tipoSeguimiento.Descripcion.Equals("Plan Quinquenal"))
                 {
@@ -67,6 +73,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.Message = Constantes.CreacionExistosa;
                     obj.Valid = true;
                     comentarioregister = c.Descripcion;
+                    var py = await _context.PQuinquenal.Where(x => x.Id.Equals(c.ProyectoId)).FirstOrDefaultAsync();
+                    idComentario = py.AnioPlan;
+                    codigo = comentario.Id;
+                    nomTipo = "Plan Quinquenal";
                 }
                 else if (tipoSeguimiento.Descripcion.Equals("Plan Anual"))
                 {
@@ -79,6 +89,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.Message = Constantes.CreacionExistosa;
                     obj.Valid = true;
                     comentarioregister = c.Descripcion;
+                    var py = await _context.PlanAnual.Where(x => x.Id.Equals(c.ProyectoId)).FirstOrDefaultAsync();
+                    idComentario = py.AnioPlan;
+                    codigo = comentario.Id;
+                    nomTipo = "Plan Anual";
                 }
                 else if (tipoSeguimiento.Descripcion.Equals("Gestión de Reemplazo"))
                 {
@@ -90,8 +104,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
                     obj.Message = Constantes.CreacionExistosa;
                     obj.Valid = true;
+                    var py = await _context.BolsaReemplazo.Where(x => x.Id.Equals(c.ProyectoId)).FirstOrDefaultAsync();
+                    idComentario = py.CodigoProyecto;
                     comentarioregister = c.Descripcion;
-
+                    codigo = comentario.Id;
+                    nomTipo = "Bolsa Reemplazo";
                 }
                 else
                 {
@@ -113,6 +130,45 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
                     }
+
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = idComentario
+                    };
+
+                    #region Envio de notificacion
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Comentario";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = idComentario;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el comentario en {nomTipo} : {idComentario}";
+                            notifProyecto.codigo = codigo;
+                            notifProyecto.modulo = "C";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Comentario");
+                        }
+                    }
+
+                    #endregion
 
 
                     //#region Comparacion de estructuras y agregacion de cambios

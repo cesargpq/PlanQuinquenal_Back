@@ -86,11 +86,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
                 #region notificacion
-                var UsuarioInt = await _context.Usuario.Where(x=>x.estado_user == "A").Where(x=>x.Perfil.nombre_perfil.Equals("Administrador")).ToListAsync();
+                var UsuarioInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                 foreach (var listaUsuInters in UsuarioInt)
                 {
                     int cod_usu = listaUsuInters.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regBR == true).ToListAsync();
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modImp == true).ToListAsync();
                     string correo = listaUsuInters.correo_usu;
                     if (lstpermisos.Count() == 1)
                     {
@@ -319,12 +319,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                     string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                     string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
-                    var py = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(map.CodigoProyecto)).FirstOrDefaultAsync();
-                    var usuInt = await _context.Usuario.Where(x=>x.Perfil.nombre_perfil.Equals("Administrador")).ToListAsync();
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                     foreach (var listaUsuInters in usuInt)
                     {
                         int cod_usu = listaUsuInters.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regImp == true).ToListAsync();
                         var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
                         string correo = UsuarioInt[0].correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
