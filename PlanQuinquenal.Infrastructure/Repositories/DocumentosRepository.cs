@@ -142,6 +142,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
                     }
+
+                    #region Notificacion
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = resultado.CodigoProyecto
+                    };
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regImp == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Bolsa de Reemplazo";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = resultado.CodigoProyecto;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el documento {documentoRequestDto.NombreDocumento} en la Bolsa de Reemplazo {resultado.CodigoProyecto}";
+                            notifProyecto.codigo = resultado.Id;
+                            notifProyecto.modulo = "BR";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Bolsa de Reemplazo");
+                        }
+                    }
+                    #endregion
                 }
                 return true;
             }
@@ -188,6 +229,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
                     }
+
+                    #region Notificacion
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = resultado.AnioPlan
+                    };
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPQ == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Plan Anual";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = resultado.AnioPlan;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el documento {documentoRequestDto.NombreDocumento} en el Plan Anual {resultado.AnioPlan}";
+                            notifProyecto.codigo = resultado.Id;
+                            notifProyecto.modulo = "PA";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Plan Anual");
+                        }
+                    }
+                    #endregion
                 }
                 return true;
             }
@@ -239,6 +321,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
                     }
+
+                    #region Notificacion
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = resultado.AnioPlan
+                    };
+                    composCorreo.Add(correoDatos);
+                    #endregion
+
+                    #region Envio de notificacion
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPQ == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Plan Quinquenal";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = resultado.AnioPlan;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el documento {documentoRequestDto.NombreDocumento} en el Plan Quinquenal {resultado.AnioPlan}";
+                            notifProyecto.codigo = resultado.Id;
+                            notifProyecto.modulo = "PQ";
+
+                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Plan Quinquenal");
+                        }
+                    }
+                    #endregion
 
                 }
                 return true;
@@ -296,12 +419,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                     string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                     string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
-                    var proyectoSearch = await _context.Proyecto.Where(x => x.Id == documentoRequestDto.ProyectoId).FirstOrDefaultAsync();
                     var usuariosInteresados = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == documentoRequestDto.CodigoProyecto).ToListAsync();
                     List<CorreoTabla> composCorreo = new List<CorreoTabla>();
                     CorreoTabla correoDatos = new CorreoTabla
                     {
-                        codigo = proyectoSearch.CodigoProyecto.ToString()
+                        codigo = resultado.CodigoProyecto
                     };
                     composCorreo.Add(correoDatos);
                     #endregion
@@ -320,13 +442,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.cod_usu = cod_usu;
                             notifProyecto.seccion = "PROYECTOS";
                             notifProyecto.nombreComp_usu = NomCompleto;
-                            notifProyecto.cod_reg = proyectoSearch.CodigoProyecto;
+                            notifProyecto.cod_reg = resultado.CodigoProyecto;
                             notifProyecto.area = nomPerfil;
                             notifProyecto.fechora_not = DateTime.Now;
                             notifProyecto.flag_visto = false;
                             notifProyecto.tipo_accion = "C";
-                            notifProyecto.mensaje = $"Se creó el documento {documentoRequestDto.NombreDocumento} en el proyecto {proyectoSearch.CodigoProyecto}";
-                            notifProyecto.codigo = proyectoSearch.Id;
+                            notifProyecto.mensaje = $"Se creó el documento {documentoRequestDto.NombreDocumento} en el proyecto {resultado.CodigoProyecto}";
+                            notifProyecto.codigo = resultado.Id;
                             notifProyecto.modulo = "P";
 
                             await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
@@ -562,10 +684,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         };
                         composCorreo.Add(correoDatos);
 
-                        var usuarioInt = await _context.UsuariosInteresadosPA.Where(x => x.PlanAnualId == plananual.Id).ToListAsync();
+                        var usuarioInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                         foreach (var listaUsuInters in usuarioInt)
                         {
-                            int cod_usu = listaUsuInters.UsuarioId;
+                            int cod_usu = listaUsuInters.cod_usu;
                             var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
                             var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
                             string correo = UsuarioInt[0].correo_usu.ToString();
@@ -659,7 +781,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
 
                         var dato = await _context.DocumentosPQ.Where(x => x.Id == id).FirstOrDefaultAsync();
-                        var plananual = await _context.PlanAnual.Where(x => x.Id == dato.PQuinquenalId).FirstOrDefaultAsync();
+                        var planQuinquenal = await _context.PQuinquenal.Where(x => x.Id == dato.PQuinquenalId).FirstOrDefaultAsync();
 
                         dato.Estado = false;
                         _context.Update(dato);
@@ -685,14 +807,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         List<CorreoTabla> composCorreo = new List<CorreoTabla>();
                         CorreoTabla correoDatos = new CorreoTabla
                         {
-                            codigo = plananual.AnioPlan
+                            codigo = planQuinquenal.AnioPlan
                         };
                         composCorreo.Add(correoDatos);
 
-                        var usuarisInt = await _context.UsuariosInteresadosPQ.Where(x => x.PQuinquenalId == plananual.Id).ToListAsync();
+                        var usuarisInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                         foreach (var listaUsuInters in usuarisInt)
                         {
-                            int cod_usu = listaUsuInters.UsuarioId;
+                            int cod_usu = listaUsuInters.cod_usu;
                             var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
                             var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
                             string correo = UsuarioInt[0].correo_usu.ToString();
@@ -702,13 +824,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 notifProyecto.cod_usu = cod_usu;
                                 notifProyecto.seccion = "Plan Quinquenal";
                                 notifProyecto.nombreComp_usu = NomCompleto;
-                                notifProyecto.cod_reg = plananual.AnioPlan;
+                                notifProyecto.cod_reg = planQuinquenal.AnioPlan;
                                 notifProyecto.area = nomPerfil;
                                 notifProyecto.fechora_not = DateTime.Now;
                                 notifProyecto.flag_visto = false;
                                 notifProyecto.tipo_accion = "C";
-                                notifProyecto.mensaje = $"Se creó el proyecto {plananual.AnioPlan}";
-                                notifProyecto.codigo = plananual.Id;
+                                notifProyecto.mensaje = $"Se eliminó el documento del Plan Quinquenal {planQuinquenal.AnioPlan}";
+                                notifProyecto.codigo = planQuinquenal.Id;
                                 notifProyecto.modulo = "P";
 
                                 await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
@@ -721,6 +843,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     else if (modulo.Equals("BR"))
                     {
                         var dato = await _context.DocumentosBR.Where(x => x.Id == id).FirstOrDefaultAsync();
+                        var bolsaReemplazo = await _context.BolsaReemplazo.Where(x => x.Id == dato.BolsaReemplazoId).FirstOrDefaultAsync();
                         dato.Estado = false;
                         _context.Update(dato);
                         await _context.SaveChangesAsync();
@@ -740,6 +863,40 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                             listaT.Add(trazabilidad);
                             await _trazabilidadRepository.Add(listaT);
+                        }
+
+                        List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                        CorreoTabla correoDatos = new CorreoTabla
+                        {
+                            codigo = bolsaReemplazo.CodigoProyecto
+                        };
+                        composCorreo.Add(correoDatos);
+
+                        var usuarisInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                        foreach (var listaUsuInters in usuarisInt)
+                        {
+                            int cod_usu = listaUsuInters.cod_usu;
+                            var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regPry == true).ToListAsync();
+                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                            string correo = UsuarioInt[0].correo_usu.ToString();
+                            if (lstpermisos.Count() == 1)
+                            {
+                                Notificaciones notifProyecto = new Notificaciones();
+                                notifProyecto.cod_usu = cod_usu;
+                                notifProyecto.seccion = "Plan Quinquenal";
+                                notifProyecto.nombreComp_usu = NomCompleto;
+                                notifProyecto.cod_reg = bolsaReemplazo.CodigoProyecto;
+                                notifProyecto.area = nomPerfil;
+                                notifProyecto.fechora_not = DateTime.Now;
+                                notifProyecto.flag_visto = false;
+                                notifProyecto.tipo_accion = "C";
+                                notifProyecto.mensaje = $"Se eliminó el documento de la Bolsa de Reemplazo {bolsaReemplazo.CodigoProyecto}";
+                                notifProyecto.codigo = bolsaReemplazo.Id;
+                                notifProyecto.modulo = "P";
+
+                                await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                                await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "D", "Documentos");
+                            }
                         }
                         return obj;
                     }

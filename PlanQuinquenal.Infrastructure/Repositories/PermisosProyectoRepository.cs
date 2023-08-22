@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ApiDavis.Core.Utilidades;
 using PlanQuinquenal.Core.DTOs;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -23,13 +25,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
         private readonly ITrazabilidadRepository _trazabilidadRepository;
+        private readonly IRepositoryNotificaciones _repositoryNotificaciones;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
 
-        public PermisosProyectoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, ITrazabilidadRepository trazabilidadRepository)
+        public PermisosProyectoRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, ITrazabilidadRepository trazabilidadRepository, IRepositoryNotificaciones repositoryNotificaciones, IRepositoryMantenedores repositoryMantenedores)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
             this._trazabilidadRepository = trazabilidadRepository;
+            this._repositoryMantenedores = repositoryMantenedores;
+            this._repositoryNotificaciones = repositoryNotificaciones;
         }
 
         public async Task<ResponseDTO> Add(PermisoRequestDTO permisoRequestDTO, DatosUsuario usuario)
@@ -37,7 +43,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             try
             {
                 var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto == permisoRequestDTO.CodigoProyecto).FirstOrDefaultAsync();
-
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
 
                 if (existeProyecto != null)
                 {
@@ -55,6 +63,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
                         permisoExiste.Longitud = permisoRequestDTO.Longitud;
                         permisoExiste.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
+                        List<CorreoTabla> camposModificados = CompararPropiedadesAsync(existeProyecto.CodigoProyecto,permisoExiste, NomCompleto).GetAwaiter().GetResult();
                         _context.Update(permisoExiste);
                         await _context.SaveChangesAsync();
                         var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Editar").ToListAsync();
@@ -72,6 +81,44 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             listaT.Add(trazabilidad);
                             await _trazabilidadRepository.Add(listaT);
                         }
+
+                        #region Envio de notificacion
+                        var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                        foreach (var listaUsuInters in usuInt)
+                        {
+                            int cod_usu = listaUsuInters.cod_usu;
+                            var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                            string correo = UsuarioInt[0].correo_usu.ToString();
+                            if (lstpermisos.Count() == 1)
+                            {
+                                Notificaciones notifProyecto = new Notificaciones();
+                                notifProyecto.cod_usu = cod_usu;
+                                notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
+                                notifProyecto.nombreComp_usu = NomCompleto;
+                                notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
+                                notifProyecto.area = nomPerfil;
+                                notifProyecto.fechora_not = DateTime.Now;
+                                notifProyecto.flag_visto = false;
+                                notifProyecto.tipo_accion = "M";
+                                notifProyecto.mensaje = $"Se actualizó el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                                notifProyecto.codigo = existeProyecto.Id;
+                                notifProyecto.modulo = "P";
+
+                                var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                                dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                                int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                                await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}");
+                                camposModificados.ForEach(item => {
+                                    item.idNotif = codigoNotifCreada;
+                                    item.id = null;
+                                    });
+                                _context.CorreoTabla.AddRange(camposModificados);
+                                _context.SaveChanges();
+                            }
+                        }
+                        #endregion
+
                         return new ResponseDTO
                         {
                             Valid = true,
@@ -110,6 +157,44 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             listaT.Add(trazabilidad);
                             await _trazabilidadRepository.Add(listaT);
                         }
+
+                        #region Envio de notificacion
+
+                        List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                        CorreoTabla correoDatos = new CorreoTabla
+                        {
+                            codigo = existeProyecto.CodigoProyecto
+                        };
+
+                        composCorreo.Add(correoDatos);
+                        var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                        foreach (var listaUsuInters in usuInt)
+                        {
+                            int cod_usu = listaUsuInters.cod_usu;
+                            var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                            string correo = UsuarioInt[0].correo_usu.ToString();
+                            if (lstpermisos.Count() == 1)
+                            {
+                                Notificaciones notifProyecto = new Notificaciones();
+                                notifProyecto.cod_usu = cod_usu;
+                                notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
+                                notifProyecto.nombreComp_usu = NomCompleto;
+                                notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
+                                notifProyecto.area = nomPerfil;
+                                notifProyecto.fechora_not = DateTime.Now;
+                                notifProyecto.flag_visto = false;
+                                notifProyecto.tipo_accion = "C";
+                                notifProyecto.mensaje = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                                notifProyecto.codigo = existeProyecto.Id;
+                                notifProyecto.modulo = "P";
+
+                                await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                                await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}");
+                            }
+                        }
+                        #endregion
+
                         return new ResponseDTO
                         {
                             Valid = true,
@@ -136,6 +221,110 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     Message = Constantes.ErrorSistema
                 };
             }
+        }
+
+        public async Task<List<CorreoTabla>> CompararPropiedadesAsync(string codigo, object valOriginal, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            if (valOriginal!= null)
+            {
+                DateTime fechaActual = DateTime.Today;
+                string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+                var compara = _context.Entry(valOriginal).Properties.Where(p=>p.IsModified).ToList();
+
+                foreach (var item in compara)
+                {
+                    if (item.Metadata.Name.Equals("FechaModifica") || item.Metadata.Name.Equals("UsuarioModifica"))
+                    {
+                        continue;
+                    }
+                    else if (item.Metadata.Name.Equals("EstadoPermisosId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("TipoPermisosProyecto");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Estado Permiso");
+                        camposModificados.Add(fila);
+                    }
+                    else
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                }
+            }
+
+            return camposModificados;
+        }
+
+        private string SepararPalabrasConMayusculas(string input)
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                char currentChar = input[i];
+                if (char.IsUpper(currentChar) && i > 0)
+                {
+                    result.Append(' ');
+                }
+                result.Append(currentChar);
+            }
+
+            return result.ToString().Replace("ion","ión");
+        }
+
+        private static CorreoTabla CrearCorreoTablaManualFecha(string codigo,PropertyEntry? item, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = item.OriginalValue!= null ? ((DateTime)item.OriginalValue).ToString("dd/MM/yyyy"): "",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue!= null ?((DateTime)item.CurrentValue).ToString("dd/MM/yyyy"): "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaManual(string codigo,string valorActual,string valorModificado, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = valorActual,
+                campoModificado = nombreColumna,
+                valorModificado = valorModificado,
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTabla(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, IEnumerable<MaestroResponseDto> enumerable, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual = item.OriginalValue!= null ? enumerable.Where(x => x.Id == (int)item.OriginalValue).FirstOrDefault().Descripcion: "",
+                campoModificado = nombreColumna,
+                valorModificado =item.CurrentValue!=null? enumerable.Where(x => x.Id == (int)item.CurrentValue).FirstOrDefault().Descripcion: "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaDirecto(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual =item.OriginalValue != null ? (item.OriginalValue is bool?( (bool)item.OriginalValue? "Marcado" : "Desmarcado"):  item.OriginalValue +"" ):"",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue != null ? (item.CurrentValue is bool?( (bool)item.CurrentValue? "Marcado" : "Desmarcado"): item.CurrentValue +"" ):"",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
         }
         public async Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(string CodigoProyecto, string TipoPermiso)
         {

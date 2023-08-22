@@ -19,6 +19,8 @@ using static iTextSharp.text.pdf.AcroFields;
 using ApiDavis.Core.Utilidades;
 using PlanQuinquenal.Core.DTOs;
 using Microsoft.EntityFrameworkCore.Storage;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -27,16 +29,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         private readonly PlanQuinquenalContext _context;
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
+        private readonly IRepositoryMantenedores _repositoryMantenedores;
         private readonly HashService hashService;
         private readonly ITrazabilidadRepository _trazabilidadRepository;
         private readonly IRepositoryNotificaciones _repositoryNotificaciones;
 
-        public InforemesActasRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, HashService hashService, ITrazabilidadRepository trazabilidadRepository, IRepositoryNotificaciones repositoryNotificaciones)
+        public InforemesActasRepository(PlanQuinquenalContext context, IMapper mapper, IConfiguration configuration, HashService hashService, ITrazabilidadRepository trazabilidadRepository, IRepositoryNotificaciones repositoryNotificaciones, IRepositoryMantenedores repositoryMantenedores)
         {
             this._context = context;
             this.mapper = mapper;
             this.configuration = configuration;
             this.hashService = hashService;
+            this._repositoryMantenedores = repositoryMantenedores;
             this._trazabilidadRepository = trazabilidadRepository;
             this._repositoryNotificaciones = repositoryNotificaciones;
         }
@@ -144,16 +148,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _trazabilidadRepository.Add(listaT);
                 }
 
-               
-
-
-
-
-
                 _context.Add(informe);
                 await _context.SaveChangesAsync();
-
-
 
                 #region Comparacion de estructuras y agregacion de cambios
 
@@ -170,34 +166,31 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
-                var py = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(informe.CodigoProyecto)).FirstOrDefaultAsync();
-                var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto.Equals(py.CodigoProyecto)).ToListAsync();
+                var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                 foreach (var listaUsuInters in usuInt)
                 {
-                    int cod_usu = listaUsuInters.UsuarioId;
+                    int cod_usu = listaUsuInters.cod_usu;
                     var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
-                    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
-                    string correo = UsuarioInt[0].correo_usu.ToString();
+                    string correo = listaUsuInters.correo_usu;
                     if (lstpermisos.Count() == 1)
                     {
                         Notificaciones notifProyecto = new Notificaciones();
                         notifProyecto.cod_usu = cod_usu;
-                        notifProyecto.seccion = "PROYECTOS";
+                        notifProyecto.seccion = tipoSeguimiento;
                         notifProyecto.nombreComp_usu = NomCompleto;
                         notifProyecto.cod_reg = informe.CodigoProyecto;
                         notifProyecto.area = nomPerfil;
                         notifProyecto.fechora_not = DateTime.Now;
                         notifProyecto.flag_visto = false;
                         notifProyecto.tipo_accion = "C";
-                        notifProyecto.mensaje = $"Se creó el {informe.Tipo} del proyecto {informe.CodigoProyecto}";
-                        notifProyecto.codigo = py.Id;
+                        notifProyecto.mensaje = $"Se creó el {informe.Tipo} del {tipoSeguimiento} {informe.CodigoProyecto}";
+                        notifProyecto.codigo = informe.Id;
                         notifProyecto.modulo = "I";
 
                         await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "I");
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", $"{informe.Tipo} del {tipoSeguimiento}");
                     }
                 }
-
                 #endregion
 
                 string ruta = "";
@@ -745,6 +738,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 }
                 var guidId = Guid.NewGuid();
+                var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
                 var getInforme = await _context.Informe.Where(x => x.Id == id).FirstOrDefaultAsync();
 
 
@@ -765,6 +761,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 getInforme.Acuerdos = informeReqDTO.Acuerdos != null ? informeReqDTO.Acuerdos : null;
                 getInforme.Compromisos = informeReqDTO.Compromisos != null ? informeReqDTO.Compromisos : null;
                 getInforme.Responsable = informeReqDTO.Responsable != null ? informeReqDTO.Responsable : null;
+                List<CorreoTabla> camposModificados = CompararPropiedadesAsync(getInforme.CodigoProyecto,getInforme, NomCompleto).GetAwaiter().GetResult();
                 _context.Update(getInforme);
                 await _context.SaveChangesAsync();
 
@@ -784,6 +781,54 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
                 }
+
+                #region Comparacion de estructuras y agregacion de cambios
+
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = getInforme.CodigoProyecto.ToString()
+                };
+
+                composCorreo.Add(correoDatos);
+                #endregion
+
+                #region Envio de notificacion
+                
+                var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                foreach (var listaUsuInters in usuInt)
+                {
+                    int cod_usu = listaUsuInters.cod_usu;
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                    string correo = listaUsuInters.correo_usu;
+                    if (lstpermisos.Count() == 1)
+                    {
+                        Notificaciones notifProyecto = new Notificaciones();
+                        notifProyecto.cod_usu = cod_usu;
+                        notifProyecto.seccion = tipoSeguimiento;
+                        notifProyecto.nombreComp_usu = NomCompleto;
+                        notifProyecto.cod_reg = getInforme.CodigoProyecto;
+                        notifProyecto.area = nomPerfil;
+                        notifProyecto.fechora_not = DateTime.Now;
+                        notifProyecto.flag_visto = false;
+                        notifProyecto.tipo_accion = "C";
+                        notifProyecto.mensaje = $"Se modificó el {getInforme.Tipo} del {tipoSeguimiento} {getInforme.CodigoProyecto}";
+                        notifProyecto.codigo = getInforme.Id;
+                        notifProyecto.modulo = "I";
+
+                        var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                        dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                        int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", $"{getInforme.Tipo} del {tipoSeguimiento}");
+                        camposModificados.ForEach(item => {
+                                    item.idNotif = codigoNotifCreada;
+                                    item.id = null;
+                                    });
+                        _context.CorreoTabla.AddRange(camposModificados);
+                        _context.SaveChanges();
+                    }
+                }
+                #endregion
 
 
                 string ruta = "";
@@ -997,6 +1042,131 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
 
             }
+        }
+
+        public async Task<List<CorreoTabla>> CompararPropiedadesAsync(string codigo, object valOriginal, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            if (valOriginal!= null)
+            {
+                DateTime fechaActual = DateTime.Today;
+                string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+                var compara = _context.Entry(valOriginal).Properties.Where(p=>p.IsModified).ToList();
+
+                foreach (var item in compara)
+                {
+                    if (item.Metadata.Name.Equals("FechaModificacion") || item.Metadata.Name.Equals("UsuarioModifica"))
+                    {
+                        continue;
+                    }
+                    else if (item.Metadata.Name.Equals("TipoInformeId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("TipoInforme");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Tipo de Informe");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("Responsable"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("Usuario");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Responsable");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("FechaReunion"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaManualFecha(codigo,  item, nomCompleto, fechaFormateada, "Fecha Reunión");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("FechaInforme"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaManualFecha(codigo,  item, nomCompleto, fechaFormateada, "Fecha Informe");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("FechaCompromiso"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaManualFecha(codigo,  item, nomCompleto, fechaFormateada, "Fecha Compromiso");
+                        camposModificados.Add(fila);
+                    }
+                    else
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                }
+            }
+
+            return camposModificados;
+        }
+
+        private string SepararPalabrasConMayusculas(string input)
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                char currentChar = input[i];
+                if (char.IsUpper(currentChar) && i > 0)
+                {
+                    result.Append(' ');
+                }
+                result.Append(currentChar);
+            }
+
+            return result.ToString().Replace("ion","ión");
+        }
+
+        private static CorreoTabla CrearCorreoTablaManualFecha(string codigo,PropertyEntry? item, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = item.OriginalValue!= null ? ((DateTime)item.OriginalValue).ToString("dd/MM/yyyy"): "",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue!= null ?((DateTime)item.CurrentValue).ToString("dd/MM/yyyy"): "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaManual(string codigo,string valorActual,string valorModificado, string nomCompleto, string fechaFormateada,string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = codigo,
+                valorActual = valorActual,
+                campoModificado = nombreColumna,
+                valorModificado = valorModificado,
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTabla(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, IEnumerable<MaestroResponseDto> enumerable, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual = item.OriginalValue!= null ? enumerable.Where(x => x.Id == (int)item.OriginalValue).FirstOrDefault().Descripcion: "",
+                campoModificado = nombreColumna,
+                valorModificado =item.CurrentValue!=null? enumerable.Where(x => x.Id == (int)item.CurrentValue).FirstOrDefault().Descripcion: "",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
+        }
+
+        private static CorreoTabla CrearCorreoTablaDirecto(string valOriginal, string nomCompleto, string fechaFormateada, PropertyEntry? item, string nombreColumna)
+        {
+            return new CorreoTabla
+            {
+                codigo = valOriginal,
+                valorActual =item.OriginalValue != null ? (item.OriginalValue is bool?( (bool)item.OriginalValue? "Marcado" : "Desmarcado"):  item.OriginalValue +"" ):"",
+                campoModificado = nombreColumna,
+                valorModificado = item.CurrentValue != null ? (item.CurrentValue is bool?( (bool)item.CurrentValue? "Marcado" : "Desmarcado"): item.CurrentValue +"" ):"",
+                fechaMod = fechaFormateada,
+                usuModif = nomCompleto,
+
+            };
         }
 
         public async Task<DocumentoResponseDto> Download(int id)
