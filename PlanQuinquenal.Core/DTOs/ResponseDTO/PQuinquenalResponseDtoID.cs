@@ -24,6 +24,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public int? UsuarioRegisterId { get; set; }
         public Decimal? LongHabilitada { get; set; }
         public Decimal? LongPendiente { get; set; }
+        public Decimal? InversionEjecutada { get; set; }
         public int total { get; set; }
     }
 }

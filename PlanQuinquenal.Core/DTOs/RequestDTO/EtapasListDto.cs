@@ -8,6 +8,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
     public class EtapasListDto 
     {
-        public int ProyectoId { get; set; }
+        public string CodigoProyecto { get; set; }
     }
 }
