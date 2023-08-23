@@ -116,7 +116,8 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<Unidad_negocio> Unidad_negocio { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<Proyectos> Proyectos { get; set; }
-
+        public virtual DbSet<ReporteMaterialConstruidaDetalle> ReporteMaterialConstruidaDetalle { get; set; }
+        
         public virtual DbSet<TokenAuth> TokenAuth { get; set; }
         public virtual DbSet<DobleFactor> DobleFactor { get; set; }
         
@@ -202,7 +203,15 @@ namespace PlanQuinquenal.Infrastructure.Data
               {
                   eb.HasNoKey();
               });
+            modelbuilder.Entity<ReporteMaterialConstruidaDetalle>(
+              eb =>
+              {
+                  eb.HasNoKey();
+              });
+
             
+
+
 
         }
 

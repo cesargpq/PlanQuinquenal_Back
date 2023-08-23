@@ -12,7 +12,11 @@ namespace PlanQuinquenal.Core.Interfaces
     public interface IDashboardRepository
     {
         Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o);
+
+        Task<ReporteMaterialConstruidaDetalle> ListarMaterialConstruida(RequestDashboradDTO o);
+
         Task<ResposeDistritosDetalleDTO> ListarPermisos(RequestDashboradDTO o);
         Task<MensualidadDTO> ListarAvanceMensual(AvanceMensualDto o);
+        Task<MensualidadDTO> ListarAvanceMensualConstruida(AvanceMensualDto o);
     }
 }

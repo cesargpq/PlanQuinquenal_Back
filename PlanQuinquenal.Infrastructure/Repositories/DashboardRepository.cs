@@ -205,6 +205,189 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return mensual;
         }
 
+
+
+
+        public async Task<MensualidadDTO> ListarAvanceMensualConstruida(AvanceMensualDto o)
+        {
+            var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIOCONSTRUIDA  {o.Anio} , {o.MaterialId}").ToListAsync();
+
+            var data = resultad.GroupBy(x => x.pquinquenalId).ToList();
+
+            var countQuinquenal = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
+
+
+            List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
+            for (int i = 0; i < countQuinquenal.Count(); i++)
+            {
+                foreach (var item in data)
+                {
+                    var exist = item.Where(x => x.pquinquenalId == countQuinquenal.ElementAt(i).Id).FirstOrDefault();
+                    ListaPqMensual obj = new ListaPqMensual();
+
+                    HabilitadoDto habilitado = new HabilitadoDto();
+                    if (exist != null && exist.pquinquenalId == countQuinquenal.ElementAt(i).Id)
+                    {
+
+                        var existeE = item.Where(x => x.Mes.Equals("Enero")).FirstOrDefault();
+                        if (existeE != null)
+                        {
+
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeF = item.Where(x => x.Mes.Equals("Febrero")).FirstOrDefault();
+                        if (existeF != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeM = item.Where(x => x.Mes.Equals("Marzo")).FirstOrDefault();
+                        if (existeM != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeA = item.Where(x => x.Mes.Equals("Abril")).FirstOrDefault();
+                        if (existeA != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeMay = item.Where(x => x.Mes.Equals("Mayo")).FirstOrDefault();
+                        if (existeMay != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeJuni = item.Where(x => x.Mes.Equals("Junio")).FirstOrDefault();
+                        if (existeJuni != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeJuli = item.Where(x => x.Mes.Equals("Julio")).FirstOrDefault();
+                        if (existeJuli != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeAg = item.Where(x => x.Mes.Equals("Agosto")).FirstOrDefault();
+                        if (existeAg != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeSep = item.Where(x => x.Mes.Equals("Septiembre")).FirstOrDefault();
+                        if (existeSep != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeOc = item.Where(x => x.Mes.Equals("Octubre")).FirstOrDefault();
+                        if (existeOc != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeNo = item.Where(x => x.Mes.Equals("Noviembre")).FirstOrDefault();
+                        if (existeNo != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+                        var existeDi = item.Where(x => x.Mes.Equals("Diciembre")).FirstOrDefault();
+                        if (existeDi != null)
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(exist.LongitudConstruida);
+                        }
+                        else
+                        {
+                            obj.name = exist.anioplan;
+                            obj.data.Add(0);
+                        }
+
+                        listaMensual.Add(obj);
+                        i++;
+                    }
+                }
+            }
+
+
+            MensualidadDTO mensual = new MensualidadDTO();
+            mensual.categorias.Add("Enero");
+            mensual.categorias.Add("Febrero");
+            mensual.categorias.Add("Marzo");
+            mensual.categorias.Add("Abril");
+            mensual.categorias.Add("Mayo");
+            mensual.categorias.Add("Junio");
+            mensual.categorias.Add("Julio");
+            mensual.categorias.Add("Agosto");
+            mensual.categorias.Add("Septiembre");
+            mensual.categorias.Add("Octubre");
+            mensual.categorias.Add("Noviembre");
+            mensual.categorias.Add("Diciembre");
+            mensual.ListaPqMensual = listaMensual;
+            return mensual;
+        }
+
+
         public async Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o)
         {
             var resultad = await _context.ReporteMaterialDetalle.FromSqlRaw($"EXEC dashboardMaterial  {o.MaterialId} , {o.PQuinquenalId} , {o.PAnual}").ToListAsync();
@@ -215,7 +398,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             foreach (var item in resultad)
             {
 
-                categorias.Add( item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado);
+                categorias.Add( item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
                 pendiente.Add(item.longitudPendiente);
                 habilitado.Add(item.LongitudAprobada);
             }
@@ -229,6 +412,33 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             return datos;
 
         }
+
+        public async Task<ReporteMaterialConstruidaDetalle> ListarMaterialConstruida(RequestDashboradDTO o)
+        {
+            var resultad = await _context.ReporteMaterialConstruidaDetalle.FromSqlRaw($"EXEC dashboardMaterialConstruida  {o.MaterialId} , {o.PQuinquenalId} , {o.PAnual}").ToListAsync();
+
+            List<string> categorias = new List<string>();
+            List<Decimal> pendiente = new List<Decimal>();
+            List<Decimal> construido = new List<Decimal>();
+            foreach (var item in resultad)
+            {
+
+                categorias.Add(item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudConstruida + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
+                pendiente.Add(item.longitudPendiente);
+                construido.Add(item.LongitudConstruida);
+                
+            }
+
+            var datos = new ReporteMaterialConstruidaDetalle
+            {
+                categorias = categorias,
+                pendiente = pendiente,
+                construido = construido
+            };
+            return datos;
+
+        }
+
         public async Task<ResposeDistritosDetalleDTO> ListarPermisos(RequestDashboradDTO o)
         {
             var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TOTAL {o.MaterialId}, {o.PQuinquenalId} , {o.PAnual}").ToListAsync();

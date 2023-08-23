@@ -26,6 +26,12 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _dashboardRepository.ListarMaterial(p);
             return Ok(resultado);
         }
+        [HttpPost("ListarMaterialConstruida")]
+        public async Task<IActionResult> ListarMaterialConstruida(RequestDashboradDTO p)
+        {
+            var resultado = await _dashboardRepository.ListarMaterialConstruida(p);
+            return Ok(resultado);
+        }
         [HttpPost("ListarPermisos")]
         public async Task<IActionResult> ListarPermisos(RequestDashboradDTO p)
         {
@@ -36,6 +42,12 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> ListarAvanceMensual(AvanceMensualDto p)
         {
             var resultado = await _dashboardRepository.ListarAvanceMensual(p);
+            return Ok(resultado);
+        }
+        [HttpPost("ListarAvanceMensualConstruida")]
+        public async Task<IActionResult> ListarAvanceMensualConstruida(AvanceMensualDto p)
+        {
+            var resultado = await _dashboardRepository.ListarAvanceMensualConstruida(p);
             return Ok(resultado);
         }
     }

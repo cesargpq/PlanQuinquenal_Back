@@ -332,8 +332,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     #endregion
 
-
-
                     var objeto = new ResponseDTO
                         {
                             Message = Constantes.ActualizacionSatisfactoria,
@@ -950,7 +948,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<PaginacionResponseDtoException<ProyectoEtapaResponseDto>> ListarEtapas(EtapasListDto filterProyectos)
         {
-            var resultad = await _context.ProyectoEtapaResponseDto.FromSqlInterpolated($"EXEC ListarEtapas {filterProyectos.ProyectoId}").ToListAsync();
+            var resultad = await _context.ProyectoEtapaResponseDto.FromSqlInterpolated($"EXEC ListarEtapas {filterProyectos.CodigoProyecto}").ToListAsync();
             if (resultad.Count > 0)
             {
                 var result = new PaginacionResponseDtoException<ProyectoEtapaResponseDto>
