@@ -38,7 +38,7 @@ namespace PlanQuinquenal.Core.Entities
         
         public Decimal? LongProyectos { get; set; }
 
-        public int TipoProy { get; set; }
+        public bool TipoProy { get; set; }
 
 
     }

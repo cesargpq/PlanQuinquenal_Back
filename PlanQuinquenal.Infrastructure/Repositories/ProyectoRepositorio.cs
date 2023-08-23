@@ -609,7 +609,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
                             var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
                             var dMaterial = Material.Where(x => x.Descripcion.Contains(material)).FirstOrDefault();
-                            var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor)).FirstOrDefault();
+                            var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor.ToUpper())).FirstOrDefault();
                             var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto)).FirstOrDefault();
                             var dDistrito = Distrito.Where(x => x.Descripcion.Contains(distrito)).FirstOrDefault();
                             var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion.Contains(tipoRegistro)).FirstOrDefault();
@@ -618,7 +618,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             
 
 
-                            if (dPQ == null  || dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            if ( dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
                             {
                                 var entidadError = new Proyecto
                                 {
@@ -657,9 +657,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         FechaRegistro = DateTime.Now,
                                         fechamodifica = DateTime.Now,
                                         UsuarioRegisterId = usuario.UsuaroId,
-                                        UsuarioModificaId = usuario.UsuaroId
+                                        UsuarioModificaId = usuario.UsuaroId,
+                                        TipoProy = data.TipoProy == 1 ? true : false
 
-                                    };
+                                };
                                     lista.Add(entidad);
                                 }
                                 catch (Exception e)
@@ -682,7 +683,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             try
                             {
                                 var existes = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(item.CodigoProyecto) 
-                                && x.TipoProy == (item.TipoProy ==true ?1:0)
+                                && x.TipoProy == (item.TipoProy ==true ?true:false)
                                 && x.MaterialId == item.MaterialId
                                 && x.DistritoId == item.DistritoId
                                 && x.AñosPQ == item.AñosPQ
@@ -729,7 +730,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 }
                                 else
                                 {
-                                    item.TipoProy = data.TipoProy == 1 ? true : false;
+                                    // item.TipoProy = data.TipoProy == 1 ? true : false;
                                     listaInsert.Add(item);
                                 }
                             }

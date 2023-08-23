@@ -172,7 +172,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string correoEnvioConf = configuration.GetSection("EmailSettings").GetSection("CorreoEnvio").Value;
                 string smtp = configuration.GetSection("EmailSettings").GetSection("Smtp").Value;
                 string port = configuration.GetSection("EmailSettings").GetSection("Port").Value;
-                string destinatario = correoUsu;
+                string destinatario = "cesargpq@gmail.com";
                 string asunto = "Notificacion de modficacion";
                 string cuerpo = ConstruirCuerpoCorreo(lstModif, modulo, tipoOperacion);
 
