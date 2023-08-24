@@ -93,7 +93,7 @@ namespace PlanQuinquenal.Core.Utilities
         public async Task<string> GeneraDobuleFactor()
         {
             var characters = "1234567890";
-            var Charsarr = new char[6];
+            var Charsarr = new char[4];
             var random = new Random();
 
             for (int i = 0; i < Charsarr.Length; i++)
@@ -117,7 +117,6 @@ namespace PlanQuinquenal.Core.Utilities
             string body = Engine.Razor.RunCompile(html, $"{templateKey}", typeof(T), message);
             string correoDestino = string.Join(',', obj.EmailList);
             string correoSend = correoEnvioConf;
-            string clave = key;
             MailMessage mail = new MailMessage();
             SmtpClient SmtpServer = new SmtpClient(smtp, Convert.ToInt32(port));
             mail.From = new System.Net.Mail.MailAddress(correoSend);

@@ -10,7 +10,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
     {
         public string? CodigoProyecto { get; set; }
         public string? Denominacion { get; set; }
-        public int? Etapa { get; set; }
+        public string? Etapa { get; set; }
         public Decimal? LongitudRedes { get; set; }
         public string? Constructor { get; set; }
         

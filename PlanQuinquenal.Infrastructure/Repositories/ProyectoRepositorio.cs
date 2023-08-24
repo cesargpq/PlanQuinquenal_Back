@@ -607,7 +607,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var InversionEjecutada = worksheet.Cells[row, 14].Value?.ToString();
 
                             var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
-                            var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
+                            int plananualId = 0;
+                            if(data.TipoProy == 1)
+                            {
+                                var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
+                                plananualId = PlanAnualId.Id;
+                            }
+                       
                             var dMaterial = Material.Where(x => x.Descripcion.Contains(material)).FirstOrDefault();
                             var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor.ToUpper())).FirstOrDefault();
                             var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto)).FirstOrDefault();
@@ -637,7 +643,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CodigoProyecto = codPry,
                                         PQuinquenalId = dPQ.Id,
                                         AñosPQ = anioPQ,
-                                        PlanAnualId = PlanAnualId.Id,
+                                        PlanAnualId = data.TipoProy == 0?null: plananualId,
                                         MaterialId = dMaterial.Id,
                                         ConstructorId = dConstructor.Id,
                                         TipoRegistroId = dTipoRegistroPY.Id,

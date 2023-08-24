@@ -131,7 +131,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 List<string> correos = new List<string>();
                 correos.Add(userResult.correo_usu);
                 DobleFactorDTO message = new DobleFactorDTO();
-                message.Nombre = userResult.nombre_usu + userResult.apellido_usu;
+                message.Nombre = userResult.nombre_usu +" " +userResult.apellido_usu;
                 message.DobleFactor = await hashService.GeneraDobuleFactor();
                 string templateKey = "templateKey_DobleFactor";
                 if (userResult.DobleFactor)
@@ -143,8 +143,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         Model = message,
                         HtmlTemplateName = Constantes.DobleFactor
                     };
-                    //var resultDobleFactror = await hashService.EnviarDobleFactor(obj,message, templateKey);
-                    var resultDobleFactror = true;
+                    var resultDobleFactror = await hashService.EnviarDobleFactor(obj,message, templateKey);
+                  
                     if (resultDobleFactror)
                     {
                         DobleFactor db = new DobleFactor();
