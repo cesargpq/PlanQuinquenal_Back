@@ -8,7 +8,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
     public class ImpedimentoRequestDTO
     {
-        public string codProyecto { get; set; }
+        public int codProyecto { get; set; }
         
         public int ProblematicaRealId { get; set; }
         public Decimal LongImpedimento { get; set; }

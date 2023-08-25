@@ -282,7 +282,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     map.Estrato5 = 0;
                     map.CostoInversion = 0;
                     map.LongitudReemplazo = 0;
-
+                    map.Reemplazado = false;
                     _context.Add(map);
                     await _context.SaveChangesAsync();
 

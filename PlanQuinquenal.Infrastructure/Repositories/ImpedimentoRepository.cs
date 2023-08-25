@@ -48,7 +48,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             string NomCompleto = UsuarioReg[0].nombre_usu.ToString() + " " + UsuarioReg[0].apellido_usu.ToString();
             try
             {
-                var proyect = await _context.Proyecto.Where(x =>x.CodigoProyecto.Equals(p.codProyecto)).ToListAsync();
+                var proyect = await _context.Proyecto.Where(x =>x.Id ==p.codProyecto).ToListAsync();
                 foreach (var proy in proyect)
                 {
                     Impedimento obj = new Impedimento();
@@ -83,6 +83,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Crear").ToListAsync();
                     if (resultad.Count > 0)
                     {
+                        
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Impedimento";
