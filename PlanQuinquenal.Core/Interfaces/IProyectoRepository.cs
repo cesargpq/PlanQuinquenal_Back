@@ -21,5 +21,6 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<ResponseDTO> Update(ProyectoRequestUpdateDto p,int id, DatosUsuario usuario);
         Task<ResponseDTO> Add(ProyectoRequestDto proyectoRequestDto,DatosUsuario usuario);
         Task<ImportResponseDto<Proyecto>> ProyectoImport(RequestMasivo data, DatosUsuario usuario);
+        Task<ResponseDTO> ProyectoDelete(RequestDeleteMasivo data, DatosUsuario usuario);
     }
 }

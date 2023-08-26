@@ -11,6 +11,8 @@ namespace PlanQuinquenal.Core.Entities
         public int Total { get; set; }
         public int Id { get; set; }
         public string? PQ { get; set; }
+        public string? AnioPlan { get; set; }
+        public DateTime? FechaPresentacionReemplazo { get; set; }
         public string? CodigoProyecto { get; set; }
         public string? CodigoMalla { get; set; }
         public Decimal? LongImpedimento { get; set; }

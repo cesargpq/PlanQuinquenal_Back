@@ -561,9 +561,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.CodigoProyecto.Equals("")) f.CodigoProyecto = null;
             if (f.CodigoMalla.Equals("")) f.CodigoMalla = null;
             if (f.FechaRegistro.Equals("")) f.FechaRegistro = null;
+            if (f.FechaReemplazo.Equals("")) f.FechaReemplazo = null;
 
-            
-         
+
             if (f.DistritoId == 0) f.DistritoId = null;
             if (f.CausalReemplazoId == 0) f.CausalReemplazoId = null;
             if (f.ConstructorId == 0) f.ConstructorId = null;
@@ -574,10 +574,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.CostoInversion == 0) f.CostoInversion = null;
             if (f.PrimerEstrato == 0) f.PrimerEstrato = null;
             if (f.SegundoEstrato == 0) f.SegundoEstrato = null;
+            if (f.PAnualId == 0) f.PAnualId = null;
             if (f.TercerEstrato == 0) f.TercerEstrato = null;
             if (f.CuartoEstrato == 0) f.CuartoEstrato = null;
             if (f.QuintoEstrato == 0) f.QuintoEstrato = null;
-            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.PAnualId} , {f.FechaReemplazo}  , {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ImpedimentoDetalle>

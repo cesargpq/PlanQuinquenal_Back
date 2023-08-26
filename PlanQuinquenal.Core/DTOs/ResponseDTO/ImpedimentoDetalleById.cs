@@ -13,6 +13,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public string? PQ { get; set; }
         public string? CodigoProyecto { get; set; }
         public string? CodigoMalla { get; set; }
+        public string? PlanAnualId { get; set; }
         public Decimal? LongImpedimento { get; set; }
         public int? CausalReemplazoId { get; set; }
         public string? CausalReemplazo { get; set; }

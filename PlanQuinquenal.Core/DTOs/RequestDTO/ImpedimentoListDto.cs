@@ -9,7 +9,8 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class ImpedimentoListDto:PaginacionDTO
     {
         public string? CodigoProyecto { get; set; }
-       
+        public int? PAnualId { get; set; }
+        public string? FechaReemplazo { get; set; }
         public string? CodigoMalla { get; set; }
         public int? DistritoId { get; set; }
         public int? CausalReemplazoId { get; set; }

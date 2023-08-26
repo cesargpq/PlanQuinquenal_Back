@@ -70,12 +70,26 @@ namespace PlanQuinquenal.Controllers
 
             return Ok(resultado);
         }
-        //[HttpPost("Listar")]
-        //public async Task<IActionResult> GetAll(FiltersProyectos filterProyectos)
-        //{
-        //    var resultado = await _proyectoRepository.GetAll(filterProyectos);
-        //    return Ok(resultado);
-        //}
+        [AllowAnonymous]
+        [HttpPost("ProyectoDelete")]
+        public async Task<IActionResult> ProyectoDelete(RequestDeleteMasivo data)
+        {
+            //var identity = HttpContext.User.Identity as ClaimsIdentity;
+            //var idUser = 0;
+            //foreach (var item in identity.Claims)
+            //{
+            //    if (item.Type.Equals("$I$Us$@I@D"))
+            //    {
+            //        idUser = Convert.ToInt16(item.Value);
+            //    }
+            //}
+            DatosUsuario usuario = new DatosUsuario();
+            //usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            //usuario.UsuaroId = idUser;
+            var resultado = await _proyectoRepository.ProyectoDelete(data, usuario);
+
+            return Ok(resultado);
+        }
         [HttpPost("Listar")]
         public async Task<IActionResult> GetAll2(FiltersProyectos filterProyectos)
         {

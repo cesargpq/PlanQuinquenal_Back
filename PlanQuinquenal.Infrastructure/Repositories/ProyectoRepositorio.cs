@@ -205,7 +205,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     List<CorreoTabla> camposModificados;
                     if (existe != null)
                     {
-                        existe.descripcion = p.Descripcion;
                         existe.PQuinquenalId = p.PQuinquenalId;
                         existe.AñosPQ = p.AñosPQ;
                         existe.PlanAnualId = p.PlanAnualId == null || p.PlanAnualId == 0 ? null : p.PlanAnualId;
@@ -433,10 +432,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         CorreoTabla fila = CrearCorreoTablaManualFecha(valOriginal,  item, nomCompleto, fechaFormateada, "Fecha Gasificación");
                         camposModificados.Add(fila);
                     }
-                    else
+                    else 
                     {
-                        CorreoTabla fila = CrearCorreoTablaDirecto(valOriginal, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
-                        camposModificados.Add(fila);
+                        if(!item.Metadata.Name.Equals("descripcion"))
+                        {
+                            CorreoTabla fila = CrearCorreoTablaDirecto(valOriginal, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                            camposModificados.Add(fila);
+                        }
                     }
                 }
             }
@@ -607,12 +609,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var InversionEjecutada = worksheet.Cells[row, 14].Value?.ToString();
 
                             var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
-                            int plananualId = 0;
-                            if(data.TipoProy == 1)
-                            {
+                            
                                 var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
-                                plananualId = PlanAnualId.Id;
-                            }
+                               
                        
                             var dMaterial = Material.Where(x => x.Descripcion.Contains(material)).FirstOrDefault();
                             var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor.ToUpper())).FirstOrDefault();
@@ -643,7 +642,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CodigoProyecto = codPry,
                                         PQuinquenalId = dPQ.Id,
                                         AñosPQ = anioPQ,
-                                        PlanAnualId = data.TipoProy == 0?null: plananualId,
+                                        PlanAnualId = PlanAnualId ==null?null: PlanAnualId.Id,
                                         MaterialId = dMaterial.Id,
                                         ConstructorId = dConstructor.Id,
                                         TipoRegistroId = dTipoRegistroPY.Id,
@@ -975,6 +974,64 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return result;
             }
             
+
+        }
+
+        public async Task<ResponseDTO> ProyectoDelete(RequestDeleteMasivo data, DatosUsuario usuario)
+        {
+            try
+            {
+                var base64Content = data.base64;
+                var bytes = Convert.FromBase64String(base64Content);
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
+                List<Proyecto> listaP = new List<Proyecto>();
+                List<Proyecto> listaDelete = new List<Proyecto>();
+                if (data.TipoProy == 0)
+                {
+                    listaP = await _context.Proyecto.Where(x => x.PQuinquenalId == data.CodigoPlan && x.TipoProy == false).ToListAsync();
+                }
+                else if (data.TipoProy == 1)
+                {
+                    listaP = await _context.Proyecto.Where(x => x.PlanAnualId == data.CodigoPlan && x.TipoProy == true).ToListAsync();
+                }
+
+                using (var memoryStream = new MemoryStream(bytes))
+                {
+                    using (var package = new ExcelPackage(memoryStream))
+                    {
+                        var worksheet = package.Workbook.Worksheets["Proyecto"];
+                        for (int row = 2; row <= worksheet.Dimension.Rows; row++)
+                        {
+                            if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
+                            var codPry = worksheet.Cells[row, 1].Value?.ToString();
+
+                            var existe = listaP.Where(x => x.CodigoProyecto.Equals(codPry)).FirstOrDefault();
+                            if (existe != null)
+                            {
+                                listaDelete.Add(existe);
+                            }
+
+                        }
+
+                        _context.BulkDelete(listaDelete);
+                    }
+                }
+                return new ResponseDTO
+                {
+                    Message = "Se eliminó correctamente los proyectos",
+                    Valid = true
+                };
+            }
+            catch (Exception)
+            {
+
+                return new ResponseDTO
+                {
+                    Message = Constantes.ErrorSistema,
+                    Valid = false
+                };
+            }
 
         }
     }
