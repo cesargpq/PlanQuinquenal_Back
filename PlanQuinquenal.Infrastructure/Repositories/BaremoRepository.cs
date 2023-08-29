@@ -56,7 +56,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             List<Baremo> listaBaremoRepetidos = new List<Baremo>();
             List<Baremo> listaBaremoInsert = new List<Baremo>();
             var PlanQuin = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
-            var Baremos = await _repositoryMantenedores.GetAllByAttribute("Baremo");
+            //var Baremos = await _repositoryMantenedores.GetAllByAttribute("Baremo");
+            var Baremos = await _context.Baremo.ToListAsync();
             try
             {
                 using (var memoryStream = new MemoryStream(bytes))
@@ -114,7 +115,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             try
                             {
-                                var existe =  Baremos.Where(x => x.Descripcion.Equals(item.CodigoBaremo)).FirstOrDefault();
+                                var existe =  Baremos.Where(x => x.Descripcion.Equals(item.CodigoBaremo) && x.PQuinquenalId == item.PQuinquenalId).FirstOrDefault();
                                 if (existe != null)
                                 {
                                     Baremo obj = new Baremo();
