@@ -390,17 +390,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o)
         {
-            var resultad = await _context.ReporteMaterialDetalle.FromSqlRaw($"EXEC dashboardMaterial  {o.MaterialId} , {o.PQuinquenalId} , {o.PAnual}").ToListAsync();
+            var resultad = await _context.ReporteMaterialDetalle.FromSqlRaw($"EXEC dashboardMaterial  {o.MaterialId} , {o.CodigoPlan} , {o.tipoProy}").ToListAsync();
 
             List<string> categorias = new List<string>();
             List<Decimal> pendiente = new List<Decimal>();
             List<Decimal> habilitado = new List<Decimal>();
+            resultad = resultad.OrderByDescending(x => x.LongitudAprobada).ToList();
             foreach (var item in resultad)
             {
 
                 categorias.Add( item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
                 pendiente.Add(item.longitudPendiente);
-                habilitado.Add(item.LongitudAprobada);
+                habilitado.Add(item.LongitudConstruida);
             }
 
             var datos = new ReporteMaterialDetalle
@@ -415,15 +416,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ReporteMaterialConstruidaDetalle> ListarMaterialConstruida(RequestDashboradDTO o)
         {
-            var resultad = await _context.ReporteMaterialConstruidaDetalle.FromSqlRaw($"EXEC dashboardMaterialConstruida  {o.MaterialId} , {o.PQuinquenalId} , {o.PAnual}").ToListAsync();
+            var resultad = await _context.ReporteMaterialConstruidaDetalle.FromSqlRaw($"EXEC dashboardMaterialConstruida  {o.MaterialId} , {o.CodigoPlan} , {o.tipoProy}").ToListAsync();
 
             List<string> categorias = new List<string>();
             List<Decimal> pendiente = new List<Decimal>();
             List<Decimal> construido = new List<Decimal>();
+            resultad = resultad.OrderByDescending(x => x.LongitudAprobada).ToList();
             foreach (var item in resultad)
             {
 
-                categorias.Add(item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudConstruida + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
+                categorias.Add(item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
                 pendiente.Add(item.longitudPendiente);
                 construido.Add(item.LongitudConstruida);
                 
@@ -441,7 +443,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResposeDistritosDetalleDTO> ListarPermisos(RequestDashboradDTO o)
         {
-            var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TOTAL {o.MaterialId}, {o.PQuinquenalId} , {o.PAnual}").ToListAsync();
+            var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TOTAL {o.MaterialId}, {o.CodigoPlan} , {o.tipoProy}").ToListAsync();
 
             List<string> categorias = new List<string>();
             List<int> norequiere = new List<int>();
@@ -459,17 +461,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             foreach (var item in resultad)
             {
-                var norequierecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 1 , {o.MaterialId}, {item.Descripcion} , {o.PQuinquenalId} , {o.PAnual} ").ToListAsync();
+                var norequierecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 1 , {o.MaterialId}, {item.Descripcion} , {o.CodigoPlan}  ").ToListAsync();
                 norequiere.Add(norequierecount.Count);
-                var permisodenegadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 2 , {o.MaterialId}, {item.Descripcion} , {o.PQuinquenalId} , {o.PAnual} ").ToListAsync();
+                var permisodenegadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 2 , {o.MaterialId}, {item.Descripcion} , {o.CodigoPlan}  ").ToListAsync();
                 permisodenegado.Add(permisodenegadocount.Count);
-                var permisotramitecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 3 , {o.MaterialId}, {item.Descripcion} , {o.PQuinquenalId} , {o.PAnual} ").ToListAsync();
+                var permisotramitecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 3 , {o.MaterialId}, {item.Descripcion} , {o.CodigoPlan}  ").ToListAsync();
                 permisotramite.Add(permisotramitecount.Count);
-                var permisonotramitadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 4 , {o.MaterialId}, {item.Descripcion} , {o.PQuinquenalId} , {o.PAnual}  ").ToListAsync();
+                var permisonotramitadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 4 , {o.MaterialId}, {item.Descripcion} , {o.CodigoPlan}   ").ToListAsync();
                 permisonotramitado.Add(permisonotramitadocount.Count);
-                var permisootorgadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 5 ,{o.MaterialId}, {item.Descripcion} , {o.PQuinquenalId} , {o.PAnual}  ").ToListAsync();
+                var permisootorgadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 5 ,{o.MaterialId}, {item.Descripcion} , {o.CodigoPlan}   ").ToListAsync();
                 permisootorgado.Add(permisootorgadocount.Count);
-                var sapcount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 6 ,{o.MaterialId}, {item.Descripcion} , {o.PQuinquenalId} , {o.PAnual}  ").ToListAsync();
+                var sapcount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 6 ,{o.MaterialId}, {item.Descripcion} , {o.CodigoPlan}   ").ToListAsync();
                 sap.Add(sapcount.Count);
             }
             var datos = new ResposeDistritosDetalleDTO

@@ -71,7 +71,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     Proyecto proyecto = new Proyecto();
                     proyecto.CodigoProyecto = proyectoRequestDto.CodigoProyecto;
                     proyecto.PQuinquenalId = proyectoRequestDto.PQuinquenalId == 0 ? null : proyectoRequestDto.PQuinquenalId;
-                    proyecto.AñosPQ = proyectoRequestDto.AñosPQ;
+                    proyecto.AñosPQ = proyectoRequestDto.AñosPQ==null?"":proyectoRequestDto.AñosPQ;
                     proyecto.PlanAnualId = proyectoRequestDto.PlanAnualId == 0 ? null : proyectoRequestDto.PlanAnualId;
                     proyecto.MaterialId = proyectoRequestDto.MaterialId == 0 ? null : proyectoRequestDto.MaterialId;
                     proyecto.ConstructorId = proyectoRequestDto.ConstructorId == 0 ? null : proyectoRequestDto.ConstructorId;
@@ -206,7 +206,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     if (existe != null)
                     {
                         existe.PQuinquenalId = p.PQuinquenalId;
-                        existe.AñosPQ = p.AñosPQ;
+                        existe.AñosPQ = p.AñosPQ==null?"":p.AñosPQ;
                         existe.PlanAnualId = p.PlanAnualId == null || p.PlanAnualId == 0 ? null : p.PlanAnualId;
                         existe.MaterialId = p.MaterialId == null || p.MaterialId == 0 ? null : p.MaterialId;
                         existe.DistritoId = p.DistritoId == null || p.DistritoId == 0 ? null : p.DistritoId;
@@ -610,18 +610,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                             var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
                             
-                                var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA)).FirstOrDefault();
-                               
+                            var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA==null?"NONAME":anioPA)).FirstOrDefault();   
                        
                             var dMaterial = Material.Where(x => x.Descripcion.Contains(material)).FirstOrDefault();
                             var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor.ToUpper())).FirstOrDefault();
                             var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto)).FirstOrDefault();
                             var dDistrito = Distrito.Where(x => x.Descripcion.Contains(distrito)).FirstOrDefault();
                             var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion.Contains(tipoRegistro)).FirstOrDefault();
-
-                         
-                            
-
 
                             if ( dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
                             {

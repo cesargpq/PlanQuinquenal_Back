@@ -10,7 +10,7 @@ namespace PlanQuinquenal.Core.DTOs
     public class ReporteMaterialConstruidaDetalle
     {
         public string Distrito { get; set; }
-    
+        public Decimal LongitudAprobada { get; set; }
         public Decimal LongitudConstruida { get; set; }
         public Decimal longitudPendiente { get; set; }
 

@@ -11,7 +11,7 @@ namespace PlanQuinquenal.Core.DTOs
         public string CodigoProyecto { get; set; }
         public string? Descripcion { get; set; }
         public int? PQuinquenalId { get; set; }
-        public string AñosPQ { get; set; }
+        public string? AñosPQ { get; set; }
         public int? PlanAnualId { get; set; }
         public int? MaterialId { get; set; }
         public int? DistritoId { get; set; }
