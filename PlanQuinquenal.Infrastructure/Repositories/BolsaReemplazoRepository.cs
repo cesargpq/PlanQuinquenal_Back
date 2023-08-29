@@ -716,6 +716,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 proyecto.LongRealPend = 0;
                 proyecto.LongProyectos = 0;
                 proyecto.DistritoId = bolsa.Id;
+                proyecto.TipoProy = true;
                 _context.Add(proyecto);
                 _context.Update(bolsa);
                 await _context.SaveChangesAsync();
