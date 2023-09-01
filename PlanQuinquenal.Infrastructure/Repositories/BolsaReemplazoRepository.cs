@@ -451,7 +451,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var contratistadesc = Constructores.Where(x => x.Descripcion.Equals(contratista)).FirstOrDefault();
 
 
-                            if ( distritodesc == null || contratistadesc == null )
+                            if ( distritodesc == null || contratistadesc == null || proyecto != null)
                             {
                                 var entidadError = new BolsaReemplazo
                                 {
@@ -662,6 +662,18 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         public async Task<ResponseDTO> GestionReemplazo(GestionReemplazoDto p, DatosUsuario usuario)
         {
 
+            string anioActuales = DateTime.Now.Year.ToString();
+            var planAnualActual = await _context.PlanAnual.Where(x => x.AnioPlan.Equals(anioActuales)).FirstOrDefaultAsync();
+
+            if(planAnualActual == null)
+            {
+                return new ResponseDTO
+                {
+                    Valid = false,
+                    Message = $"No existe el Plan Anual {anioActuales } registrado para realizar el reemplazo "
+                };
+            }
+
             foreach (var item in p.Impedimentos)
             {
                 var impedimentos = await _context.Impedimento.Where(x => x.Id == item).FirstOrDefaultAsync();
@@ -690,16 +702,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 
                 bolsa.Reemplazado = true;
-
+               
+             
                 Proyecto proyecto= new Proyecto();
                 proyecto.CodigoProyecto = bolsa.CodigoProyecto;
                 proyecto.PQuinquenalId = null;
                 proyecto.AñosPQ =null;
-                proyecto.PlanAnualId = null;
+                proyecto.PlanAnualId = planAnualActual.Id == null ? null : planAnualActual.Id;
                 proyecto.MaterialId = null;
-                proyecto.ConstructorId = bolsa.ConstructorId;
+                proyecto.ConstructorId = bolsa.ConstructorId == null ? null : bolsa.ConstructorId;
                 proyecto.TipoRegistroId = null;
-                proyecto.LongAprobPa = 0;
+                proyecto.LongAprobPa = bolsa.LongitudReemplazo;
                 proyecto.LongConstruida = 0;
                 proyecto.TipoProyectoId = null;
                 proyecto.InversionEjecutada = bolsa.CostoInversion;
@@ -715,7 +728,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 proyecto.LongRealHab = 0;
                 proyecto.LongRealPend = 0;
                 proyecto.LongProyectos = 0;
-                proyecto.DistritoId = bolsa.Id;
+                proyecto.DistritoId = bolsa.DistritoId == null ? null : bolsa.DistritoId;
                 proyecto.TipoProy = true;
                 _context.Add(proyecto);
                 _context.Update(bolsa);

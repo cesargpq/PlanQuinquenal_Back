@@ -75,7 +75,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.FechaRegistro = DateTime.Now;
                     obj.UsuarioRegisterId = usuario.UsuaroId;
                     obj.UsuarioModificaId = usuario.UsuaroId;
-                    obj.CostoInversion = proy.InversionEjecutada;
+                    obj.CostoInversion = 0;
                     obj.Reemplazado = false;
                     obj.estado = true;
                     _context.Add(obj);
@@ -607,8 +607,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var ProblematicaReal = await _repositoryMantenedores.GetAllByAttribute(Constantes.ProblematicaReal);
             
             var proyectosMasivos = await _context.ProyectoMasivoDetalle.FromSqlInterpolated($"EXEC listaMasiva").ToListAsync();
-            var Baremos = await _repositoryMantenedores.GetAllByAttribute("Baremo");
             var base64Content = data.base64;
+            var causalReempList = await _repositoryMantenedores.GetAllByAttribute("CausalReemplazo");
+            var ValidacionLegalList = await _repositoryMantenedores.GetAllByAttribute("ValidacionLegal");
             var bytes = Convert.FromBase64String(base64Content);
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             List<Impedimento> lista = new List<Impedimento>();
@@ -631,19 +632,28 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var codPry = worksheet.Cells[row, 1].Value?.ToString();
                             var ProbleReal = worksheet.Cells[row, 2].Value?.ToString();
                             var LongImpe = worksheet.Cells[row, 3].Value?.ToString();
+                            var CausalReemplazo = worksheet.Cells[row, 4].Value?.ToString();
+                            var CostoInversion = worksheet.Cells[row, 5].Value?.ToString();
+                            var Estrato1 = worksheet.Cells[row, 6].Value?.ToString();
+                            var Estrato2 = worksheet.Cells[row, 7].Value?.ToString();
+                            var Estrato3 = worksheet.Cells[row, 8].Value?.ToString();
+                            var Estrato4 = worksheet.Cells[row, 9].Value?.ToString();
+                            var Estrato5 = worksheet.Cells[row, 10].Value?.ToString();
+                            var ValidacionProyectos = worksheet.Cells[row, 11].Value?.ToString();
+                            var ValidacionSustentosPermisos = worksheet.Cells[row, 12].Value?.ToString();
+                            var ValidacionSustentosRRCC = worksheet.Cells[row, 13].Value?.ToString();
+                            var ValidacionLegal = worksheet.Cells[row, 14].Value?.ToString();
+                            var FechaPresentacionReemplazo = worksheet.Cells[row, 15].Value?.ToString();
+                            var ComentarioEvaluacion = worksheet.Cells[row, 16].Value?.ToString();
 
-                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto == codPry ).FirstOrDefault();
-                            var dProReal = ProblematicaReal.Where(x => x.Descripcion == ProbleReal).FirstOrDefault();
-                            int baremoId = 0;
-                            if (dCodPry != null)
-                            {
-                                //var baremoAdd = Baremos.Where(x => x.Id == dCodPry.BaremoId).FirstOrDefault();
-                                //baremoId = baremoAdd.Id;
-                            }
-                           
+
+                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(codPry) ).FirstOrDefault();
+                            var dProReal = ProblematicaReal.Where(x => x.Descripcion.Equals(ProbleReal)).FirstOrDefault();
+                            var validacionLegal = ValidacionLegalList.Where(x => x.Descripcion.Equals(ValidacionLegal)).FirstOrDefault();
+                            var causalReemp = causalReempList.Where(x=>x.Descripcion.Equals(CausalReemplazo)).FirstOrDefault();
 
 
-                            if (dCodPry == null || dProReal == null /*|| baremoId==0*/ )
+                            if (dCodPry == null || dProReal == null || validacionLegal == null || causalReemp == null )
                             {
                                 var entidadError = new Impedimento
                                 {
@@ -662,27 +672,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         ProyectoId = dCodPry.Id,
                                         ProblematicaRealId = dProReal.Id,
                                         LongImpedimento = Convert.ToDecimal(LongImpe),
-                                        CausalReemplazoId = null,
+                                        CausalReemplazoId = causalReemp.Id,
                                         Resuelto = false,
-                                        PrimerEstrato = 0,
-                                        SegundoEstrato = 0,
-                                        TercerEstrato = 0,
-                                        CuartoEstrato = 0,
-                                        QuintoEstrato = 0,
+                                        PrimerEstrato = Convert.ToInt16(Estrato1),
+                                        SegundoEstrato = Convert.ToInt16(Estrato2),
+                                        TercerEstrato = Convert.ToInt16(Estrato3),
+                                        CuartoEstrato = Convert.ToInt16(Estrato4),
+                                        QuintoEstrato = Convert.ToInt16(Estrato5),
                                         LongitudReemplazo = 0,
-                                        ValidacionCargoPlano = false,
-                                        ValidacionCargoSustentoRRCC = false,
-                                        ValidacionCargoSustentoAmbiental = false,
+                                        ValidacionCargoPlano = ValidacionProyectos == "SI"?true:false,
+                                        ValidacionCargoSustentoRRCC = ValidacionSustentosRRCC == "SI" ? true : false,
+                                        ValidacionCargoSustentoAmbiental = ValidacionSustentosPermisos == "SI" ? true : false,
                                         ValidacionCargoSustentoArqueologia = false,
-                                        ValidacionLegalId = null,
-                                        Comentario = "",
+                                        ValidacionLegalId = validacionLegal.Id,
+                                        Comentario = ComentarioEvaluacion,
                                         FechaPresentacion = null,
-                                        FechaPresentacionReemplazo = null,
+                                        FechaPresentacionReemplazo = Convert.ToDateTime(FechaPresentacionReemplazo),
                                         fechamodifica = DateTime.Now,
                                         FechaRegistro = DateTime.Now,
                                         UsuarioRegisterId = null,
                                         UsuarioModificaId = null,
-                                        CostoInversion = 0,
+                                        CostoInversion = Convert.ToDecimal(CostoInversion),
                                         estado = true,
                                         Reemplazado = false
 
@@ -712,7 +722,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         if (listaInsert.Count > 0)
                         {
                             await _context.BulkInsertAsync(listaInsert);
-                            await _context.SaveChangesAsync();
 
                         }
                        
