@@ -420,8 +420,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var bolsaMasivos = await _context.BolsaReemplazo.FromSqlInterpolated($"EXEC LISTARMASIVOBOLSA").ToListAsync();
             var Distritos = await _repositoryMantenedores.GetAllByAttribute(Constantes.Distrito);
             var Constructores = await _repositoryMantenedores.GetAllByAttribute(Constantes.Constructor);
+            var zonaPermiso = await _repositoryMantenedores.GetAllByAttribute(Constantes.ZonaPermiso);
             var base64Content = data.base64;
             var bytes = Convert.FromBase64String(base64Content);
+
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             List<BolsaReemplazo> lista = new List<BolsaReemplazo>();
             List<BolsaReemplazo> listaError = new List<BolsaReemplazo>();
@@ -444,14 +446,23 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var distrito = worksheet.Cells[row, 2].Value?.ToString();
                             var contratista = worksheet.Cells[row, 3].Value?.ToString();
                             var codigoMalla = worksheet.Cells[row, 4].Value?.ToString();
-
-
+                            var malla = worksheet.Cells[row, 5].Value?.ToString();
+                            var Estrato1 = worksheet.Cells[row, 6].Value?.ToString();
+                            var Estrato2 = worksheet.Cells[row, 7].Value?.ToString();
+                            var Estrato3 = worksheet.Cells[row, 8].Value?.ToString();
+                            var Estrato4 = worksheet.Cells[row, 9].Value?.ToString();
+                            var Estrato5 = worksheet.Cells[row, 10].Value?.ToString();
+                            var CostoInversion = worksheet.Cells[row, 11].Value?.ToString();
+                            var LongReemplazo = worksheet.Cells[row, 12].Value?.ToString();
+                            var RiesgoSocial = worksheet.Cells[row, 13].Value?.ToString();
+                            var ZonaPermiso = worksheet.Cells[row, 14].Value?.ToString();
                             var proyecto = bolsaMasivos.Where(x => x.CodigoProyecto.Equals(codPry)).FirstOrDefault();
                             var distritodesc = Distritos.Where(x => x.Descripcion.Equals(distrito)).FirstOrDefault();
                             var contratistadesc = Constructores.Where(x => x.Descripcion.Equals(contratista)).FirstOrDefault();
+                            var zonaPermisoDesc = zonaPermiso.Where(x=>x.Descripcion.Equals(ZonaPermiso)).FirstOrDefault();
 
 
-                            if ( distritodesc == null || contratistadesc == null || proyecto != null)
+                            if (  proyecto != null)
                             {
                                 var entidadError = new BolsaReemplazo
                                 {
@@ -468,8 +479,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     var entidad = new BolsaReemplazo
                                     {
                                         CodigoProyecto = codPry,
-                                        DistritoId = distritodesc.Id,
-                                        ConstructorId = contratistadesc.Id,
+                                        DistritoId = distritodesc == null ? null : distritodesc.Id,
+                                        ConstructorId = contratistadesc == null ? null : contratistadesc.Id,
                                         CodigoMalla = codigoMalla,
                                         FechaModifica = DateTime.Now,
                                         FechaRegistro = DateTime.Now,
@@ -483,9 +494,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         Estrato5 = 0,
                                         CostoInversion = 0,
                                         LongitudReemplazo = 0,
-                                        Reemplazado=false
+                                        Reemplazado = false,
+                                        PermisoId = zonaPermisoDesc == null ? null : zonaPermisoDesc.Id
 
-                                };
+                                    };
                                     lista.Add(entidad);
                                 }
                                 catch (Exception e)

@@ -12,6 +12,7 @@ namespace PlanQuinquenal.Core.Utilities
         public const string Material = "Material";
         public const string ProblematicaReal = "ProblematicaReal";
         public const string Constructor = "Constructor";
+        public const string ZonaPermiso = "ZonaPermiso";
         public const string PARCIALMENTEEJECUTADO = "Parcialmente ejecutado";
         public const string NOEJECUTADO = "No Ejecutado";
         public const string EJECUTADO = "Ejecutado";

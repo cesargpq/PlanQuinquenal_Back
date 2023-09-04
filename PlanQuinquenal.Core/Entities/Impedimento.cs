@@ -36,5 +36,6 @@ namespace PlanQuinquenal.Core.Entities
         public Decimal? CostoInversion { get; set; }
         public bool estado { get; set; }
         public bool Reemplazado { get; set; }
+        public int? NumeroReemplazo { get; set; }
     }
 }

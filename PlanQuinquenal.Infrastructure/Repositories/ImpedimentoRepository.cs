@@ -78,6 +78,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.CostoInversion = 0;
                     obj.Reemplazado = false;
                     obj.estado = true;
+                    obj.NumeroReemplazo = null;
                     _context.Add(obj);
                     await _context.SaveChangesAsync();
                     var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Crear").ToListAsync();
@@ -694,7 +695,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         UsuarioModificaId = null,
                                         CostoInversion = Convert.ToDecimal(CostoInversion),
                                         estado = true,
-                                        Reemplazado = false
+                                        Reemplazado = false,
+                                        NumeroReemplazo = null
 
                                     };
                                     lista.Add(entidad);
