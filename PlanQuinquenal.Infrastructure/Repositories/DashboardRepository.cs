@@ -1,5 +1,6 @@
 ﻿using iTextSharp.text;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static iTextSharp.text.pdf.events.IndexEvents;
+using static Microsoft.IO.RecyclableMemoryStreamManager;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -28,181 +30,82 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<MensualidadDTO> ListarAvanceMensual(AvanceMensualDto o)
         {
-            var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIO  {o.Anio} , {o.MaterialId}").ToListAsync();
-
-            var data = resultad.GroupBy(x=>x.pquinquenalId).ToList();
-
-            var countQuinquenal = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
-
             
-            List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
-            for (int i = 0; i < countQuinquenal.Count(); i++)
-            {
-                foreach (var item in data)
+                if (o.AnioPQ.Equals(""))
                 {
-                    var exist = item.Where(x => x.pquinquenalId == countQuinquenal.ElementAt(i).Id).FirstOrDefault();
-                    ListaPqMensual obj = new ListaPqMensual();
-                    
-                    HabilitadoDto habilitado = new HabilitadoDto();
-                    if (exist != null && exist.pquinquenalId == countQuinquenal.ElementAt(i).Id)
-                    {
-
-                        var existeE = item.Where(x => x.Mes.Equals("Enero")).FirstOrDefault();
-                        if (existeE != null)
-                        {
-
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeF = item.Where(x => x.Mes.Equals("Febrero")).FirstOrDefault();
-                        if (existeF != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeM = item.Where(x => x.Mes.Equals("Marzo")).FirstOrDefault();
-                        if (existeM != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeA = item.Where(x => x.Mes.Equals("Abril")).FirstOrDefault();
-                        if (existeA != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeMay = item.Where(x => x.Mes.Equals("Mayo")).FirstOrDefault();
-                        if (existeMay != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeJuni = item.Where(x => x.Mes.Equals("Junio")).FirstOrDefault();
-                        if (existeJuni != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeJuli = item.Where(x => x.Mes.Equals("Julio")).FirstOrDefault();
-                        if (existeJuli != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeAg = item.Where(x => x.Mes.Equals("Agosto")).FirstOrDefault();
-                        if (existeAg != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeSep = item.Where(x => x.Mes.Equals("Septiembre")).FirstOrDefault();
-                        if (existeSep != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeOc = item.Where(x => x.Mes.Equals("Octubre")).FirstOrDefault();
-                        if (existeOc != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeNo = item.Where(x => x.Mes.Equals("Noviembre")).FirstOrDefault();
-                        if (existeNo != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeDi = item.Where(x => x.Mes.Equals("Diciembre")).FirstOrDefault();
-                        if (existeDi != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-
-                        listaMensual.Add(obj);
-                        i++;
-                    }
+                    o.AnioPQ = "NO";
                 }
-            }
 
+                string anioInicial = "";
+                string anioFin = "";
+                if (o.TipoProy == 0)
+                {
+                    var qnq = await _context.PQuinquenal.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
+                     anioInicial = qnq.AnioPlan.ToString().Split("-")[0];
+                     anioFin = qnq.AnioPlan.ToString().Split("-")[1];
+                }
+                else
+                {
+                    var anual = await _context.PlanAnual.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
+                    anioInicial = anual.AnioPlan.ToString();
+                    anioFin = anual.AnioPlan.ToString();
+                }
+                
+               
+                List<string> aniosqnq = new List<string>();
+                for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
+                {
+                    aniosqnq.Add(i.ToString());
+                }
+                var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIO  {o.TipoProy}, {o.CodigoPlan}, {o.AnioPQ}, {o.MaterialId}").ToListAsync();
 
-            MensualidadDTO mensual = new MensualidadDTO();
-            mensual.categorias.Add("Enero");
-            mensual.categorias.Add("Febrero");
-            mensual.categorias.Add("Marzo");
-            mensual.categorias.Add("Abril");
-            mensual.categorias.Add("Mayo");
-            mensual.categorias.Add("Junio");
-            mensual.categorias.Add("Julio");
-            mensual.categorias.Add("Agosto");
-            mensual.categorias.Add("Septiembre");
-            mensual.categorias.Add("Octubre");
-            mensual.categorias.Add("Noviembre");
-            mensual.categorias.Add("Diciembre");
-            mensual.ListaPqMensual = listaMensual;
-            return mensual;
+                var listaMeses = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
+                var agrupado = resultad.GroupBy(x => x.FechaGasificacion);
+
+                var grupos = resultad.GroupBy(d => d.FechaGasificacion)
+                               .Select(grupo => new
+                               {
+                                   FechaGasificacion = grupo.Key,
+                                   AniosPQ = grupo.Select(d => d.CodigoPlan).Distinct().OrderBy(a => a).ToList(),
+                                   Valores = grupo.Select(d => d.LongitudConstruida).ToList()
+                               });
+
+                // Crear el objeto en el formato deseado
+                var series = new List<object>();
+                foreach (var grupo in grupos)
+                {
+                    var data = new List<double>();
+                    for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
+                    {
+                        if (grupo.AniosPQ.Contains(i.ToString()))
+                        {
+                            data.Add(Convert.ToDouble(grupo.Valores[grupo.AniosPQ.IndexOf(i.ToString())]));
+                        }
+                        else
+                        {
+                            data.Add(0);
+                        }
+                    }
+
+                    var serie = new
+                    {
+                        type = "column",
+                        name = grupo.FechaGasificacion.ToString(),
+                        data = data
+                    };
+
+                    series.Add(serie);
+                }
+
+                List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
+
+                MensualidadDTO mensual = new MensualidadDTO();
+                mensual.categorias = listaMeses;
+                mensual.ListaPqMensual = series;
+                return mensual;
+           
+            
+           
         }
 
 
@@ -210,181 +113,80 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<MensualidadDTO> ListarAvanceMensualConstruida(AvanceMensualDto o)
         {
-            var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIOCONSTRUIDA  {o.Anio} , {o.MaterialId}").ToListAsync();
 
-            var data = resultad.GroupBy(x => x.pquinquenalId).ToList();
-
-            var countQuinquenal = await _repositoryMantenedores.GetAllByAttribute("PlanQuinquenal");
-
-
-            List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
-            for (int i = 0; i < countQuinquenal.Count(); i++)
+            if (o.AnioPQ.Equals(""))
             {
-                foreach (var item in data)
-                {
-                    var exist = item.Where(x => x.pquinquenalId == countQuinquenal.ElementAt(i).Id).FirstOrDefault();
-                    ListaPqMensual obj = new ListaPqMensual();
+                o.AnioPQ = "NO";
+            }
 
-                    HabilitadoDto habilitado = new HabilitadoDto();
-                    if (exist != null && exist.pquinquenalId == countQuinquenal.ElementAt(i).Id)
-                    {
-
-                        var existeE = item.Where(x => x.Mes.Equals("Enero")).FirstOrDefault();
-                        if (existeE != null)
-                        {
-
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeF = item.Where(x => x.Mes.Equals("Febrero")).FirstOrDefault();
-                        if (existeF != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeM = item.Where(x => x.Mes.Equals("Marzo")).FirstOrDefault();
-                        if (existeM != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeA = item.Where(x => x.Mes.Equals("Abril")).FirstOrDefault();
-                        if (existeA != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeMay = item.Where(x => x.Mes.Equals("Mayo")).FirstOrDefault();
-                        if (existeMay != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeJuni = item.Where(x => x.Mes.Equals("Junio")).FirstOrDefault();
-                        if (existeJuni != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeJuli = item.Where(x => x.Mes.Equals("Julio")).FirstOrDefault();
-                        if (existeJuli != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeAg = item.Where(x => x.Mes.Equals("Agosto")).FirstOrDefault();
-                        if (existeAg != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeSep = item.Where(x => x.Mes.Equals("Septiembre")).FirstOrDefault();
-                        if (existeSep != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeOc = item.Where(x => x.Mes.Equals("Octubre")).FirstOrDefault();
-                        if (existeOc != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeNo = item.Where(x => x.Mes.Equals("Noviembre")).FirstOrDefault();
-                        if (existeNo != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-                        var existeDi = item.Where(x => x.Mes.Equals("Diciembre")).FirstOrDefault();
-                        if (existeDi != null)
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(exist.LongitudConstruida);
-                        }
-                        else
-                        {
-                            obj.name = exist.anioplan;
-                            obj.data.Add(0);
-                        }
-
-                        listaMensual.Add(obj);
-                        i++;
-                    }
-                }
+            string anioInicial = "";
+            string anioFin = "";
+            if (o.TipoProy == 0)
+            {
+                var qnq = await _context.PQuinquenal.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
+                anioInicial = qnq.AnioPlan.ToString().Split("-")[0];
+                anioFin = qnq.AnioPlan.ToString().Split("-")[1];
+            }
+            else
+            {
+                var anual = await _context.PlanAnual.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
+                anioInicial = anual.AnioPlan.ToString();
+                anioFin = anual.AnioPlan.ToString();
             }
 
 
+            List<string> aniosqnq = new List<string>();
+            for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
+            {
+                aniosqnq.Add(i.ToString());
+            }
+            var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIOCONSTRUIDA  {o.TipoProy}, {o.CodigoPlan}, {o.AnioPQ}, {o.MaterialId}").ToListAsync();
+
+            var listaMeses = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
+            var agrupado = resultad.GroupBy(x => x.FechaGasificacion);
+
+            var grupos = resultad.GroupBy(d => d.FechaGasificacion)
+                           .Select(grupo => new
+                           {
+                               FechaGasificacion = grupo.Key,
+                               AniosPQ = grupo.Select(d => d.CodigoPlan).Distinct().OrderBy(a => a).ToList(),
+                               Valores = grupo.Select(d => d.LongitudConstruida).ToList()
+                           });
+
+            // Crear el objeto en el formato deseado
+            var series = new List<object>();
+            foreach (var grupo in grupos)
+            {
+                var data = new List<double>();
+                for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
+                {
+                    if (grupo.AniosPQ.Contains(i.ToString()))
+                    {
+                        data.Add(Convert.ToDouble(grupo.Valores[grupo.AniosPQ.IndexOf(i.ToString())]));
+                    }
+                    else
+                    {
+                        data.Add(0);
+                    }
+                }
+
+                var serie = new
+                {
+                    type = "column",
+                    name = grupo.FechaGasificacion.ToString(),
+                    data = data
+                };
+
+                series.Add(serie);
+            }
+
+            List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
+
             MensualidadDTO mensual = new MensualidadDTO();
-            mensual.categorias.Add("Enero");
-            mensual.categorias.Add("Febrero");
-            mensual.categorias.Add("Marzo");
-            mensual.categorias.Add("Abril");
-            mensual.categorias.Add("Mayo");
-            mensual.categorias.Add("Junio");
-            mensual.categorias.Add("Julio");
-            mensual.categorias.Add("Agosto");
-            mensual.categorias.Add("Septiembre");
-            mensual.categorias.Add("Octubre");
-            mensual.categorias.Add("Noviembre");
-            mensual.categorias.Add("Diciembre");
-            mensual.ListaPqMensual = listaMensual;
+            mensual.categorias = listaMeses;
+            mensual.ListaPqMensual = series;
             return mensual;
+
         }
 
 

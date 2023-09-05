@@ -8,7 +8,9 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
 {
     public class AvanceMensualDto
     {
-        public string Anio { get; set; }
+        public int TipoProy { get; set; }
+        public int CodigoPlan { get; set; }
+        public string? AnioPQ { get; set; }
         public int MaterialId { get; set; }
     }
 }

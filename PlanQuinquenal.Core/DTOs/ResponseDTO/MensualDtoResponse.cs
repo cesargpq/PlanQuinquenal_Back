@@ -8,9 +8,8 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
 {
     public class MensualDtoResponse
     {
-        public string Mes { get; set; }
-        public int pquinquenalId { get; set; }
-        public string anioplan { get; set; }
+        public string FechaGasificacion { get; set; }
+        public string CodigoPlan { get; set; }
         public Decimal LongitudConstruida { get; set; }
     }
 }
