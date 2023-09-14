@@ -26,5 +26,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int? CuartoEstrato { get; set; }
         public int? QuintoEstrato { get; set; }
         public string? FechaRegistro { get; set; }
+        public int? reemplazoId { get; set; }
     }
 }

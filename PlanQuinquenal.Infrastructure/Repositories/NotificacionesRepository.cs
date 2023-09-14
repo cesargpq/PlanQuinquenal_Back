@@ -449,6 +449,97 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             return queryable;
         }
+
+        public async Task<object> CrearNotificacionList(List<Notificaciones> notificacion)
+        {
+            try
+            {
+                _context.AddRange(notificacion);
+                await _context.SaveChangesAsync();
+
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Se creo la notificacion correctamente",
+                    codigoNot = 1
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            catch (Exception e )
+            {
+
+                var resp = new
+                {
+                    idMensaje = "0",
+                    mensaje = "Hubo un error al crear la notificacion ",
+                    codigoNot = 1
+                };
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+            
+        }
+
+        public async Task<object> EnvioCorreoNotifList(List<CorreoTabla> lstModif, List<string> correoUsu, string tipoOperacion, string modulo)
+        {
+            try
+            {
+                // Configurar el correo electrónico
+                string correoEnvioConf = configuration.GetSection("EmailSettings").GetSection("CorreoEnvio").Value;
+                string smtp = configuration.GetSection("EmailSettings").GetSection("Smtp").Value;
+                string port = configuration.GetSection("EmailSettings").GetSection("Port").Value;
+                string asunto = "Notificación de modificación";
+                string cuerpo = ConstruirCuerpoCorreo(lstModif, modulo, tipoOperacion);
+
+                // Configurar el cliente SMTP
+                SmtpClient clienteSmtp = new SmtpClient(smtp, Convert.ToInt32(port));
+                clienteSmtp.Port = Convert.ToInt32(port);
+                clienteSmtp.EnableSsl = false;
+                clienteSmtp.UseDefaultCredentials = true;
+
+                // Crear el correo
+
+                MailMessage correo = new MailMessage();
+                correo.From = new System.Net.Mail.MailAddress(correoEnvioConf);
+                foreach (var item in correoUsu)
+                {
+                    correo.To.Add(item);
+                }
+                
+                correo.Subject = asunto;
+                correo.IsBodyHtml = true;
+                correo.Body = cuerpo;
+
+                // Enviar el correo
+                clienteSmtp.Send(correo);
+
+                Console.WriteLine("Correo enviado exitosamente.");
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = "Correo enviado exitosamente.",
+                    correoHtml = cuerpo
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+
+            }
+            catch (Exception ex)
+            {
+                var resp = new
+                {
+                    idMensaje = "1",
+                    mensaje = ex.Message
+                };
+
+                var json = JsonConvert.SerializeObject(resp);
+                return json;
+            }
+
+        }
         #endregion
     }
 }

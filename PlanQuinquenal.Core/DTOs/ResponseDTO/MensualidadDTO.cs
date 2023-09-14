@@ -9,6 +9,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
     public class MensualidadDTO
     {
         public List<string> categorias { get; set; } = new List<string>();
-        public List<Object> ListaPqMensual { get; set; }
+        public List<Serie> ListaPqMensual { get; set; }
     }
+   
 }

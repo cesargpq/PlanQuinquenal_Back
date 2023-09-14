@@ -621,17 +621,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var codMalla = worksheet.Cells[row, 13].Value?.ToString();
                             var InversionEjecutada = worksheet.Cells[row, 14].Value?.ToString();
 
-                            var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ)).FirstOrDefault();
+                            var dPQ = PlanQuin.Where(x => x.Descripcion.Contains(codPQ== null ? "NONAME" : codPQ)).FirstOrDefault();
                             
                             var PlanAnualId = PlanAnu.Where(x => x.Descripcion.Contains(anioPA==null?"NONAME":anioPA)).FirstOrDefault();   
                        
-                            var dMaterial = Material.Where(x => x.Descripcion.Contains(material)).FirstOrDefault();
-                            var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor.ToUpper())).FirstOrDefault();
-                            var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto)).FirstOrDefault();
-                            var dDistrito = Distrito.Where(x => x.Descripcion.Contains(distrito)).FirstOrDefault();
-                            var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion.Contains(tipoRegistro)).FirstOrDefault();
+                            var dMaterial = Material.Where(x => x.Descripcion.Contains(material==null?"NONAM2":material)).FirstOrDefault();
+                            var dConstructor = Constructor.Where(x => x.Descripcion.Contains(constructor == null ? "NONAME" : constructor.ToUpper())).FirstOrDefault();
+                            var dTipoProyecto = TipoProyecto.Where(x => x.Descripcion.Contains(tipoProyecto ==null ? "NONAME":tipoProyecto)).FirstOrDefault();
+                            var dDistrito = Distrito.Where(x => x.Descripcion.Contains(distrito==null?"NONAME":distrito)).FirstOrDefault();
+                            var dTipoRegistroPY = TipoRegistroPY.Where(x => x.Descripcion.Contains(tipoRegistro==null?"NONAME":tipoRegistro)).FirstOrDefault();
 
-                            if ( dMaterial == null || dConstructor == null || dTipoProyecto == null || dDistrito == null)
+                            if(dDistrito == null)
+                            {
+                                var dato = 0;
+                            }
+                            if (codPry ==null)
                             {
                                 var entidadError = new Proyecto
                                 {
@@ -648,14 +652,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     var entidad = new Proyecto
                                     {
                                         CodigoProyecto = codPry,
-                                        PQuinquenalId = dPQ.Id,
+                                        PQuinquenalId = dPQ == null ? null : dPQ.Id,
                                         AñosPQ = anioPQ,
                                         PlanAnualId = PlanAnualId ==null?null: PlanAnualId.Id,
-                                        MaterialId = dMaterial.Id,
-                                        ConstructorId = dConstructor.Id,
-                                        TipoRegistroId = dTipoRegistroPY.Id,
-                                        DistritoId = dDistrito.Id,
-                                        TipoProyectoId = dTipoProyecto.Id,
+                                        MaterialId = dMaterial == null? null:dMaterial.Id,
+                                        ConstructorId = dConstructor == null ? null: dConstructor.Id,
+                                        TipoRegistroId = dTipoRegistroPY == null ? null: dTipoRegistroPY.Id,
+                                        DistritoId = dDistrito == null ? null:dDistrito.Id,
+                                        TipoProyectoId = dTipoProyecto == null ? null : dTipoProyecto.Id,
                                         LongAprobPa = longAproPa == null ? 0 : Decimal.Parse(longAproPa),
                                         LongRealHab = longRealHab == null ? 0 : Decimal.Parse(longRealHab),
                                         LongRealPend = longRealPend == null ? 0 : Decimal.Parse(longRealPend),
@@ -665,7 +669,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         //LongReemplazada=0,
                                         //LongImpedimentos = Decimal.Parse(longImpedimentos),
                                         //LongReemplazada = Decimal.Parse(longReemplazada),
-                                        CodigoMalla = codMalla,
+                                        CodigoMalla = codMalla==null?null:codMalla,
                                         InversionEjecutada = InversionEjecutada==null?0:Decimal.Parse(InversionEjecutada),
                                         FechaRegistro = DateTime.Now,
                                         fechamodifica = DateTime.Now,
@@ -691,7 +695,24 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
                         }
-                        foreach (var item in lista)
+                        List<Proyecto> listaSinDuplicados = new List<Proyecto>();
+                        List<Proyecto> listaDuplicados = new List<Proyecto>();
+                        HashSet<string> proyProcesados = new HashSet<string>();
+
+                        foreach (var proy in lista)
+                        {
+                            if (!proyProcesados.Contains(proy.CodigoProyecto))
+                            {
+                                proyProcesados.Add(proy.CodigoProyecto);
+                                listaSinDuplicados.Add(proy);
+                            }
+                            else
+                            {
+                                listaDuplicados.Add(proy);
+                            }
+                        }
+
+                        foreach (var item in listaSinDuplicados)
                         {
                             try
                             {
@@ -700,6 +721,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 && x.MaterialId == item.MaterialId
                                 && x.DistritoId == item.DistritoId
                                 && x.AñosPQ == item.AñosPQ
+                                && x.PlanAnualId == item.PlanAnualId
+                                && x.PQuinquenalId == item.PQuinquenalId
                                 ).FirstOrDefault();
 
                                 if (existes != null)
@@ -738,6 +761,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     //existe.LongReemplazada = existes.LongReemplazada;
                                     existe.LongProyectos = existes.LongProyectos;
                                     existe.UsuarioModificaId = usuario.UsuaroId;
+                                    existe.TipoProy = data.TipoProy == 1 ? true : false;
                                     listaRepetidosInsert.Add(existe);
 
                                 }
@@ -759,14 +783,93 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
                         }
+                        //if (listaRepetidosInsert != null)
+                        //{
+                        //    foreach (var item in listaDuplicados)
+                        //    {
+                        //        try
+                        //        {
+                        //            var existes = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(item.CodigoProyecto)
+                        //            && x.TipoProy == (item.TipoProy == true ? true : false)
+                        //            && x.MaterialId == item.MaterialId
+                        //            && x.DistritoId == item.DistritoId
+                        //            && x.AñosPQ == item.AñosPQ
+                        //            && x.PlanAnualId == item.PlanAnualId
+                        //            && x.PQuinquenalId == item.PQuinquenalId
+                        //            ).FirstOrDefault();
+
+                        //            if (existes != null)
+                        //            {
+                        //                var repetidos = new Proyecto
+                        //                {
+                        //                    CodigoProyecto = existes.CodigoProyecto,
+                        //                    Id = existes.Id
+                        //                };
+                        //                listaRepetidos.Add(repetidos);
+                        //                Proyecto existe = new Proyecto();
+                        //                existe.Id = existes.Id;
+                        //                existe.CodigoProyecto = existes.CodigoProyecto;
+                        //                existe.descripcion = existes.descripcion;
+                        //                existe.PQuinquenalId = item.PQuinquenalId;
+                        //                existe.AñosPQ = item.AñosPQ;
+                        //                existe.PlanAnualId = item.PlanAnualId;
+                        //                existe.MaterialId = item.MaterialId;
+                        //                existe.DistritoId = item.DistritoId;
+                        //                existe.TipoProyectoId = item.TipoProyectoId;
+                        //                existe.CodigoMalla = item.CodigoMalla;
+                        //                existe.TipoRegistroId = item.TipoRegistroId;
+                        //                existe.IngenieroResponsableId = existes.IngenieroResponsableId;
+                        //                existe.ConstructorId = item.ConstructorId;
+                        //                existe.InversionEjecutada = item.InversionEjecutada;
+                        //                existe.UsuarioRegisterId = existes.UsuarioRegisterId;
+                        //                existe.UsuarioModificaId = existes.UsuarioModificaId;
+                        //                existe.FechaRegistro = existes.FechaRegistro;
+                        //                existe.fechamodifica = DateTime.Now;
+                        //                existe.FechaGasificacion = existes.FechaGasificacion;
+                        //                existe.LongAprobPa = item.LongAprobPa;
+                        //                existe.LongRealHab = item.LongRealHab;
+                        //                existe.LongRealPend = item.LongRealPend;
+                        //                existe.LongConstruida = existe.LongConstruida;
+                        //                //existe.LongImpedimentos = existes.LongImpedimentos;
+                        //                //existe.LongReemplazada = existes.LongReemplazada;
+                        //                existe.LongProyectos = existes.LongProyectos;
+                        //                existe.UsuarioModificaId = usuario.UsuaroId;
+                        //                existe.TipoProy = data.TipoProy == 1 ? true : false;
+                        //                listaRepetidosInsert.Add(existe);
+                        //            }
+                        //            else
+                        //            {
+                        //                // item.TipoProy = data.TipoProy == 1 ? true : false;
+                        //                listaInsert.Add(item);
+                        //            }
+                        //        }
+                        //        catch (Exception e)
+                        //        {
+
+                        //            var entidadError = new Proyecto
+                        //            {
+                        //                CodigoProyecto = item.CodigoProyecto
+                        //            };
+                        //            listaError.Add(entidadError);
+                        //        }
+
+
+                        //    }
+                        //}
+                        
+
+
+
+
                         if (listaInsert.Count > 0)
                         {
-                            await _context.BulkInsertAsync(listaInsert);
+                             _context.AddRange(listaInsert);
                             await _context.SaveChangesAsync();
                         }
                         if (listaRepetidosInsert.Count > 0)
                         {
-                            _context.BulkUpdate(listaRepetidosInsert);
+                            _context.UpdateRange(listaRepetidosInsert);
+                            await _context.SaveChangesAsync();
 
                         }
 
@@ -795,51 +898,51 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 #region Comparacion de estructuras y agregacion de cambios
 
                 
-                List< Notificaciones >  notificacioneslist= new List<Notificaciones>();
-                List<Notificaciones> notificacioneslistrepetido = new List<Notificaciones>();
-                foreach (var item in listaInsert)
-                {
+                //List< Notificaciones >  notificacioneslist= new List<Notificaciones>();
+                //List<Notificaciones> notificacioneslistrepetido = new List<Notificaciones>();
+                //foreach (var item in listaInsert)
+                //{
                    
-                    Notificaciones notifProyecto = new Notificaciones();
-                    notifProyecto.cod_usu = usuario.UsuaroId;
-                    notifProyecto.seccion = "PROYECTOS";
-                    notifProyecto.nombreComp_usu = NomCompleto;
-                    notifProyecto.cod_reg = item.CodigoProyecto;
-                    notifProyecto.area = nomPerfil;
-                    notifProyecto.fechora_not = DateTime.Now;
-                    notifProyecto.flag_visto = false;
-                    notifProyecto.tipo_accion = "C";
-                    notifProyecto.mensaje = $"Se creó el proyecto {item.CodigoProyecto}";
-                    notifProyecto.codigo = item.Id;
-                    notifProyecto.modulo = "P";
-                    notificacioneslist.Add(notifProyecto);
-                }
-                if(notificacioneslist.Count > 0)
-                {
-                    await _context.BulkInsertAsync(notificacioneslist);
-                    await _context.SaveChangesAsync();
-                }
-                foreach (var item in listaRepetidos)
-                {
-                    Notificaciones notifProyecto = new Notificaciones();
-                    notifProyecto.cod_usu = usuario.UsuaroId;
-                    notifProyecto.seccion = "PROYECTOS";
-                    notifProyecto.nombreComp_usu = NomCompleto;
-                    notifProyecto.cod_reg = item.CodigoProyecto;
-                    notifProyecto.area = nomPerfil;
-                    notifProyecto.fechora_not = DateTime.Now;
-                    notifProyecto.flag_visto = false;
-                    notifProyecto.tipo_accion = "M";
-                    notifProyecto.mensaje = $"Se editó el proyecto {item.CodigoProyecto}";
-                    notifProyecto.codigo = item.Id;
-                    notifProyecto.modulo = "P";
-                    notificacioneslistrepetido.Add(notifProyecto);
-                }
-                if (notificacioneslistrepetido.Count > 0)
-                {
-                    await _context.BulkInsertAsync(notificacioneslistrepetido);
-                    await _context.SaveChangesAsync();
-                }
+                //    Notificaciones notifProyecto = new Notificaciones();
+                //    notifProyecto.cod_usu = usuario.UsuaroId;
+                //    notifProyecto.seccion = "PROYECTOS";
+                //    notifProyecto.nombreComp_usu = NomCompleto;
+                //    notifProyecto.cod_reg = item.CodigoProyecto;
+                //    notifProyecto.area = nomPerfil;
+                //    notifProyecto.fechora_not = DateTime.Now;
+                //    notifProyecto.flag_visto = false;
+                //    notifProyecto.tipo_accion = "C";
+                //    notifProyecto.mensaje = $"Se creó el proyecto {item.CodigoProyecto}";
+                //    notifProyecto.codigo = item.Id;
+                //    notifProyecto.modulo = "P";
+                //    notificacioneslist.Add(notifProyecto);
+                //}
+                //if(notificacioneslist.Count > 0)
+                //{
+                //    _context.AddRange(notificacioneslist);
+                //    await _context.SaveChangesAsync();
+                //}
+                //foreach (var item in listaRepetidos)
+                //{
+                //    Notificaciones notifProyecto = new Notificaciones();
+                //    notifProyecto.cod_usu = usuario.UsuaroId;
+                //    notifProyecto.seccion = "PROYECTOS";
+                //    notifProyecto.nombreComp_usu = NomCompleto;
+                //    notifProyecto.cod_reg = item.CodigoProyecto;
+                //    notifProyecto.area = nomPerfil;
+                //    notifProyecto.fechora_not = DateTime.Now;
+                //    notifProyecto.flag_visto = false;
+                //    notifProyecto.tipo_accion = "M";
+                //    notifProyecto.mensaje = $"Se editó el proyecto {item.CodigoProyecto}";
+                //    notifProyecto.codigo = item.Id;
+                //    notifProyecto.modulo = "P";
+                //    notificacioneslistrepetido.Add(notifProyecto);
+                //}
+                //if (notificacioneslistrepetido.Count > 0)
+                //{
+                //    _context.AddRange(notificacioneslistrepetido);
+                //    await _context.SaveChangesAsync();
+                //}
 
                 #endregion
 
@@ -848,14 +951,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 #endregion
 
 
-                dto.listaError = listaError;
-                dto.listaRepetidos = listaRepetidos;
-                dto.listaInsert = listaInsert;
+                dto.listaError = null;
+                dto.listaRepetidos = null;
+                dto.listaInsert = null;
                 dto.Satisfactorios = listaInsert.Count();
                 dto.Error = listaError.Count();
                 dto.Actualizados = listaRepetidos.Count();
                 dto.Valid = true;
                 dto.Message = Constantes.SatisfactorioImport;
+                return dto;
             }
             catch (Exception e)
             {
@@ -868,7 +972,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 return dto;
             }
 
-            return dto;
+            
 
         }
 
@@ -1022,12 +1126,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         }
 
-                        _context.BulkDelete(listaDelete);
+                        _context.RemoveRange(listaDelete);
+                        await _context.SaveChangesAsync();
                     }
                 }
                 return new ResponseDTO
                 {
-                    Message = "Se eliminó correctamente los proyectos",
+                    Message = $"Se eliminó correctamente {listaDelete.Count()} los proyectos",
                     Valid = true
                 };
             }

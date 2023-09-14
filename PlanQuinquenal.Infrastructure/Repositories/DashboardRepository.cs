@@ -1,6 +1,8 @@
 ﻿using iTextSharp.text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using Org.BouncyCastle.Utilities.Collections;
 using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
@@ -11,7 +13,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static iTextSharp.text.pdf.AcroFields;
 using static iTextSharp.text.pdf.events.IndexEvents;
 using static Microsoft.IO.RecyclableMemoryStreamManager;
 
@@ -36,76 +40,86 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     o.AnioPQ = "NO";
                 }
 
-                string anioInicial = "";
-                string anioFin = "";
-                if (o.TipoProy == 0)
-                {
-                    var qnq = await _context.PQuinquenal.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
-                     anioInicial = qnq.AnioPlan.ToString().Split("-")[0];
-                     anioFin = qnq.AnioPlan.ToString().Split("-")[1];
-                }
-                else
-                {
-                    var anual = await _context.PlanAnual.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
-                    anioInicial = anual.AnioPlan.ToString();
-                    anioFin = anual.AnioPlan.ToString();
-                }
-                
-               
-                List<string> aniosqnq = new List<string>();
-                for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
-                {
-                    aniosqnq.Add(i.ToString());
-                }
+              
                 var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIO  {o.TipoProy}, {o.CodigoPlan}, {o.AnioPQ}, {o.MaterialId}").ToListAsync();
 
-                var listaMeses = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
-                var agrupado = resultad.GroupBy(x => x.FechaGasificacion);
+                var listaMesesGasi = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
+                var listaMesesPQ = resultad.Select(x => x.CodigoPlan).Distinct().ToList();
 
-                var grupos = resultad.GroupBy(d => d.FechaGasificacion)
-                               .Select(grupo => new
-                               {
-                                   FechaGasificacion = grupo.Key,
-                                   AniosPQ = grupo.Select(d => d.CodigoPlan).Distinct().OrderBy(a => a).ToList(),
-                                   Valores = grupo.Select(d => d.LongitudConstruida).ToList()
-                               });
+                //var agrupado = resultad.GroupBy(x => x.CodigoPlan);
 
-                // Crear el objeto en el formato deseado
-                var series = new List<object>();
-                foreach (var grupo in grupos)
+
+                var grupos = resultad
+                    .GroupBy(r => r.CodigoPlan)
+                    .OrderBy(g => g.Key)
+                    .ToList();
+
+                List<Serie> series = new List<Serie>();
+            List<double> totalApro = new List<double>();
+            foreach (var grupo in grupos)
                 {
                     var data = new List<double>();
-                    for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
-                    {
-                        if (grupo.AniosPQ.Contains(i.ToString()))
+                    double totalHabilitada = 0;
+                    double totalAprobada = 0;
+                        // Crear una lista de longitud cero para todas las fechas desde 2018 hasta 2022
+                        foreach (var item in listaMesesGasi)
                         {
-                            data.Add(Convert.ToDouble(grupo.Valores[grupo.AniosPQ.IndexOf(i.ToString())]));
-                        }
-                        else
-                        {
-                            data.Add(0);
-                        }
-                    }
+                            double longitud = grupo
+                            .Where(r => r.FechaGasificacion == item)
+                            .Select(r => Convert.ToDouble(r.LongitudConstruida))
+                            .FirstOrDefault();
+                            //double longitudApro = grupo
+                            //        .Where(r => r.FechaGasificacion == item)
+                            //        .Select(r => Convert.ToDouble(r.LongitudAprobada))
+                            //        .FirstOrDefault();
+                            //totalAprobada +=  longitudApro;
 
-                    var serie = new
-                    {
-                        type = "column",
-                        name = grupo.FechaGasificacion.ToString(),
-                        data = data
-                    };
+                            totalHabilitada += longitud;
+                            data.Add(longitud);
+                        }
 
-                    series.Add(serie);
+                //totalApro.Add(totalAprobada);
+                data.Add(totalHabilitada);
+                Serie  s= new Serie();
+                s.type = "column";
+                s.name = grupo.Key.ToString();
+                s.data = data;
+                series.Add(s);
                 }
 
-                List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
+                listaMesesGasi.Add("Longitud Habilitado");
+                listaMesesGasi.Add("Longitud Aprobado");
+            var resultadAprob = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIOAPROBADO  {o.TipoProy}, {o.CodigoPlan}, {o.AnioPQ}, {o.MaterialId}").ToListAsync();
+
+            var grupoAprob = resultadAprob
+                  .GroupBy(r => r.CodigoPlan)
+                  .OrderBy(g => g.Key)
+                  .ToList();
+            foreach (var grupo in grupoAprob)
+            {
+                double longitud = grupo
+                           .Where(r => r.CodigoPlan == grupo.Key)
+                           .Select(r => Convert.ToDouble(r.LongitudConstruida))
+                           .Sum();
+                totalApro.Add(longitud);
+            }
+                int j = 0;
+                for (int i = 0; i < totalApro.Count(); i++)
+                {
+                    for (int z = j; z < series.Count; z++)
+                    {
+                        series[z].data.Add(totalApro[i]);
+                        break;
+                    }
+                    j++;
+                }
+
 
                 MensualidadDTO mensual = new MensualidadDTO();
-                mensual.categorias = listaMeses;
+                mensual.categorias = listaMesesGasi;
                 mensual.ListaPqMensual = series;
                 return mensual;
-           
-            
-           
+
         }
 
 
@@ -119,71 +133,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 o.AnioPQ = "NO";
             }
 
-            string anioInicial = "";
-            string anioFin = "";
-            if (o.TipoProy == 0)
-            {
-                var qnq = await _context.PQuinquenal.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
-                anioInicial = qnq.AnioPlan.ToString().Split("-")[0];
-                anioFin = qnq.AnioPlan.ToString().Split("-")[1];
-            }
-            else
-            {
-                var anual = await _context.PlanAnual.Where(x => x.Id == o.CodigoPlan).FirstOrDefaultAsync();
-                anioInicial = anual.AnioPlan.ToString();
-                anioFin = anual.AnioPlan.ToString();
-            }
 
-
-            List<string> aniosqnq = new List<string>();
-            for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
-            {
-                aniosqnq.Add(i.ToString());
-            }
             var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIOCONSTRUIDA  {o.TipoProy}, {o.CodigoPlan}, {o.AnioPQ}, {o.MaterialId}").ToListAsync();
 
-            var listaMeses = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
-            var agrupado = resultad.GroupBy(x => x.FechaGasificacion);
+            var listaMesesGasi = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
+            var listaMesesPQ = resultad.Select(x => x.CodigoPlan).Distinct().ToList();
 
-            var grupos = resultad.GroupBy(d => d.FechaGasificacion)
-                           .Select(grupo => new
-                           {
-                               FechaGasificacion = grupo.Key,
-                               AniosPQ = grupo.Select(d => d.CodigoPlan).Distinct().OrderBy(a => a).ToList(),
-                               Valores = grupo.Select(d => d.LongitudConstruida).ToList()
-                           });
+            var agrupado = resultad.GroupBy(x => x.CodigoPlan);
 
-            // Crear el objeto en el formato deseado
-            var series = new List<object>();
+
+            var grupos = resultad
+                .GroupBy(r => r.CodigoPlan)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            List<Serie> series = new List<Serie>();
+
             foreach (var grupo in grupos)
             {
                 var data = new List<double>();
-                for (int i = Convert.ToInt32(anioInicial); i <= Convert.ToInt32(anioFin); i++)
+                double totalConstruido = 0;
+                // Crear una lista de longitud cero para todas las fechas desde 2018 hasta 2022
+                foreach (var item in listaMesesGasi)
                 {
-                    if (grupo.AniosPQ.Contains(i.ToString()))
-                    {
-                        data.Add(Convert.ToDouble(grupo.Valores[grupo.AniosPQ.IndexOf(i.ToString())]));
-                    }
-                    else
-                    {
-                        data.Add(0);
-                    }
+                    double longitud = grupo
+                    .Where(r => r.FechaGasificacion == item)
+                    .Select(r => Convert.ToDouble(r.LongitudConstruida))
+                    .FirstOrDefault();
+                    totalConstruido += longitud;
+                    data.Add(longitud);
                 }
-
-                var serie = new
-                {
-                    type = "column",
-                    name = grupo.FechaGasificacion.ToString(),
-                    data = data
-                };
-
-                series.Add(serie);
+                data.Add(totalConstruido);
+             
+                Serie s = new Serie();
+                s.type = "column";
+                s.name = grupo.Key.ToString();
+                s.data = data;
+                series.Add(s);
             }
-
-            List<ListaPqMensual> listaMensual = new List<ListaPqMensual>();
-
+            listaMesesGasi.Add("Longitud Construida");
             MensualidadDTO mensual = new MensualidadDTO();
-            mensual.categorias = listaMeses;
+            mensual.categorias = listaMesesGasi;
             mensual.ListaPqMensual = series;
             return mensual;
 
@@ -192,20 +182,60 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ReporteMaterialDetalle> ListarMaterial(RequestDashboradDTO o)
         {
-            var resultad = await _context.ReporteMaterialDetalle.FromSqlRaw($"EXEC dashboardMaterial  {o.MaterialId} , {o.CodigoPlan} , {o.tipoProy}").ToListAsync();
+            if (o.anioPq.Equals(""))
+            {
+                o.anioPq = "NO";
+            }
+            var resultad = await _context.ReporteMaterialDetalle.FromSqlRaw($"EXEC dashboardMaterial  {o.MaterialId} , {o.CodigoPlan} , {o.tipoProy} , {o.anioPq}").ToListAsync();
 
             List<string> categorias = new List<string>();
             List<Decimal> pendiente = new List<Decimal>();
             List<Decimal> habilitado = new List<Decimal>();
+            decimal pendienteD = 0;
+            decimal longitudConsD = 0;
+            decimal planiD = 0;
+            decimal longiD = 0;
             resultad = resultad.OrderByDescending(x => x.LongitudAprobada).ToList();
+            string stringAAgregar = "&nbsp;";
+            int maxD = 0;
             foreach (var item in resultad)
             {
-
-                categorias.Add( item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
-                pendiente.Add(item.longitudPendiente);
-                habilitado.Add(item.LongitudConstruida);
+                string plani = item.Planificado.ToString();
+                string longi = item.LongitudAprobada.ToString();
+                string distrito = item.Distrito.ToString();
+                //while(plani.Length<=12)
+                //{                   
+                //    plani = stringAAgregar + plani;
+                //}
+                //while (longi.Length <= 12)
+                //{
+                //    longi = stringAAgregar + longi;
+                //}
+                //while (distrito.Length<= 12)
+                //{
+                //    distrito = stringAAgregar + distrito;
+                //}
+               
+                //maxD++;
+           
+                //if (maxD <= 5)
+                //{
+                    categorias.Add(distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + longi + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + plani + "%");
+                    pendiente.Add(item.longitudPendiente);
+                    habilitado.Add(item.LongitudConstruida);
+                //}
+                //else
+                //{
+                //    planiD += item.Planificado;
+                //    longiD += item.LongitudAprobada;
+                //    pendienteD += item.longitudPendiente;
+                //    longitudConsD += item.LongitudConstruida;
+                //}
+               
             }
-
+            //categorias.Add("OTROS" + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + longiD + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + planiD /(maxD-5) +" "+"%");
+            //pendiente.Add(pendienteD);
+            //habilitado.Add(longitudConsD);
             var datos = new ReporteMaterialDetalle
             {
                 categorias = categorias,
@@ -218,16 +248,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ReporteMaterialConstruidaDetalle> ListarMaterialConstruida(RequestDashboradDTO o)
         {
-            var resultad = await _context.ReporteMaterialConstruidaDetalle.FromSqlRaw($"EXEC dashboardMaterialConstruida  {o.MaterialId} , {o.CodigoPlan} , {o.tipoProy}").ToListAsync();
+            if (o.anioPq.Equals(""))
+            {
+                o.anioPq = "NO";
+            }
+            var resultad = await _context.ReporteMaterialConstruidaDetalle.FromSqlRaw($"EXEC dashboardMaterialConstruida  {o.MaterialId} , {o.CodigoPlan} , {o.tipoProy} , {o.anioPq}").ToListAsync();
 
             List<string> categorias = new List<string>();
-            List<Decimal> pendiente = new List<Decimal>();
-            List<Decimal> construido = new List<Decimal>();
+            List<Decimal?> pendiente = new List<Decimal?>();
+            List<Decimal?> construido = new List<Decimal?>();
             resultad = resultad.OrderByDescending(x => x.LongitudAprobada).ToList();
             foreach (var item in resultad)
             {
 
-                categorias.Add(item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + " " + "&nbsp;&nbsp;&nbsp;&nbsp;" + " " + item.Planificado+ "%");
+                categorias.Add(item.Distrito + " " + "&nbsp;&nbsp;&nbsp;&nbsp; " + item.LongitudAprobada + "&nbsp;&nbsp;&nbsp;&nbsp;"  + item.Planificado+ "%");
                 pendiente.Add(item.longitudPendiente);
                 construido.Add(item.LongitudConstruida);
                 
@@ -245,7 +279,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResposeDistritosDetalleDTO> ListarPermisos(RequestDashboradDTO o)
         {
-            var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TOTAL {o.MaterialId}, {o.CodigoPlan} , {o.tipoProy}").ToListAsync();
+            if (o.anioPq.Equals(""))
+            {
+                o.anioPq = "NO";
+            }
+            var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TOTAL {o.MaterialId}, {o.CodigoPlan} , {o.tipoProy} , {o.anioPq}").ToListAsync();
 
             List<string> categorias = new List<string>();
             List<int> norequiere = new List<int>();

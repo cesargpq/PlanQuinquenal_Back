@@ -12,6 +12,7 @@ namespace PlanQuinquenal.Core.DTOs
         //public int PQuinquenalId { get; set; }
         //public int PAnual { get; set; }
         public int tipoProy { get; set; }
+        public string? anioPq { get; set; }
         public int CodigoPlan { get; set; }
         public int MaterialId { get; set; }
     }

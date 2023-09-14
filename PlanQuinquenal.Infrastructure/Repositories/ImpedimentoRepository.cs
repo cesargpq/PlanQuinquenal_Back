@@ -108,6 +108,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     composCorreo.Add(correoDatos);
                     #endregion
 
+                    List<string> correosList = new List<string>();
+                    List<Notificaciones> listaNotif = new List<Notificaciones>();
                     #region Envio de notificacion
                     var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.estado_user == "A").ToListAsync();
                     var lstpermisos = await _context.Config_notificaciones.Where(x => x.regImp == true).ToListAsync();
@@ -130,11 +132,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.mensaje = $"Se creó el impedimento {proyecto.CodigoProyecto + " - " + obj.Id}";
                             notifProyecto.codigo = obj.Id;
                             notifProyecto.modulo = "IMP";
-
-                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Impedimentos");
+                            correosList.Add(correo);
+                            listaNotif.Add(notifProyecto);
                         }
                     }
+                    await _repositoryNotificaciones.CrearNotificacionList(listaNotif);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Impedimentos");
 
                     #endregion
                 }
@@ -579,7 +582,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.TercerEstrato == 0) f.TercerEstrato = null;
             if (f.CuartoEstrato == 0) f.CuartoEstrato = null;
             if (f.QuintoEstrato == 0) f.QuintoEstrato = null;
-            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.PAnualId} , {f.FechaReemplazo}  , {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            if (f.reemplazoId == 0) f.reemplazoId = null;
+            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.PAnualId} , {f.FechaReemplazo}  , {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina} , {f.reemplazoId}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ImpedimentoDetalle>
@@ -649,12 +653,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
                             var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(codPry) ).FirstOrDefault();
-                            var dProReal = ProblematicaReal.Where(x => x.Descripcion.Equals(ProbleReal)).FirstOrDefault();
-                            var validacionLegal = ValidacionLegalList.Where(x => x.Descripcion.Equals(ValidacionLegal)).FirstOrDefault();
-                            var causalReemp = causalReempList.Where(x=>x.Descripcion.Equals(CausalReemplazo)).FirstOrDefault();
+                            var dProReal = ProblematicaReal.Where(x => x.Descripcion.Equals(ProbleReal==null?"NONAME":ProbleReal)).FirstOrDefault();
+                            var validacionLegal = ValidacionLegalList.Where(x => x.Descripcion.Equals(ValidacionLegal== null?"NONAM":ValidacionLegal)).FirstOrDefault();
+                            var causalReemp = causalReempList.Where(x=>x.Descripcion.Equals(CausalReemplazo == null ? "NONAME": CausalReemplazo)).FirstOrDefault();
 
 
-                            if (dCodPry == null || dProReal == null || validacionLegal == null || causalReemp == null )
+                            if (dCodPry == null  )
                             {
                                 var entidadError = new Impedimento
                                 {
@@ -671,9 +675,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                     var entidad = new Impedimento
                                     {
                                         ProyectoId = dCodPry.Id,
-                                        ProblematicaRealId = dProReal.Id,
+                                        ProblematicaRealId = dProReal == null ? null : dProReal.Id,
                                         LongImpedimento = Convert.ToDecimal(LongImpe),
-                                        CausalReemplazoId = causalReemp.Id,
+                                        CausalReemplazoId = causalReemp == null ? null: causalReemp.Id,
                                         Resuelto = false,
                                         PrimerEstrato = Convert.ToInt16(Estrato1),
                                         SegundoEstrato = Convert.ToInt16(Estrato2),
@@ -685,10 +689,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         ValidacionCargoSustentoRRCC = ValidacionSustentosRRCC == "SI" ? true : false,
                                         ValidacionCargoSustentoAmbiental = ValidacionSustentosPermisos == "SI" ? true : false,
                                         ValidacionCargoSustentoArqueologia = false,
-                                        ValidacionLegalId = validacionLegal.Id,
-                                        Comentario = ComentarioEvaluacion,
+                                        ValidacionLegalId = validacionLegal == null ?null:validacionLegal.Id,
+                                        Comentario = ComentarioEvaluacion==null?null:ComentarioEvaluacion,
                                         FechaPresentacion = null,
-                                        FechaPresentacionReemplazo = Convert.ToDateTime(FechaPresentacionReemplazo),
+                                        FechaPresentacionReemplazo = FechaPresentacionReemplazo==null?null:Convert.ToDateTime(FechaPresentacionReemplazo),
                                         fechamodifica = DateTime.Now,
                                         FechaRegistro = DateTime.Now,
                                         UsuarioRegisterId = null,
@@ -723,7 +727,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                        
                         if (listaInsert.Count > 0)
                         {
-                            await _context.BulkInsertAsync(listaInsert);
+                            await _context.AddRangeAsync(listaInsert);
+                            await _context.SaveChangesAsync();
 
                         }
                        
@@ -748,9 +753,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
                 }
-                dto.listaError = listaError;
+                dto.listaError = null;
                 dto.listaRepetidos = null;
-                dto.listaInsert = listaInsert;
+                dto.listaInsert = null;
                 dto.Satisfactorios = listaInsert.Count();
                 dto.Error = listaError.Count();
                 dto.Actualizados = 0;

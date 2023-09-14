@@ -26,8 +26,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 			try
 			{
 
-                await _context.BulkInsertAsync(t);
-                
+              
+                _context.AddRange(t);
+                await _context.SaveChangesAsync();
+
                 return new ResponseDTO
                 {
                     Message = Constantes.CreacionExistosa,

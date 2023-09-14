@@ -63,9 +63,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     //_context.Permisos_viz_seccion.Add(nuevoPermiso);
                     //_context.SaveChanges();
                 }
-
-                await _context.BulkInsertAsync(listaInsert);
+                _context.AddRange(listaInsert);
                 await _context.SaveChangesAsync();
+                
 
                 var resp = new
                 {

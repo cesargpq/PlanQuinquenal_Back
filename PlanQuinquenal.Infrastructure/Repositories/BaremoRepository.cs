@@ -142,21 +142,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                         if (listaBaremoInsert.Count > 0)
                         {
-                            await _context.BulkInsertAsync(listaBaremoInsert);
+                          
+                            _context.AddRange(listaBaremoInsert);
                             await _context.SaveChangesAsync();
                         }
                         if (listaBaremoRepetidos.Count > 0)
                         {
-                            _context.BulkUpdate(listaBaremoRepetidos);
-
-                            //var numerosParam = new SqlParameter("@ObjectList", SqlDbType.Structured)
-                            //{
-                            //    TypeName = "dbo.Proyecto", // Reemplaza dbo.NumeroTableType por el nombre de tu tipo de tabla definido en SQL Server
-                            //    Value = ToDataTable(listaRepetidosInsert)
-                            //};
-                            //var proyectosMasivoss = _context.ProyectoMasivoDetalle.FromSqlRaw($"EXEC UpdateObjectList {numerosParam}");
-                            //// Crea un parámetro de tipo tabla en SQL Server
-
+                            _context.Update(listaBaremoRepetidos);
+                            await _context.SaveChangesAsync();
                         }
 
 
@@ -180,9 +173,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _trazabilidadRepository.Add(listaT);
                 }
 
-                dto.listaError = listaBaremoError;
-                dto.listaRepetidos = listaBaremoRepetidos;
-                dto.listaInsert = listaBaremoInsert;
+                dto.listaError = null;
+                dto.listaRepetidos = null;
+                dto.listaInsert = null;
                 dto.Satisfactorios = listaBaremoInsert.Count();
                 dto.Error = listaBaremoError.Count();
                 dto.Actualizados = listaBaremoRepetidos.Count();

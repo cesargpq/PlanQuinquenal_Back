@@ -446,16 +446,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var distrito = worksheet.Cells[row, 2].Value?.ToString();
                             var contratista = worksheet.Cells[row, 3].Value?.ToString();
                             var codigoMalla = worksheet.Cells[row, 4].Value?.ToString();
-                            var malla = worksheet.Cells[row, 5].Value?.ToString();
-                            var Estrato1 = worksheet.Cells[row, 6].Value?.ToString();
-                            var Estrato2 = worksheet.Cells[row, 7].Value?.ToString();
-                            var Estrato3 = worksheet.Cells[row, 8].Value?.ToString();
-                            var Estrato4 = worksheet.Cells[row, 9].Value?.ToString();
-                            var Estrato5 = worksheet.Cells[row, 10].Value?.ToString();
-                            var CostoInversion = worksheet.Cells[row, 11].Value?.ToString();
-                            var LongReemplazo = worksheet.Cells[row, 12].Value?.ToString();
-                            var RiesgoSocial = worksheet.Cells[row, 13].Value?.ToString();
-                            var ZonaPermiso = worksheet.Cells[row, 14].Value?.ToString();
+                            var Estrato1 = worksheet.Cells[row, 5].Value?.ToString();
+                            var Estrato2 = worksheet.Cells[row, 6].Value?.ToString();
+                            var Estrato3 = worksheet.Cells[row, 7].Value?.ToString();
+                            var Estrato4 = worksheet.Cells[row, 8].Value?.ToString();
+                            var Estrato5 = worksheet.Cells[row, 9].Value?.ToString();
+                            var CostoInversion = worksheet.Cells[row, 10].Value?.ToString();
+                            var LongReemplazo = worksheet.Cells[row, 11].Value?.ToString();
+                            var RiesgoSocial = worksheet.Cells[row, 12].Value?.ToString();
+                            var ZonaPermiso = worksheet.Cells[row, 13].Value?.ToString();
                             var proyecto = bolsaMasivos.Where(x => x.CodigoProyecto.Equals(codPry)).FirstOrDefault();
                             var distritodesc = Distritos.Where(x => x.Descripcion.Equals(distrito)).FirstOrDefault();
                             var contratistadesc = Constructores.Where(x => x.Descripcion.Equals(contratista)).FirstOrDefault();
@@ -487,13 +486,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         UsuarioModifica = usuario.UsuaroId,
                                         UsuarioRegistra = usuario.UsuaroId,
                                         Estado = true,
-                                        Estrato1 = 0,
-                                        Estrato2 = 0,
-                                        Estrato3 = 0,
-                                        Estrato4 = 0,
-                                        Estrato5 = 0,
-                                        CostoInversion = 0,
-                                        LongitudReemplazo = 0,
+                                        Estrato1 = Convert.ToInt32(Estrato1),
+                                        Estrato2 = Convert.ToInt32(Estrato2),
+                                        Estrato3 = Convert.ToInt32(Estrato3),
+                                        Estrato4 = Convert.ToInt32(Estrato4),
+                                        Estrato5 = Convert.ToInt32(Estrato5),
+                                        CostoInversion = Convert.ToDecimal(CostoInversion),
+                                        LongitudReemplazo = Convert.ToDecimal(LongReemplazo),
                                         Reemplazado = false,
                                         PermisoId = zonaPermisoDesc == null ? null : zonaPermisoDesc.Id
 
@@ -573,13 +572,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                         if (listaInsert.Count > 0)
                         {
-                            await _context.BulkInsertAsync(listaInsert);
+                             _context.AddRange(listaInsert);
                             await _context.SaveChangesAsync();
 
                         }
                         if (listaRepetidosInsert.Count > 0)
                         {
-                            _context.BulkUpdate(listaRepetidosInsert);
+                            _context.UpdateRange(listaRepetidosInsert);
+                            await _context.SaveChangesAsync();
                         }
 
 
@@ -601,9 +601,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
                 }
-                dto.listaError = listaError;
-                dto.listaRepetidos = listaRepetidos;
-                dto.listaInsert = listaInsert;
+                dto.listaError = null;
+                dto.listaRepetidos = null;
+                dto.listaInsert = null;
                 dto.Satisfactorios = listaInsert.Count();
                 dto.Error = listaError.Count();
                 dto.Actualizados = listaRepetidos.Count();
@@ -690,6 +690,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             {
                 var impedimentos = await _context.Impedimento.Where(x => x.Id == item).FirstOrDefaultAsync();
                 impedimentos.FechaPresentacionReemplazo = p.FechaPresenacionReemplazo;
+                impedimentos.NumeroReemplazo = p.NumeroReemplazo;
                 impedimentos.Reemplazado = true;
                 impedimentos.LongitudReemplazo = impedimentos.LongImpedimento;
                 _context.Update(impedimentos);
@@ -768,7 +769,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 if(doc.Count > 0) 
                 {
-                    await _context.BulkInsertAsync(doc);
+                    _context.AddRange(doc);
+                    await _context.SaveChangesAsync();
+                   
                 }
 
                 var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Gestionar").ToListAsync();

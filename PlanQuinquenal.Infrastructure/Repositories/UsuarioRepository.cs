@@ -238,9 +238,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 //_context.ColumTablaUsu.Add(nuevoPermiso);
                 //_context.SaveChanges();
             }
-            await _context.BulkInsertAsync(listaInsert);
+            _context.AddRange(listaInsert);
             await _context.SaveChangesAsync();
-
+        
             #endregion
 
             #region creacion de permisos de notificaciones 
