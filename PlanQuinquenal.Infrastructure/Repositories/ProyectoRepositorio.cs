@@ -160,7 +160,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     #endregion
 
                     #region Envio de notificacion
-
+                    List<string> correosList = new List<string>();
+                    List<Notificaciones> notificacionList = new List<Notificaciones>();
+                    string asunto = $"Se creó el proyecto {proyectoRequestDto.CodigoProyecto}";
                     foreach (var listaUsuInters in proyectoRequestDto.UsuariosInteresados)
                     {
                         int cod_usu = listaUsuInters;
@@ -181,12 +183,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.mensaje = $"Se creó el proyecto {proyectoRequestDto.CodigoProyecto}";
                             notifProyecto.codigo = proyecto.Id;
                             notifProyecto.modulo = "P";
-
-                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Proyectos");
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
+                            
                         }
                     }
-
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Proyectos", asunto);
                     #endregion
                     return new ResponseDTO
                     {
@@ -305,8 +308,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     #region notificacion
 
-                    
-
+                    List<string> correosList = new List<string>();
+                    string asunto = $"Se modificó el proyecto {p.CodigoProyecto}";
 
                     foreach (var listaUsuInters in p.UsuariosInteresados)
                     {
@@ -328,11 +331,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.mensaje = $"Se modificó el proyecto {p.CodigoProyecto}";
                             notifProyecto.codigo = existe.Id;
                             notifProyecto.modulo = "P";
+                            correosList.Add(correo);
 
                             var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                             dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                             int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                            await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Proyectos");
                             camposModificados.ForEach(item => {
                                 item.idNotif = codigoNotifCreada;
                                 item.id = null;
@@ -341,7 +344,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             _context.SaveChanges();
                         }
                     }
-
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(camposModificados, correosList, "M", "Proyectos", asunto);
                     #endregion
 
                     var objeto = new ResponseDTO

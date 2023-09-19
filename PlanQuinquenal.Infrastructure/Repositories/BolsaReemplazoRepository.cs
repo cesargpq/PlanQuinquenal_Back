@@ -86,6 +86,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
 
                 #region notificacion
+                List<string> correosList = new List<string>();
+                string asunto = $"Se modificó el anteproyecto {brUpdate.CodigoProyecto}";
                 var UsuarioInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                 foreach (var listaUsuInters in UsuarioInt)
                 {
@@ -96,21 +98,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
                         Notificaciones notifProyecto = new Notificaciones();
                         notifProyecto.cod_usu = cod_usu;
-                        notifProyecto.seccion = "REEMPLAZO";
+                        notifProyecto.seccion = "Gestión Reemplazo";
                         notifProyecto.nombreComp_usu = NomCompleto;
                         notifProyecto.cod_reg = p.CodigoProyecto.ToString();
                         notifProyecto.area = nomPerfil;
                         notifProyecto.fechora_not = DateTime.Now;
                         notifProyecto.flag_visto = false;
                         notifProyecto.tipo_accion = "M";
-                        notifProyecto.mensaje = $"Se modificó el reemplazo {brUpdate.CodigoProyecto}";
+                        notifProyecto.mensaje = $"Se modificó el anteproyecto {brUpdate.CodigoProyecto}";
                         notifProyecto.codigo = brUpdate.Id;
                         notifProyecto.modulo = "I";
+                        correosList.Add(correo);
 
                         var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                         dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                         int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                        await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Bolsa Reemplazo");
                         camposModificados.ForEach(item => {
                                     item.idNotif = codigoNotifCreada;
                                     item.id = null;
@@ -119,6 +121,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         _context.SaveChanges();
                     }
                 }
+
+                await _repositoryNotificaciones.EnvioCorreoNotifList(camposModificados, correosList, "M", "Bolsa Reemplazo",asunto);
 
                 #endregion
 
@@ -316,6 +320,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     #endregion
 
                     #region Envio de notificacion
+                    List<string> correosList = new List<string>();
+                    List<Notificaciones> notificacionList = new List<Notificaciones>();
+                    string asunto = $"Se creó el anteproyecto {map.CodigoProyecto}";
                     var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                     string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                     string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
@@ -324,8 +331,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
                         int cod_usu = listaUsuInters.cod_usu;
                         var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regImp == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
-                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        string correo = listaUsuInters.correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifProyecto = new Notificaciones();
@@ -340,11 +346,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.mensaje = $"Se creó el anteproyecto {map.CodigoProyecto}";
                             notifProyecto.codigo = map.Id;
                             notifProyecto.modulo = "A";
-
-                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "A");
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
                         }
                     }
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Bolsa Reemplazo", asunto);
 
                     #endregion
 
@@ -815,7 +822,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     };
 
                     composCorreo.Add(correoDatos);
-
+                    List<string> correosList = new List<string>();
+                    string asunto = $"Se creó la gestión de reemplazo {py.CodigoProyecto}";
                     var usuInt = await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == py.CodigoProyecto).ToListAsync();
                     foreach (var listaUsuInters in usuInt)
                     {
@@ -837,12 +845,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.mensaje = $"Se creó la gestión de reemplazo {py.CodigoProyecto}";
                             notifProyecto.codigo = py.Id;
                             notifProyecto.modulo = "A";
-
+                            correosList.Add(correo);
                             await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "G");
+                            
                         }
                     }
-
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Gestión Reemplazo", asunto);
                     #endregion
 
                 }

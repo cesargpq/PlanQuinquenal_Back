@@ -136,8 +136,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             listaNotif.Add(notifProyecto);
                         }
                     }
+                    var asunto = $"Se creó el impedimento {proyecto.CodigoProyecto + " - " + obj.Id}";
                     await _repositoryNotificaciones.CrearNotificacionList(listaNotif);
-                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Impedimentos");
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Impedimentos", asunto);
 
                     #endregion
                 }
@@ -251,6 +252,86 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _trazabilidadRepository.Add(listaT);
                 }
                 saveDocument(p, guidId);
+                #region Envio de notificacion
+                var proyecto = await _context.Proyecto.Where(x => x.Id == resultado.ProyectoId).FirstOrDefaultAsync();
+                List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                CorreoTabla correoDatos = new CorreoTabla
+                {
+                    codigo = proyecto.CodigoProyecto + " - " + d.Id
+                };
+
+                composCorreo.Add(correoDatos);
+
+                List<string> correosList = new List<string>();
+                List<Notificaciones> notificacionList = new List<Notificaciones>();
+                
+                if (d.Gestion == "INSISTENCIA")
+                {
+                    string asunto = $"Se creó el documento de Insistencia {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regImp == true).ToListAsync();
+                        string correo = listaUsuInters.correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Gestión Reemplazo";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = proyecto.CodigoProyecto + " - " + p.CodigoImpedimento;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el documento de Insistencia {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
+                            notifProyecto.codigo = d.Id;
+                            notifProyecto.modulo = "IMP";
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
+                        }
+                    }
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Bolsa Reemplazo", asunto);
+                }else{
+                    string asunto = $"Se creó el documento de Evidencia de Reemplazo {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+                    var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regEviReemp == true).ToListAsync();
+                        string correo = listaUsuInters.correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Gestión Reemplazo";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = proyecto.CodigoProyecto + " - " + p.CodigoImpedimento;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el documento de Evidencia de Reemplazo {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
+                            notifProyecto.codigo = d.Id;
+                            notifProyecto.modulo = "IMP";
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
+                        }
+                    }
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Bolsa Reemplazo", asunto);
+                }
+                
+                
+                #endregion
                 var resp = new ResponseDTO
                 {
                     Valid = true,
@@ -309,6 +390,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 else
                 {
                     List<CorreoTabla> camposModificados;
+                    List<CorreoTabla> camposModificadosValidacion;
 
                     existe.ProblematicaRealId = p.ProblematicaRealId==0?null:p.ProblematicaRealId;
                     existe.LongImpedimento = p.LongImpedimento==null?0:p.LongImpedimento;
@@ -335,6 +417,51 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var proyecto = await _context.Proyecto.Where(x => x.Id == existe.ProyectoId).FirstOrDefaultAsync();
                     camposModificados = CompararPropiedadesAsync(proyecto.CodigoProyecto,existe, NomCompleto).GetAwaiter().GetResult();
 
+                    camposModificadosValidacion = CompararPropiedadesValidacionAsync(proyecto.CodigoProyecto,existe, NomCompleto).GetAwaiter().GetResult();
+                    //Notificacion de legal
+                    if (existe.ValidacionCargoPlano.Value && (existe.ValidacionCargoSustentoRRCC.Value || existe.ValidacionCargoSustentoAmbiental.Value || existe.ValidacionCargoSustentoArqueologia.Value))
+                    {
+                        IEnumerable<int> listaUsuarios = new List<int>();
+                        var legalid = (await _context.Perfil.Where(x=>x.nombre_perfil.ToLower().Contains("legal") && x.estado_perfil == "A").ToListAsync())[0].cod_perfil;
+                        var userInt = (await _context.Usuario.Where(x=>x.estado_user == "A" && (x.cod_rol == legalid || x.cod_rol == 1)).ToListAsync()).Select(obj=>obj.cod_usu);
+                        listaUsuarios = userInt.Distinct();
+
+                        var Usuario1 = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                        string nomPerfil1 = Usuario1[0].Perfil.nombre_perfil;
+                        string NomCompleto1 = Usuario1[0].nombre_usu.ToString() + " " + Usuario1[0].apellido_usu.ToString();
+                        List<CorreoTabla> composCorreo1 = new List<CorreoTabla>();
+                        List<string> correosList1 = new List<string>();
+                        List<Notificaciones> notificacionList1 = new List<Notificaciones>();
+                        var asunto1 = $"Alerta: Carga de Evidencia de Reemplazo para Revisión Legal {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
+
+                        foreach (var listaUsuInters in listaUsuarios)
+                        {
+                            int cod_usu = listaUsuInters;
+                            //var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
+                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                            string correo = UsuarioInt[0].correo_usu.ToString();
+                            /*if (lstpermisos.Count() == 1)
+                            {*/
+                                Notificaciones notifProyecto = new Notificaciones();
+                                notifProyecto.cod_usu = cod_usu;
+                                notifProyecto.seccion = "Impedimentos";
+                                notifProyecto.nombreComp_usu = NomCompleto1;
+                                notifProyecto.cod_reg = proyecto.CodigoProyecto + " - "+ existe.Id;
+                                notifProyecto.area = nomPerfil1;
+                                notifProyecto.fechora_not = DateTime.Now;
+                                notifProyecto.flag_visto = false;
+                                notifProyecto.tipo_accion = "C";
+                                notifProyecto.mensaje = $"Alerta: Carga de Evidencia de Reemplazo para Revisión Legal {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
+                                notifProyecto.codigo = existe.Id;
+                                notifProyecto.modulo = "IMP";
+                                correosList1.Add(correo);
+                                notificacionList1.Add(notifProyecto);
+                            //}
+                        }
+                        await _repositoryNotificaciones.CrearNotificacionList(notificacionList1);
+                        await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo1, correosList1, "A", $"Evidencia de Reemplazo el Código de Proyecto {proyecto.CodigoProyecto}"+ " - "+ existe.Id,asunto1);
+                    }
+
 
                     var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Editar").ToListAsync();
                     if (resultad.Count > 0)
@@ -357,6 +484,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     #region Notificacion
                     if (camposModificados.Count>0)
                     {
+                        List<string> correosList = new List<string>();
+                        string asunto = $"Se modificó el Impedimento {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
                         var lstpermisos = await _context.Config_notificaciones.Where(x => x.modImp == true).ToListAsync();
                         var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).ToListAsync();
                         if (UsuarioInt!=null && proyecto!=null)
@@ -372,14 +501,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 notifProyecto.fechora_not = DateTime.Now;
                                 notifProyecto.flag_visto = false;
                                 notifProyecto.tipo_accion = "M";
-                                notifProyecto.mensaje = $"Se modificó el Impedimento {proyecto.CodigoProyecto}";
+                                notifProyecto.mensaje = $"Se modificó el Impedimento {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
                                 notifProyecto.codigo = existe.Id;
                                 notifProyecto.modulo = "IMP";
+                                correosList.Add(correo);
 
                                 var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                                 dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                                 int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                                await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "M", "Impedimento");
                                 camposModificados.ForEach(item => {
                                     item.idNotif = codigoNotifCreada;
                                     item.id = null;
@@ -387,7 +516,51 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 _context.CorreoTabla.AddRange(camposModificados);
                                 _context.SaveChanges();
                             });
-                        
+                            
+                            await _repositoryNotificaciones.EnvioCorreoNotifList(camposModificados, correosList, "M", "Impedimento", asunto);
+                        }
+                    }
+                    #endregion
+
+                    #region Notificacion Validación de Reemplazo
+
+                    
+                    if (camposModificadosValidacion.Count>0)
+                    {
+                        List<string> correosList = new List<string>();
+                        string asunto = $"Se modificó la Validacion de Reemplazo del Impedimento {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.modEviReemp == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).ToListAsync();
+                        if (UsuarioInt!=null && proyecto!=null)
+                        {
+                            lstpermisos.ForEach(async per => {
+                                string correo = UsuarioInt.Find(usu => usu.cod_usu == per.cod_usu).correo_usu.ToString();
+                                Notificaciones notifProyecto = new Notificaciones();
+                                notifProyecto.cod_usu = per.cod_usu;
+                                notifProyecto.seccion = "IMPEDIMENTO";
+                                notifProyecto.nombreComp_usu = NomCompleto;
+                                notifProyecto.cod_reg = proyecto.CodigoProyecto + " - "+ existe.Id;
+                                notifProyecto.area = nomPerfil;
+                                notifProyecto.fechora_not = DateTime.Now;
+                                notifProyecto.flag_visto = false;
+                                notifProyecto.tipo_accion = "M";
+                                notifProyecto.mensaje = $"Se modificó la Validacion de Reemplazo del Impedimento {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
+                                notifProyecto.codigo = existe.Id;
+                                notifProyecto.modulo = "IMP";
+                                correosList.Add(correo);
+
+                                var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
+                                dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
+                                int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
+                                
+                                camposModificadosValidacion.ForEach(item => {
+                                    item.idNotif = codigoNotifCreada;
+                                    item.id = null;
+                                    });
+                                _context.CorreoTabla.AddRange(camposModificadosValidacion);
+                                _context.SaveChanges();
+                            });
+                            await _repositoryNotificaciones.EnvioCorreoNotifList(camposModificadosValidacion, correosList, "M", "Impedimento",asunto);
                         }
                     }
                     #endregion
@@ -424,7 +597,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var item in compara)
                 {
-                    if (item.Metadata.Name.Equals("fechamodifica") || item.Metadata.Name.Equals("UsuarioModificaId"))
+                    if (item.Metadata.Name.Equals("fechamodifica") || item.Metadata.Name.Equals("UsuarioModificaId")
+                     || item.Metadata.Name.Equals("ValidacionCargoPlano") || item.Metadata.Name.Equals("ValidacionCargoSustentoRRCC")
+                     || item.Metadata.Name.Equals("ValidacionCargoSustentoAmbiental") || item.Metadata.Name.Equals("ValidacionCargoSustentoArqueologia")
+                     || item.Metadata.Name.Equals("ValidacionLegalId") || item.Metadata.Name.Equals("FechaPresentacion")
+                     || item.Metadata.Name.Equals("Comentario"))
                     {
                         continue;
                     }
@@ -466,6 +643,64 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             return camposModificados;
         }
+
+        public async Task<List<CorreoTabla>> CompararPropiedadesValidacionAsync(string codigo, object valOriginal, string nomCompleto)
+        {
+            List<CorreoTabla> camposModificados = new List<CorreoTabla>();
+            if (valOriginal!= null)
+            {
+                DateTime fechaActual = DateTime.Today;
+                string fechaFormateada = fechaActual.ToString("dd/MM/yyyy");
+                var compara = _context.Entry(valOriginal).Properties.Where(p=>p.IsModified).ToList();
+
+                foreach (var item in compara)
+                {
+                    if (item.Metadata.Name.Equals("fechamodifica") || item.Metadata.Name.Equals("UsuarioModificaId"))
+                    {
+                        continue;
+                    }
+                    else if (item.Metadata.Name.Equals("ValidacionCargoPlano"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ValidacionCargoSustentoRRCC"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ValidacionCargoSustentoAmbiental"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ValidacionCargoSustentoArqueologia"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("ValidacionLegalId"))
+                    {
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("ValidacionLegal");
+                        CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Causal Reemplazo");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("FechaPresentacion"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaManualFecha(codigo,  item, nomCompleto, fechaFormateada, "Fecha Presentación");
+                        camposModificados.Add(fila);
+                    }
+                    else if (item.Metadata.Name.Equals("Comentario"))
+                    {
+                        CorreoTabla fila = CrearCorreoTablaDirecto(codigo, nomCompleto, fechaFormateada, item, SepararPalabrasConMayusculas(item.Metadata.Name));
+                        camposModificados.Add(fila);
+                    }
+                }
+            }
+
+            return camposModificados;
+        }
+
 
         private string SepararPalabrasConMayusculas(string input)
         {

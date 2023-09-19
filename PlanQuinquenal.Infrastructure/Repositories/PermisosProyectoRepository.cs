@@ -83,6 +83,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
 
                         #region Envio de notificacion
+                        List<string> correosList = new List<string>();
+                        string asunto = $"Se actualizó el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
                         var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                         foreach (var listaUsuInters in usuInt)
                         {
@@ -104,11 +106,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 notifProyecto.mensaje = $"Se actualizó el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
                                 notifProyecto.codigo = existeProyecto.Id;
                                 notifProyecto.modulo = "P";
+                                correosList.Add(correo);
 
                                 var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                                 dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                                 int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                                await _repositoryNotificaciones.EnvioCorreoNotif(camposModificados, correo, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}");
                                 camposModificados.ForEach(item => {
                                     item.idNotif = codigoNotifCreada;
                                     item.id = null;
@@ -117,6 +119,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 _context.SaveChanges();
                             }
                         }
+                        await _repositoryNotificaciones.EnvioCorreoNotifList(camposModificados, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
                         #endregion
 
                         return new ResponseDTO
@@ -165,7 +168,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         {
                             codigo = existeProyecto.CodigoProyecto
                         };
-
+                        List<string> correosList = new List<string>();
+                        List<Notificaciones> notificacionList = new List<Notificaciones>();
+                        string asunto = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
                         composCorreo.Add(correoDatos);
                         var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                         foreach (var listaUsuInters in usuInt)
@@ -188,11 +193,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 notifProyecto.mensaje = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
                                 notifProyecto.codigo = existeProyecto.Id;
                                 notifProyecto.modulo = "P";
-
-                                await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                                await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}");
+                                correosList.Add(correo);
+                                notificacionList.Add(notifProyecto);
                             }
                         }
+                        await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                        await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
                         #endregion
 
                         return new ResponseDTO

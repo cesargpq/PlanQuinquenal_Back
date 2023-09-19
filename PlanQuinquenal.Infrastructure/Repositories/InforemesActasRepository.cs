@@ -163,6 +163,9 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 #endregion
 
                 #region Envio de notificacion
+                List<string> correosList = new List<string>();
+                List<Notificaciones> notificacionList = new List<Notificaciones>();
+                string asunto = $"Se creó el {informe.Tipo} del {tipoSeguimiento} {informe.CodigoProyecto}";
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
@@ -187,10 +190,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         notifProyecto.codigo = informe.Id;
                         notifProyecto.modulo = "I";
 
-                        await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", $"{informe.Tipo} del {tipoSeguimiento}");
+                        correosList.Add(correo);
+                        notificacionList.Add(notifProyecto);
                     }
                 }
+                await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"{informe.Tipo} del {tipoSeguimiento}", asunto);
                 #endregion
 
                 string ruta = "";
@@ -794,12 +799,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 #endregion
 
                 #region Envio de notificacion
-                
+                List<string> correosList = new List<string>();
+                string asunto = $"Se modificó el {getInforme.Tipo} del {tipoSeguimiento} {getInforme.CodigoProyecto}";
                 var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
                 foreach (var listaUsuInters in usuInt)
                 {
                     int cod_usu = listaUsuInters.cod_usu;
-                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regInfActas == true).ToListAsync();
+                    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modInfActas == true).ToListAsync();
                     string correo = listaUsuInters.correo_usu;
                     if (lstpermisos.Count() == 1)
                     {
@@ -815,11 +821,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         notifProyecto.mensaje = $"Se modificó el {getInforme.Tipo} del {tipoSeguimiento} {getInforme.CodigoProyecto}";
                         notifProyecto.codigo = getInforme.Id;
                         notifProyecto.modulo = "I";
+                        correosList.Add(correo);
 
                         var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
                         dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
                         int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                        await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", $"{getInforme.Tipo} del {tipoSeguimiento}");
                         camposModificados.ForEach(item => {
                                     item.idNotif = codigoNotifCreada;
                                     item.id = null;
@@ -828,6 +834,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         _context.SaveChanges();
                     }
                 }
+                await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"{getInforme.Tipo} del {tipoSeguimiento}", asunto);
                 #endregion
 
 

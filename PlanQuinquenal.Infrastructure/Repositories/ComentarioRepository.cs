@@ -32,6 +32,22 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             this._trazabilidadRepository = trazabilidadRepository;
             this._repositoryNotificaciones = repositoryNotificaciones;
         }
+
+        static IEnumerable<int> UnionArrays(IEnumerable<int> array1, IEnumerable<int> array2)
+        {
+            HashSet<int> uniqueElements = new HashSet<int>();
+            foreach (var elemento in array1)
+            {
+                uniqueElements.Add(elemento);
+            }
+            foreach (var elemento in array2)
+            {
+                uniqueElements.Add(elemento);
+            }
+            int[] union = uniqueElements.ToArray();
+
+            return union;
+        }
         public async Task<ResponseDTO> Add(ComentarioRequestDTO c, DatosUsuario usuario)
         {
 
@@ -61,6 +77,58 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     idComentario = comentario.CodigoProyecto;
                     codigo = comentario.Id;
                     nomTipo = "Proyecto";
+
+                    #region Notificacion
+                    List<CorreoTabla> composCorreo1 = new List<CorreoTabla>();
+                    List<string> correosList1 = new List<string>();
+                    List<Notificaciones> notificacionList1 = new List<Notificaciones>();
+                    string asunto1 =  $"Se creó el comentario en {nomTipo} : {idComentario}";
+                    var Usuario1 = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil1 = Usuario1[0].Perfil.nombre_perfil;
+                    string NomCompleto1 = Usuario1[0].nombre_usu.ToString() + " " + Usuario1[0].apellido_usu.ToString();
+                    IEnumerable<int> listaUsuarios = new List<int>();
+                    if (c.TipoComentario == 1)
+                    {
+                        var userInt = (await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == c.CodigoProyecto).ToListAsync()).Select(obj=> obj.UsuarioId);
+                        var usuAdm = (await _context.Usuario.Where(x=>x.estado_user == "A" && x.cod_rol == 1).ToListAsync()).Select(obj=>obj.cod_usu);
+                        listaUsuarios = UnionArrays(userInt, usuAdm);
+                    }else{
+                        var userInt = (await _context.UsuariosInteresadosPy.Where(x => x.CodigoProyecto == c.CodigoProyecto).ToListAsync()).Select(obj=> obj.UsuarioId);
+                        var usuAdm = (await _context.Usuario.Where(x=>x.estado_user == "A" && x.Unidad_negociocod_und == Usuario1[0].Unidad_negociocod_und).ToListAsync()).Select(obj=>obj.cod_usu);
+                        var interceptado = userInt.Intersect(usuAdm);
+                        listaUsuarios = interceptado.Distinct();
+                    }
+                    
+                    
+                    foreach (var listaUsuInters in listaUsuarios)
+                    {
+                        int cod_usu = listaUsuInters;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = "Comentario";
+                            notifProyecto.nombreComp_usu = NomCompleto1;
+                            notifProyecto.cod_reg = idComentario;
+                            notifProyecto.area = nomPerfil1;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se creó el comentario en {nomTipo} : {idComentario}";
+                            notifProyecto.codigo = codigo;
+                            notifProyecto.modulo = "C";
+                            correosList1.Add(correo);
+                            notificacionList1.Add(notifProyecto);
+                        }
+                    }
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList1);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo1, correosList1, "C", "Comentario",asunto1);
+                    #endregion
+
+
                 }
                 else if (tipoSeguimiento.Descripcion.Equals("Plan Quinquenal"))
                 {
@@ -114,6 +182,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 {
                     obj.Message = Constantes.BusquedaNoExitosa;
                     obj.Valid = true;
+                    return obj;
                 }
                 var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Comentario , Crear").ToListAsync();
                     if (resultad.Count > 0)
@@ -138,6 +207,11 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     };
 
                     #region Envio de notificacion
+                    if (tipoSeguimiento.Descripcion.Equals("Proyectos"))
+                        return obj;
+                    List<string> correosList = new List<string>();
+                    List<Notificaciones> notificacionList = new List<Notificaciones>();
+                    string asunto =  $"Se creó el comentario en {nomTipo} : {idComentario}";
                     var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                     string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                     string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
@@ -146,8 +220,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     {
                         int cod_usu = listaUsuInters.cod_usu;
                         var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.regCom == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
-                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        string correo = listaUsuInters.correo_usu.ToString();
                         if (lstpermisos.Count() == 1)
                         {
                             Notificaciones notifProyecto = new Notificaciones();
@@ -159,14 +232,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.fechora_not = DateTime.Now;
                             notifProyecto.flag_visto = false;
                             notifProyecto.tipo_accion = "C";
-                            notifProyecto.mensaje = $"Se creó el comentario en {nomTipo} : {idComentario}";
+                            notifProyecto.mensaje = $"Se creó el comentario '{comentarioregister}' en {nomTipo} : {idComentario}";
                             notifProyecto.codigo = codigo;
                             notifProyecto.modulo = "C";
-
-                            await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                            await _repositoryNotificaciones.EnvioCorreoNotif(composCorreo, correo, "C", "Comentario");
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
                         }
                     }
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Comentario '"+comentarioregister+"'",asunto);
 
                     #endregion
 
