@@ -146,7 +146,7 @@ namespace PlanQuinquenal.Controllers
             {
                 var worksheet = workbook.Worksheets.Add("Proyectos");
                 var currentRow = 1;
-                for (int i = 1; i <= 25; i++)
+                for (int i = 1; i <= 27; i++)
                 {
                     //worksheet.Cell(currentRow, i).Style.Fill.BackgroundColor = XLColor.FromHtml("#2ec6ff");
                     //worksheet.Cell(currentRow, i).Style.Font.SetBold();
@@ -155,30 +155,32 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, i).Style.Font.FontColor = XLColor.Black;
                 }
                     worksheet.Cell(currentRow, 1).Value = "CodigoProyecto";
-                    worksheet.Cell(currentRow, 2).Value = "Denominación";
-                    worksheet.Cell(currentRow, 3).Value = "Plan Quinquenal";
-                    worksheet.Cell(currentRow, 4).Value = "Plan Anual";
-                    worksheet.Cell(currentRow, 5).Value = "CodigoMalla";
-                    worksheet.Cell(currentRow, 6).Value = "Material";
-                    worksheet.Cell(currentRow, 7).Value = "Distrito";
-                    worksheet.Cell(currentRow, 8).Value = "Constructor";
-                    worksheet.Cell(currentRow, 9).Value = "TipoProyecto";
-                    worksheet.Cell(currentRow, 10).Value = "TipoRegistro";
-                    worksheet.Cell(currentRow, 11).Value = "IngenieroResponsable";
-                    worksheet.Cell(currentRow, 12).Value = "Longitud Aprobadda PA";
-                    worksheet.Cell(currentRow, 13).Value = "Longitud Real PEndiente";
-                    worksheet.Cell(currentRow, 14).Value = "Longitud de Impedimentos";
-                    worksheet.Cell(currentRow, 15).Value = "Longitud Real Habilitada";
-                    worksheet.Cell(currentRow, 16).Value = "Longitud Reemplazada";
-                    worksheet.Cell(currentRow, 17).Value = "Longitud Pendiente Ejecución";
-                    worksheet.Cell(currentRow, 18).Value = "LongProyectos";
-                    worksheet.Cell(currentRow, 19).Value = "FechaGasificacion";
-                    worksheet.Cell(currentRow, 20).Value = "EstadoGeneral";
+                    worksheet.Cell(currentRow, 2).Value = "Plan Quinquenal";
+                    worksheet.Cell(currentRow, 3).Value = "Plan Anual";
+                    worksheet.Cell(currentRow, 4).Value = "CodigoMalla";
+                    worksheet.Cell(currentRow, 5).Value = "Material";
+                    worksheet.Cell(currentRow, 6).Value = "Distrito";
+                    worksheet.Cell(currentRow, 7).Value = "Constructor";
+                    worksheet.Cell(currentRow, 8).Value = "TipoProyecto";
+                    worksheet.Cell(currentRow, 9).Value = "TipoRegistro";
+                    worksheet.Cell(currentRow, 10).Value = "IngenieroResponsable";
+                    worksheet.Cell(currentRow, 11).Value = "Longitud Aprobada PA";
+                    worksheet.Cell(currentRow, 12).Value = "Longitud Real Pendiente";
+                    worksheet.Cell(currentRow, 13).Value = "Longitud de Impedimentos";
+                    worksheet.Cell(currentRow, 14).Value = "Longitud Real Habilitada";
+                    worksheet.Cell(currentRow, 15).Value = "Longitud Reemplazada";
+                    worksheet.Cell(currentRow, 16).Value = "Longitud Pendiente Ejecución";
+                    worksheet.Cell(currentRow, 17).Value = "Longitud Construida";
+                    worksheet.Cell(currentRow, 18).Value = "Longitud de Proyectos";
+                    worksheet.Cell(currentRow, 19).Value = "Fecha de Gasificación";
+                    worksheet.Cell(currentRow, 20).Value = "Estado General";
                     worksheet.Cell(currentRow, 21).Value = "Porcentaje de Avance";
                     worksheet.Cell(currentRow, 22).Value = "Fecha de Registro";
                     worksheet.Cell(currentRow, 23).Value = "Fecha de Modificación";
                     worksheet.Cell(currentRow, 24).Value = "Año PQ";
                     worksheet.Cell(currentRow, 25).Value = "Problemática Real";
+                    worksheet.Cell(currentRow, 26).Value = "Inversión Ejecutada";
+                    worksheet.Cell(currentRow, 27).Value = "Costo Inversión";
 
                 if (resultado != null)
                 {
@@ -186,22 +188,22 @@ namespace PlanQuinquenal.Controllers
                     {
                         currentRow++;
                         worksheet.Cell(currentRow, 1).Value = item.CodigoProyecto;
-                        worksheet.Cell(currentRow, 2).Value = item.descripcion;
-                        worksheet.Cell(currentRow, 3).Value = item.AnioPlanPQ;
-                        worksheet.Cell(currentRow, 4).Value = item.AnioPlanPA;
-                        worksheet.Cell(currentRow, 5).Value = item.CodigoMalla;
-                        worksheet.Cell(currentRow, 6).Value = item.Material;
-                        worksheet.Cell(currentRow, 7).Value = item.Distrito;
-                        worksheet.Cell(currentRow, 8).Value = item.Constructor;
-                        worksheet.Cell(currentRow, 9).Value = item.TipoProyecto;
-                        worksheet.Cell(currentRow, 10).Value = item.TipoRegistro;
-                        worksheet.Cell(currentRow, 11).Value = item.IngenieroResponsable;
-                        worksheet.Cell(currentRow, 12).Value = item.LongAprobPa;
-                        worksheet.Cell(currentRow, 13).Value = item.LongRealPend;
-                        worksheet.Cell(currentRow, 14).Value = item.LongImpedimentos;
-                        worksheet.Cell(currentRow, 15).Value = item.LongRealHab;
-                        worksheet.Cell(currentRow, 16).Value = item.LongReemplazada;
-                        worksheet.Cell(currentRow, 17).Value = item.longPendienteEjecucion;
+                        worksheet.Cell(currentRow, 2).Value = item.AnioPlanPQ;
+                        worksheet.Cell(currentRow, 3).Value = item.AnioPlanPA;
+                        worksheet.Cell(currentRow, 4).Value = item.CodigoMalla;
+                        worksheet.Cell(currentRow, 5).Value = item.Material;
+                        worksheet.Cell(currentRow, 6).Value = item.Distrito;
+                        worksheet.Cell(currentRow, 7).Value = item.Constructor;
+                        worksheet.Cell(currentRow, 8).Value = item.TipoProyecto;
+                        worksheet.Cell(currentRow, 9).Value = item.TipoRegistro;
+                        worksheet.Cell(currentRow, 10).Value = item.IngenieroResponsable;
+                        worksheet.Cell(currentRow, 11).Value = item.LongAprobPa;
+                        worksheet.Cell(currentRow, 12).Value = item.LongRealPend;
+                        worksheet.Cell(currentRow, 13).Value = item.LongImpedimentos;
+                        worksheet.Cell(currentRow, 14).Value = item.LongRealHab;
+                        worksheet.Cell(currentRow, 15).Value = item.LongReemplazada;
+                        worksheet.Cell(currentRow, 16).Value = item.longPendienteEjecucion;
+                        worksheet.Cell(currentRow, 17).Value = item.LongConstruida;
                         worksheet.Cell(currentRow, 18).Value = item.LongProyectos;
                         worksheet.Cell(currentRow, 19).Value = item.FechaGasificacion;
                         worksheet.Cell(currentRow, 20).Value = item.EstadoGeneral;
@@ -210,6 +212,8 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 23).Value = item.fechamodifica;
                         worksheet.Cell(currentRow, 24).Value = item.AñosPQ;
                         worksheet.Cell(currentRow, 25).Value = item.ProblematicaReal;
+                        worksheet.Cell(currentRow, 26).Value = item.InversionEjecutada;
+                        worksheet.Cell(currentRow, 27).Value = item.CostoInversion;
 
 
 
@@ -236,7 +240,7 @@ namespace PlanQuinquenal.Controllers
             {
                 var worksheet = workbook.Worksheets.Add("Proyectos");
                 var currentRow = 1;
-                for (int i = 1; i <= 25; i++)
+                for (int i = 1; i <= 27; i++)
                 {
                     //worksheet.Cell(currentRow, i).Style.Fill.BackgroundColor = XLColor.FromHtml("#2ec6ff");
                     //worksheet.Cell(currentRow, i).Style.Font.SetBold();
@@ -245,52 +249,54 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, i).Style.Font.FontColor = XLColor.Black;
                 }
                 worksheet.Cell(currentRow, 1).Value = "CodigoProyecto";
-                worksheet.Cell(currentRow, 2).Value = "Denominación";
-                worksheet.Cell(currentRow, 3).Value = "Plan Quinquenal";
-                worksheet.Cell(currentRow, 4).Value = "Plan Anual";
-                worksheet.Cell(currentRow, 5).Value = "CodigoMalla";
-                worksheet.Cell(currentRow, 6).Value = "Material";
-                worksheet.Cell(currentRow, 7).Value = "Distrito";
-                worksheet.Cell(currentRow, 8).Value = "Constructor";
-                worksheet.Cell(currentRow, 9).Value = "TipoProyecto";
-                worksheet.Cell(currentRow, 10).Value = "TipoRegistro";
-                worksheet.Cell(currentRow, 11).Value = "IngenieroResponsable";
-                worksheet.Cell(currentRow, 12).Value = "Longitud Aprobadda PA";
-                worksheet.Cell(currentRow, 13).Value = "Longitud Real PEndiente";
-                worksheet.Cell(currentRow, 14).Value = "Longitud de Impedimentos";
-                worksheet.Cell(currentRow, 15).Value = "Longitud Real Habilitada";
-                worksheet.Cell(currentRow, 16).Value = "Longitud Reemplazada";
-                worksheet.Cell(currentRow, 17).Value = "Longitud Pendiente Ejecución";
-                worksheet.Cell(currentRow, 18).Value = "LongProyectos";
-                worksheet.Cell(currentRow, 19).Value = "FechaGasificacion";
-                worksheet.Cell(currentRow, 20).Value = "EstadoGeneral";
+                worksheet.Cell(currentRow, 2).Value = "Plan Quinquenal";
+                worksheet.Cell(currentRow, 3).Value = "Plan Anual";
+                worksheet.Cell(currentRow, 4).Value = "CodigoMalla";
+                worksheet.Cell(currentRow, 5).Value = "Material";
+                worksheet.Cell(currentRow, 6).Value = "Distrito";
+                worksheet.Cell(currentRow, 7).Value = "Constructor";
+                worksheet.Cell(currentRow, 8).Value = "TipoProyecto";
+                worksheet.Cell(currentRow, 9).Value = "TipoRegistro";
+                worksheet.Cell(currentRow, 10).Value = "IngenieroResponsable";
+                worksheet.Cell(currentRow, 11).Value = "Longitud Aprobada PA";
+                worksheet.Cell(currentRow, 12).Value = "Longitud Real Pendiente";
+                worksheet.Cell(currentRow, 13).Value = "Longitud de Impedimentos";
+                worksheet.Cell(currentRow, 14).Value = "Longitud Real Habilitada";
+                worksheet.Cell(currentRow, 15).Value = "Longitud Reemplazada";
+                worksheet.Cell(currentRow, 16).Value = "Longitud Pendiente Ejecución";
+                worksheet.Cell(currentRow, 17).Value = "Longitud Construida";
+                worksheet.Cell(currentRow, 18).Value = "Longitud de Proyectos";
+                worksheet.Cell(currentRow, 19).Value = "Fecha de Gasificación";
+                worksheet.Cell(currentRow, 20).Value = "Estado General";
                 worksheet.Cell(currentRow, 21).Value = "Porcentaje de Avance";
                 worksheet.Cell(currentRow, 22).Value = "Fecha de Registro";
                 worksheet.Cell(currentRow, 23).Value = "Fecha de Modificación";
                 worksheet.Cell(currentRow, 24).Value = "Año PQ";
                 worksheet.Cell(currentRow, 25).Value = "Problemática Real";
+                worksheet.Cell(currentRow, 26).Value = "Inversión Ejecutada";
+                worksheet.Cell(currentRow, 27).Value = "Costo Inversión";
                 if (resultado != null)
                 {
                     foreach (var item in resultado.Model)
                     {
                         currentRow++;
                         worksheet.Cell(currentRow, 1).Value = item.CodigoProyecto;
-                        worksheet.Cell(currentRow, 2).Value = item.descripcion;
-                        worksheet.Cell(currentRow, 3).Value = item.AnioPlanPQ;
-                        worksheet.Cell(currentRow, 4).Value = item.AnioPlanPA;
-                        worksheet.Cell(currentRow, 5).Value = item.CodigoMalla;
-                        worksheet.Cell(currentRow, 6).Value = item.Material;
-                        worksheet.Cell(currentRow, 7).Value = item.Distrito;
-                        worksheet.Cell(currentRow, 8).Value = item.Constructor;
-                        worksheet.Cell(currentRow, 9).Value = item.TipoProyecto;
-                        worksheet.Cell(currentRow, 10).Value = item.TipoRegistro;
-                        worksheet.Cell(currentRow, 11).Value = item.IngenieroResponsable;
-                        worksheet.Cell(currentRow, 12).Value = item.LongAprobPa;
-                        worksheet.Cell(currentRow, 13).Value = item.LongRealPend;
-                        worksheet.Cell(currentRow, 14).Value = item.LongImpedimentos;
-                        worksheet.Cell(currentRow, 15).Value = item.LongRealHab;
-                        worksheet.Cell(currentRow, 16).Value = item.LongReemplazada;
-                        worksheet.Cell(currentRow, 17).Value = item.longPendienteEjecucion;
+                        worksheet.Cell(currentRow, 2).Value = item.AnioPlanPQ;
+                        worksheet.Cell(currentRow, 3).Value = item.AnioPlanPA;
+                        worksheet.Cell(currentRow, 4).Value = item.CodigoMalla;
+                        worksheet.Cell(currentRow, 5).Value = item.Material;
+                        worksheet.Cell(currentRow, 6).Value = item.Distrito;
+                        worksheet.Cell(currentRow, 7).Value = item.Constructor;
+                        worksheet.Cell(currentRow, 8).Value = item.TipoProyecto;
+                        worksheet.Cell(currentRow, 9).Value = item.TipoRegistro;
+                        worksheet.Cell(currentRow, 10).Value = item.IngenieroResponsable;
+                        worksheet.Cell(currentRow, 11).Value = item.LongAprobPa;
+                        worksheet.Cell(currentRow, 12).Value = item.LongRealPend;
+                        worksheet.Cell(currentRow, 13).Value = item.LongImpedimentos;
+                        worksheet.Cell(currentRow, 14).Value = item.LongRealHab;
+                        worksheet.Cell(currentRow, 15).Value = item.LongReemplazada;
+                        worksheet.Cell(currentRow, 16).Value = item.longPendienteEjecucion;
+                        worksheet.Cell(currentRow, 17).Value = item.LongConstruida;
                         worksheet.Cell(currentRow, 18).Value = item.LongProyectos;
                         worksheet.Cell(currentRow, 19).Value = item.FechaGasificacion;
                         worksheet.Cell(currentRow, 20).Value = item.EstadoGeneral;
@@ -299,6 +305,8 @@ namespace PlanQuinquenal.Controllers
                         worksheet.Cell(currentRow, 23).Value = item.fechamodifica;
                         worksheet.Cell(currentRow, 24).Value = item.AñosPQ;
                         worksheet.Cell(currentRow, 25).Value = item.ProblematicaReal;
+                        worksheet.Cell(currentRow, 26).Value = item.InversionEjecutada;
+                        worksheet.Cell(currentRow, 27).Value = item.CostoInversion;
 
                         worksheet.Cell(currentRow, 22).Style.DateFormat.Format = "dd/MM/yyyy";
                         worksheet.Cell(currentRow, 23).Style.DateFormat.Format = "dd/MM/yyyy";

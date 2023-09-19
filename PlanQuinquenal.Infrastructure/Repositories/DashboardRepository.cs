@@ -148,7 +148,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 .ToList();
 
             List<Serie> series = new List<Serie>();
-
+            List<double> totalConst = new List<double>();
             foreach (var grupo in grupos)
             {
                 var data = new List<double>();
@@ -171,7 +171,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 s.data = data;
                 series.Add(s);
             }
+
+
             listaMesesGasi.Add("Longitud Construida");
+          
+
+
+
             MensualidadDTO mensual = new MensualidadDTO();
             mensual.categorias = listaMesesGasi;
             mensual.ListaPqMensual = series;
