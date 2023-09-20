@@ -154,17 +154,17 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, i).Style.Font.SetBold();
                     worksheet.Cell(currentRow, i).Style.Font.FontColor = XLColor.Black;
                 }
-                    worksheet.Cell(currentRow, 1).Value = "CodigoProyecto";
-                    worksheet.Cell(currentRow, 2).Value = "Plan Quinquenal";
+                    worksheet.Cell(currentRow, 1).Value = "Código de Proyecto";
+                    worksheet.Cell(currentRow, 2).Value = "Periodo PQ";
                     worksheet.Cell(currentRow, 3).Value = "Plan Anual";
-                    worksheet.Cell(currentRow, 4).Value = "CodigoMalla";
+                    worksheet.Cell(currentRow, 4).Value = "Código de Malla";
                     worksheet.Cell(currentRow, 5).Value = "Material";
                     worksheet.Cell(currentRow, 6).Value = "Distrito";
                     worksheet.Cell(currentRow, 7).Value = "Constructor";
-                    worksheet.Cell(currentRow, 8).Value = "TipoProyecto";
-                    worksheet.Cell(currentRow, 9).Value = "TipoRegistro";
-                    worksheet.Cell(currentRow, 10).Value = "IngenieroResponsable";
-                    worksheet.Cell(currentRow, 11).Value = "Longitud Aprobada PA";
+                    worksheet.Cell(currentRow, 8).Value = "Tipo de Proyecto";
+                    worksheet.Cell(currentRow, 9).Value = "Tipo de Registro";
+                    worksheet.Cell(currentRow, 10).Value = "Ingeniero Responsable";
+                    worksheet.Cell(currentRow, 11).Value = "Long. Aprobada (m)";
                     worksheet.Cell(currentRow, 12).Value = "Longitud Real Pendiente";
                     worksheet.Cell(currentRow, 13).Value = "Longitud de Impedimentos";
                     worksheet.Cell(currentRow, 14).Value = "Longitud Real Habilitada";
@@ -179,8 +179,8 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, 23).Value = "Fecha de Modificación";
                     worksheet.Cell(currentRow, 24).Value = "Año PQ";
                     worksheet.Cell(currentRow, 25).Value = "Problemática Real";
-                    worksheet.Cell(currentRow, 26).Value = "Inversión Ejecutada";
-                    worksheet.Cell(currentRow, 27).Value = "Costo Inversión";
+                    worksheet.Cell(currentRow, 26).Value = "Inversión Aprobada (USD)";
+                    worksheet.Cell(currentRow, 27).Value = "Inversión Ejecutada";
 
                 if (resultado != null)
                 {
@@ -248,17 +248,17 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, i).Style.Font.SetBold();
                     worksheet.Cell(currentRow, i).Style.Font.FontColor = XLColor.Black;
                 }
-                worksheet.Cell(currentRow, 1).Value = "CodigoProyecto";
-                worksheet.Cell(currentRow, 2).Value = "Plan Quinquenal";
+                worksheet.Cell(currentRow, 1).Value = "Código de Proyecto";
+                worksheet.Cell(currentRow, 2).Value = "Periodo PQ";
                 worksheet.Cell(currentRow, 3).Value = "Plan Anual";
-                worksheet.Cell(currentRow, 4).Value = "CodigoMalla";
+                worksheet.Cell(currentRow, 4).Value = "Código de Malla";
                 worksheet.Cell(currentRow, 5).Value = "Material";
                 worksheet.Cell(currentRow, 6).Value = "Distrito";
                 worksheet.Cell(currentRow, 7).Value = "Constructor";
-                worksheet.Cell(currentRow, 8).Value = "TipoProyecto";
-                worksheet.Cell(currentRow, 9).Value = "TipoRegistro";
-                worksheet.Cell(currentRow, 10).Value = "IngenieroResponsable";
-                worksheet.Cell(currentRow, 11).Value = "Longitud Aprobada PA";
+                worksheet.Cell(currentRow, 8).Value = "Tipo de Proyecto";
+                worksheet.Cell(currentRow, 9).Value = "Tipo de Registro";
+                worksheet.Cell(currentRow, 10).Value = "Ingeniero Responsable";
+                worksheet.Cell(currentRow, 11).Value = "Long. Aprobada (m)";
                 worksheet.Cell(currentRow, 12).Value = "Longitud Real Pendiente";
                 worksheet.Cell(currentRow, 13).Value = "Longitud de Impedimentos";
                 worksheet.Cell(currentRow, 14).Value = "Longitud Real Habilitada";
@@ -273,8 +273,8 @@ namespace PlanQuinquenal.Controllers
                 worksheet.Cell(currentRow, 23).Value = "Fecha de Modificación";
                 worksheet.Cell(currentRow, 24).Value = "Año PQ";
                 worksheet.Cell(currentRow, 25).Value = "Problemática Real";
-                worksheet.Cell(currentRow, 26).Value = "Inversión Ejecutada";
-                worksheet.Cell(currentRow, 27).Value = "Costo Inversión";
+                worksheet.Cell(currentRow, 26).Value = "Inversión Aprobada (USD)";
+                worksheet.Cell(currentRow, 27).Value = "Inversión Ejecutada";
                 if (resultado != null)
                 {
                     foreach (var item in resultado.Model)
