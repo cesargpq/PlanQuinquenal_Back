@@ -288,7 +288,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.fechora_not = DateTime.Now;
                             notifProyecto.flag_visto = false;
                             notifProyecto.tipo_accion = "C";
-                            notifProyecto.mensaje = $"Se creó el documento de Insistencia {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
+                            notifProyecto.mensaje = $"Se creó el documento de Gestión Insistencia {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
                             notifProyecto.codigo = d.Id;
                             notifProyecto.modulo = "IMP";
                             correosList.Add(correo);
@@ -296,7 +296,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                     }
                     await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
-                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Bolsa Reemplazo", asunto);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Impedimento - Gestión Insistencia {d.NombreDocumento}", asunto);
                 }else{
                     string asunto = $"Se creó el documento de Evidencia de Reemplazo {d.NombreDocumento} en el Impedimento {proyecto.CodigoProyecto}"+ " - " + p.CodigoImpedimento;
                     var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x=>x.estado_user == "A").Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
@@ -327,7 +327,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                     }
                     await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
-                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", "Bolsa Reemplazo", asunto);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Impedimento - Evidencia de Reemplazo {d.NombreDocumento}", asunto);
                 }
                 
                 
