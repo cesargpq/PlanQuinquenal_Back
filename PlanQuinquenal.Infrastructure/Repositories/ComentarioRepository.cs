@@ -80,6 +80,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     #region Notificacion
                     List<CorreoTabla> composCorreo1 = new List<CorreoTabla>();
+                    CorreoTabla correoDatos1 = new CorreoTabla
+                    {
+                        codigo = idComentario
+                    };
+
+                    composCorreo1.Add(correoDatos1);
                     List<string> correosList1 = new List<string>();
                     List<Notificaciones> notificacionList1 = new List<Notificaciones>();
                     string asunto1 =  $"Se creó el comentario en {nomTipo} : {idComentario}";
