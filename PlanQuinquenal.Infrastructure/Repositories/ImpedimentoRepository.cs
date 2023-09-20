@@ -430,6 +430,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         string nomPerfil1 = Usuario1[0].Perfil.nombre_perfil;
                         string NomCompleto1 = Usuario1[0].nombre_usu.ToString() + " " + Usuario1[0].apellido_usu.ToString();
                         List<CorreoTabla> composCorreo1 = new List<CorreoTabla>();
+                        CorreoTabla correoDatos = new CorreoTabla
+                        {
+                            codigo = proyecto.CodigoProyecto + " - " + existe.Id
+                        };
+
+                        composCorreo1.Add(correoDatos);
                         List<string> correosList1 = new List<string>();
                         List<Notificaciones> notificacionList1 = new List<Notificaciones>();
                         var asunto1 = $"Alerta: Carga de Evidencia de Reemplazo para Revisión Legal {proyecto.CodigoProyecto}"+ " - "+ existe.Id;
