@@ -21,6 +21,7 @@ using Microsoft.Data.SqlClient;
 using System.Reflection;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace PlanQuinquenal.Infrastructure.Repositories
 {
@@ -53,21 +54,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
 
                 bool existe = false;
+
+
                 if(proyectoRequestDto.TipoProy == 0)
                 {
-                     existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto
-                        && x.TipoProy == false
-                        && x.PQuinquenalId == proyectoRequestDto.PQuinquenalId
-                        && x.AñosPQ == proyectoRequestDto.AñosPQ
-                        ).AnyAsync();
+                     existe = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(proyectoRequestDto.CodigoProyecto)
+                                        && x.TipoProy == (proyectoRequestDto.TipoProy==1?true:false)
+                                      && x.MaterialId == proyectoRequestDto.MaterialId
+                                      && x.DistritoId == proyectoRequestDto.DistritoId
+                                         && x.AñosPQ == proyectoRequestDto.AñosPQ
+                                      && x.PQuinquenalId == proyectoRequestDto.PQuinquenalId
+                                      ).AnyAsync();
                 }
                 else
                 {
-                    existe = await _context.Proyecto.Where(x => x.CodigoProyecto == proyectoRequestDto.CodigoProyecto
-                       && x.TipoProy == true
-                       && x.PQuinquenalId == proyectoRequestDto.PQuinquenalId
-                       && x.PlanAnualId == proyectoRequestDto.PlanAnualId
-                       ).AnyAsync();
+                    existe = await _context.Proyecto.Where(x => x.CodigoProyecto.Equals(proyectoRequestDto.CodigoProyecto)
+                                      && x.TipoProy == (proyectoRequestDto.TipoProy == 1 ? true : false)
+                                      && x.MaterialId == proyectoRequestDto.MaterialId
+                                      && x.DistritoId == proyectoRequestDto.DistritoId
+                                      && x.PlanAnualId == proyectoRequestDto.PlanAnualId
+                                      && x.PQuinquenalId == proyectoRequestDto.PQuinquenalId
+                                      ).AnyAsync();
                 }
                 
                 
@@ -216,8 +223,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
-
+                
                 var existe = await _context.Proyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+
                     List<CorreoTabla> camposModificados;
                     if (existe != null)
                     {

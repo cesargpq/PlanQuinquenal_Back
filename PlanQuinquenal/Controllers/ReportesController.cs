@@ -180,7 +180,7 @@ namespace PlanQuinquenal.Controllers
                     worksheet.Cell(currentRow, 24).Value = "Año PQ";
                     worksheet.Cell(currentRow, 25).Value = "Problemática Real";
                     worksheet.Cell(currentRow, 26).Value = "Inversión Aprobada (USD)";
-                    worksheet.Cell(currentRow, 27).Value = "Inversión Ejecutada";
+                    worksheet.Cell(currentRow, 27).Value = "Inversión Ejecutada (USD)";
 
                 if (resultado != null)
                 {
@@ -274,7 +274,7 @@ namespace PlanQuinquenal.Controllers
                 worksheet.Cell(currentRow, 24).Value = "Año PQ";
                 worksheet.Cell(currentRow, 25).Value = "Problemática Real";
                 worksheet.Cell(currentRow, 26).Value = "Inversión Aprobada (USD)";
-                worksheet.Cell(currentRow, 27).Value = "Inversión Ejecutada";
+                worksheet.Cell(currentRow, 27).Value = "Inversión Ejecutada (USD)";
                 if (resultado != null)
                 {
                     foreach (var item in resultado.Model)
