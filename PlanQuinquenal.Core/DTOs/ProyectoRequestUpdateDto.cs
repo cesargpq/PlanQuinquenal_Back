@@ -16,10 +16,10 @@ namespace PlanQuinquenal.Core.DTOs
         public int? MaterialId { get; set; }
         public int? DistritoId { get; set; }
         public Decimal InversionEjecutada { get; set; }
-        public int TipoProyectoId { get; set; }
+        public int? TipoProyectoId { get; set; }
         
         public string CodigoMalla { get; set; }
-        public int TipoRegistroId { get; set; }
+        public int? TipoRegistroId { get; set; }
         public int? IngenieroResponsableId { get; set; }
         public int? ConstructorId { get; set; }
         
