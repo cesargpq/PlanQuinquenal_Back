@@ -40,7 +40,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     o.AnioPQ = "NO";
                 }
 
-              
+            var planesAnuales = await _repositoryMantenedores.GetAllByAttribute("PlanAnual");
+
                 var resultad = await _context.MensualDtoResponse.FromSqlRaw($"EXEC AVANCEMENSUALXANIO  {o.TipoProy}, {o.CodigoPlan}, {o.AnioPQ}, {o.MaterialId}").ToListAsync();
 
                 var listaMesesGasi = resultad.Select(x => x.FechaGasificacion).Distinct().ToList();
@@ -104,6 +105,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 totalApro.Add(longitud);
             }
                 int j = 0;
+            if(series.Count > 0)
+            {
                 for (int i = 0; i < totalApro.Count(); i++)
                 {
                     for (int z = j; z < series.Count; z++)
@@ -113,6 +116,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                     j++;
                 }
+            }
+            else
+            {
+                var grupo = planesAnuales.Where(x => x.Id == o.CodigoPlan).Select(x => x.Descripcion).FirstOrDefault();
+                List<double> dataD = new List<double>();
+                dataD.Add(0);
+                dataD.Add(totalApro[0]);
+                Serie s = new Serie();
+                s.type = "column";
+                s.name = grupo;
+                s.data = dataD;
+                
+                series.Add(s);
+            }
+               
 
 
                 MensualidadDTO mensual = new MensualidadDTO();
