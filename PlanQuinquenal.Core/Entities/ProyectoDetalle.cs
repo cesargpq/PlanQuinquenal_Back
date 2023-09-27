@@ -50,5 +50,18 @@ namespace PlanQuinquenal.Core.Entities
         public Decimal? CostoInversion { get; set; }
         public Decimal? InversionEjecutada { get; set; }
 
+        //Permisos
+
+        public Decimal? LongitudLocal { get; set; }
+        public string PermisoLocal { get; set; }
+        public Decimal? LongitudMetropolitano { get; set; }
+        public string PermisoMetropolitano { get; set; }
+        public Decimal? LongitudAmbiental { get; set; }
+        public string PermisoAmbiental { get; set; }
+        public Decimal? LongitudArqueologia { get; set; }
+        public string PermisoArqueologia { get; set; }
+        public Decimal? LongitudSociales { get; set; }
+        public string PermisoSociales { get; set; }
+
     }
 }

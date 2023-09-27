@@ -543,6 +543,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             };
         }
 
+        
         public async Task<PaginacionResponseDtoException<ProyectoDetalle>> GetAll2(FiltersProyectos f)
         {
             if (f.CodigoProyecto.Equals("")) f.CodigoProyecto = null;
@@ -573,6 +574,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.TipoProy}, {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
+        
 
             var dato = new PaginacionResponseDtoException<ProyectoDetalle>
             {
@@ -971,8 +973,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<PaginacionResponseDtoException<ProyectoDetalle>> GetSeleccionados(PlanQuinquenalSelectedId p)
         {
-            List<int> intList = new List<int> { 1, 2, 3, 4, 5 };
-
             var dataTable = new DataTable();
             dataTable.TableName = "dbo.IntArray";
             dataTable.Columns.Add("Id", typeof(int));

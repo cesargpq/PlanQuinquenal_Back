@@ -683,8 +683,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             string anioActuales = DateTime.Now.Year.ToString();
             var planAnualActual = await _context.PlanAnual.Where(x => x.AnioPlan.Equals(anioActuales)).FirstOrDefaultAsync();
-
-            if(planAnualActual == null)
+            var reemplazado = await _repositoryMantenedores.GetAllByAttribute("TipoRegistro");
+            if (planAnualActual == null)
             {
                 return new ResponseDTO
                 {
@@ -731,7 +731,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 proyecto.PlanAnualId = planAnualActual.Id == null ? null : planAnualActual.Id;
                 proyecto.MaterialId = null;
                 proyecto.ConstructorId = bolsa.ConstructorId == null ? null : bolsa.ConstructorId;
-                proyecto.TipoRegistroId = null;
+                proyecto.TipoRegistroId = reemplazado.Where(x=>x.Descripcion.Equals("Reemplazo")).Select(x=>x.Id).FirstOrDefault();
                 proyecto.LongAprobPa = bolsa.LongitudReemplazo;
                 proyecto.LongConstruida = 0;
                 proyecto.TipoProyectoId = null;

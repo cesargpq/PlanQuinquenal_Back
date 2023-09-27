@@ -1,4 +1,5 @@
-﻿using PlanQuinquenal.Core.DTOs.RequestDTO;
+﻿using PlanQuinquenal.Core.DTOs;
+using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
 using System;
@@ -15,6 +16,7 @@ namespace PlanQuinquenal.Core.Interfaces
         Task<MaestroResponseDto> GetById(int id, string maestro);
         Task<IEnumerable<MaestroResponseDto>> GetAllByAttribute(string attribute);
         Task<bool> DeleteById(int id, string maestro);
+        Task<List<ColumnSelected>> GetColumnSelected(int idUser);
         Task<bool> Post(PostEntityReqDTO postEntityReqDTO);
         Task<bool> Update(PostUpdateEntityDTO postEntityReqDTO,int id);
     }

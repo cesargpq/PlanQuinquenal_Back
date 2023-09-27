@@ -1,6 +1,7 @@
 ﻿using ApiDavis.Core.Utilidades;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using PlanQuinquenal.Core.DTOs;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -23,6 +24,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             _context = context;
             this.mapper = mapper;
+        }
+
+        public async Task<List<ColumnSelected>> GetColumnSelected(int idUser)
+        {
+            var resultad = await _context.ColumnSelected.FromSqlInterpolated($"EXEC ColumnSelected {idUser}").ToListAsync();
+
+            var dato = 0;
+            return resultad;
+
         }
         public async Task<IEnumerable<MaestroResponseDto>> GetAllByAttribute(string attribute)
         {
