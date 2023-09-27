@@ -122,7 +122,15 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var grupo = planesAnuales.Where(x => x.Id == o.CodigoPlan).Select(x => x.Descripcion).FirstOrDefault();
                 List<double> dataD = new List<double>();
                 dataD.Add(0);
-                dataD.Add(totalApro[0]);
+                if(totalApro.Count > 0)
+                {
+                    dataD.Add(totalApro[0]);
+                }
+                else
+                {
+                    dataD.Add(0);
+                }
+                
                 Serie s = new Serie();
                 s.type = "column";
                 s.name = grupo;
