@@ -44,13 +44,40 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
         [HttpGet]
-        public async Task<IActionResult> GetPermiso(string CodigoProyecto, string TipoPermiso)
+        public async Task<IActionResult> GetPermiso(int PermisoId)
         {
-            var resultado = await _permisosProyectoRepository.GetPermiso(CodigoProyecto, TipoPermiso);
+            var resultado = await _permisosProyectoRepository.GetPermiso(PermisoId);
 
             return Ok(resultado);
         }
 
+        [HttpPost("ListarPermisos")]
+        public async Task<IActionResult> ListarPermisos(PermisosListDto p)
+        {
+            var resultado = await _permisosProyectoRepository.ListarPermisos(p);
+
+            return Ok(resultado);
+        }
+        [HttpPut]
+
+        public async Task<IActionResult> UpdatePermiso(int PermisoId, PermisoUpdateDto dto)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+            var resultado = await _permisosProyectoRepository.Update(PermisoId, usuario,dto);
+
+            return Ok(resultado);
+        }
         [HttpPost("CargarExpediente")]
         public async Task<IActionResult> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO)
         {
@@ -70,7 +97,7 @@ namespace PlanQuinquenal.Controllers
             return Ok(resultado);
         }
 
-        [HttpDelete]
+        [HttpDelete("EliminarExpediente")]
         public async Task<IActionResult> Delete(int id)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
@@ -89,7 +116,26 @@ namespace PlanQuinquenal.Controllers
             var resultado = await _permisosProyectoRepository.Delete(id, usuario);
             return Ok(resultado);
         }
-        [HttpPost("Listar")]
+        [HttpDelete("EliminarPermiso")]
+        public async Task<IActionResult> EliminarPermiso(int id)
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var idUser = 0;
+            foreach (var item in identity.Claims)
+            {
+                if (item.Type.Equals("$I$Us$@I@D"))
+                {
+                    idUser = Convert.ToInt16(item.Value);
+                }
+            }
+            DatosUsuario usuario = new DatosUsuario();
+            usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
+            usuario.UsuaroId = idUser;
+
+            var resultado = await _permisosProyectoRepository.EliminarPermiso(id,usuario);
+            return Ok(resultado);
+        }
+        [HttpPost("ListarExpediente")]
         public async Task<IActionResult> Listar(ListDocumentosRequestDto listDocumentosRequestDto)
         {
 
@@ -101,7 +147,7 @@ namespace PlanQuinquenal.Controllers
         public async Task<IActionResult> Descargar(int id)
         {
             var resultado = await _permisosProyectoRepository.Download(id);
-          
+
             string codigoArchivo = Path.GetFileName(resultado.Model.CodigoDocumento).Trim();
             byte[] fl = System.IO.File.ReadAllBytes(resultado.Model.ruta);
             return File(fl, System.Net.Mime.MediaTypeNames.Application.Octet, codigoArchivo);

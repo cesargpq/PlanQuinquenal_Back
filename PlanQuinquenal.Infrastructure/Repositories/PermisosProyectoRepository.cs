@@ -42,7 +42,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         {
             try
             {
-                var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto == permisoRequestDTO.CodigoProyecto).FirstOrDefaultAsync();
+                var existeProyecto = await _context.Proyecto.Where(x => x.Id == permisoRequestDTO.ProyectoId).FirstOrDefaultAsync();
                 var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
                 string nomPerfil = Usuario[0].Perfil.nombre_perfil;
                 string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
@@ -50,6 +50,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 if (existeProyecto != null)
                 {
                     var obtenerPermiso = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(permisoRequestDTO.TipoPermisosProyecto.ToUpper())).FirstOrDefaultAsync();
+                    var distrito = await _context.Distrito.Where(x => x.Id == existeProyecto.DistritoId).FirstOrDefaultAsync();
+                    
                     if (obtenerPermiso == null)
                     {
                         return new ResponseDTO
@@ -58,157 +60,124 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             Message = "El permiso envíado no existe"
                         };
                     }
-                    var permisoExiste = await _context.PermisosProyecto.Where(x => x.CodigoProyecto == existeProyecto.CodigoProyecto && x.TipoPermisosProyectoId == obtenerPermiso.Id).FirstOrDefaultAsync();
-                    if (permisoExiste!=null)
+                    
+                    PermisosProyecto obj = new PermisosProyecto();
+                    obj.ProyectoId = permisoRequestDTO.ProyectoId;
+                    obj.TipoPermisosProyectoId = obtenerPermiso.Id;
+                    obj.DistritoId = distrito.Descripcion;
+                    obj.Expediente = permisoRequestDTO.Expediente;
+                    obj.Longitud = permisoRequestDTO.Longitud;
+                    obj.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
+                    obj.Estado = true;
+                    obj.FechaCreacion = DateTime.Now;
+                    obj.FechaModificacion = DateTime.Now;
+                    obj.UsuarioCreacion = usuario.UsuaroId;
+                    obj.UsuarioModifca = usuario.UsuaroId;
+                    _context.Add(obj);
+                    await _context.SaveChangesAsync();
+
+                   
+                    Trazabilidad trazabilidad = new Trazabilidad();
+                        List<Trazabilidad> listaT = new List<Trazabilidad>();
+                        trazabilidad.Tabla = "Permisos";
+                        trazabilidad.Evento = "Crear";
+                        trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {permisoRequestDTO.TipoPermisosProyecto} del proyecto {existeProyecto.CodigoProyecto} ";
+                        trazabilidad.UsuarioId = usuario.UsuaroId;
+                        trazabilidad.DireccionIp = usuario.Ip;
+                        trazabilidad.FechaRegistro = DateTime.Now;
+
+                        listaT.Add(trazabilidad);
+                        await _trazabilidadRepository.Add(listaT);
+                    
+
+                    var resultado = await _context.PermisosProyecto.Where(x => x.ProyectoId == permisoRequestDTO.ProyectoId && x.Estado ==true).ToListAsync();
+
+                    var porcenaje = await _context.Constante.Where(x => x.Descripcion.Equals("% desviación")).FirstOrDefaultAsync();
+
+                    decimal? resultadoLong =resultado.Sum(objeto => objeto.Longitud);
+                    decimal? LongAprobada = ((porcenaje.valor / 100) * existeProyecto?.LongAprobPa) + existeProyecto.LongAprobPa;
+
+
+                    var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal")).FirstOrDefaultAsync();
+                    List<string> correosList = new List<string>();
+                    List<Notificaciones> notificacionList = new List<Notificaciones>();
+                    if (perfiles != null)
                     {
-                        permisoExiste.Longitud = permisoRequestDTO.Longitud;
-                        permisoExiste.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
-                        List<CorreoTabla> camposModificados = CompararPropiedadesAsync(existeProyecto.CodigoProyecto,permisoExiste, NomCompleto).GetAwaiter().GetResult();
-                        _context.Update(permisoExiste);
-                        await _context.SaveChangesAsync();
-                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Editar").ToListAsync();
-                        if (resultad.Count > 0)
-                        {
-                            Trazabilidad trazabilidad = new Trazabilidad();
-                            List<Trazabilidad> listaT = new List<Trazabilidad>();
-                            trazabilidad.Tabla = "Permisos";
-                            trazabilidad.Evento = "Editar";
-                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {permisoExiste.Id} del proyecto {permisoExiste.CodigoProyecto} ";
-                            trazabilidad.UsuarioId = usuario.UsuaroId;
-                            trazabilidad.DireccionIp = usuario.Ip;
-                            trazabilidad.FechaRegistro = DateTime.Now;
+                        var usuLegal = await _context.Usuario.Where(x => x.estado_user == "A" && x.Perfilcod_perfil == perfiles.cod_perfil ).ToListAsync();
 
-                            listaT.Add(trazabilidad);
-                            await _trazabilidadRepository.Add(listaT);
-                        }
-
-                        #region Envio de notificacion
-                        List<string> correosList = new List<string>();
-                        string asunto = $"Se actualizó el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
-                        var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
-                        foreach (var listaUsuInters in usuInt)
+                        if (resultadoLong > existeProyecto.LongAprobPa)
                         {
-                            int cod_usu = listaUsuInters.cod_usu;
-                            var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
-                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
-                            string correo = UsuarioInt[0].correo_usu.ToString();
-                            if (lstpermisos.Count() == 1)
+                            foreach (var item in usuLegal)
                             {
+                                int cod_usu = item.cod_usu;
+                                var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                                var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                                string correo = UsuarioInt[0].correo_usu.ToString();
                                 Notificaciones notifProyecto = new Notificaciones();
                                 notifProyecto.cod_usu = cod_usu;
-                                notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
-                                notifProyecto.nombreComp_usu = NomCompleto;
-                                notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
-                                notifProyecto.area = nomPerfil;
-                                notifProyecto.fechora_not = DateTime.Now;
-                                notifProyecto.flag_visto = false;
-                                notifProyecto.tipo_accion = "M";
-                                notifProyecto.mensaje = $"Se actualizó el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
-                                notifProyecto.codigo = existeProyecto.Id;
-                                notifProyecto.modulo = "P";
-                                correosList.Add(correo);
-
-                                var respuestNotif = await _repositoryNotificaciones.CrearNotificacion(notifProyecto);
-                                dynamic objetoNotif = JsonConvert.DeserializeObject(respuestNotif.ToString());
-                                int codigoNotifCreada = int.Parse(objetoNotif.codigoNot.ToString());
-                                camposModificados.ForEach(item => {
-                                    item.idNotif = codigoNotifCreada;
-                                    item.id = null;
-                                    });
-                                _context.CorreoTabla.AddRange(camposModificados);
-                                _context.SaveChanges();
-                            }
-                        }
-                        await _repositoryNotificaciones.EnvioCorreoNotifList(camposModificados, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
-                        #endregion
-
-                        return new ResponseDTO
-                        {
-                            Valid = true,
-                            Message = Constantes.ActualizacionSatisfactoria
-                        };
-                    }
-                    else
-                    {
-                        PermisosProyecto obj = new PermisosProyecto();
-
-                        obj.CodigoProyecto = existeProyecto.CodigoProyecto;
-                        obj.TipoPermisosProyectoId = obtenerPermiso.Id;
-                        obj.Longitud = permisoRequestDTO.Longitud;
-                        obj.EstadoPermisosId = permisoRequestDTO.EstadoPermisosId;
-                        obj.Estado = true;
-                        obj.FechaCreacion = DateTime.Now;
-                        obj.FechaModificacion = DateTime.Now;
-                        obj.UsuarioCreacion = usuario.UsuaroId;
-                        obj.UsuarioModifca = usuario.UsuaroId;
-                        _context.Add(obj);
-                        await _context.SaveChangesAsync();
-
-
-                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Crear").ToListAsync();
-                        if (resultad.Count > 0)
-                        {
-                            Trazabilidad trazabilidad = new Trazabilidad();
-                            List<Trazabilidad> listaT = new List<Trazabilidad>();
-                            trazabilidad.Tabla = "Permisos";
-                            trazabilidad.Evento = "Crear";
-                            trazabilidad.DescripcionEvento = $"Se créo correctamente el permiso {obj.Id} del proyecto {obj.CodigoProyecto} ";
-                            trazabilidad.UsuarioId = usuario.UsuaroId;
-                            trazabilidad.DireccionIp = usuario.Ip;
-                            trazabilidad.FechaRegistro = DateTime.Now;
-
-                            listaT.Add(trazabilidad);
-                            await _trazabilidadRepository.Add(listaT);
-                        }
-
-                        #region Envio de notificacion
-
-                        List<CorreoTabla> composCorreo = new List<CorreoTabla>();
-                        CorreoTabla correoDatos = new CorreoTabla
-                        {
-                            codigo = existeProyecto.CodigoProyecto
-                        };
-                        List<string> correosList = new List<string>();
-                        List<Notificaciones> notificacionList = new List<Notificaciones>();
-                        string asunto = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
-                        composCorreo.Add(correoDatos);
-                        var usuInt = await _context.Usuario.Where(x=>x.estado_user == "A").ToListAsync();
-                        foreach (var listaUsuInters in usuInt)
-                        {
-                            int cod_usu = listaUsuInters.cod_usu;
-                            var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
-                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
-                            string correo = UsuarioInt[0].correo_usu.ToString();
-                            if (lstpermisos.Count() == 1)
-                            {
-                                Notificaciones notifProyecto = new Notificaciones();
-                                notifProyecto.cod_usu = cod_usu;
-                                notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
+                                notifProyecto.seccion = $"Proyecto - Permiso";
                                 notifProyecto.nombreComp_usu = NomCompleto;
                                 notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
                                 notifProyecto.area = nomPerfil;
                                 notifProyecto.fechora_not = DateTime.Now;
                                 notifProyecto.flag_visto = false;
                                 notifProyecto.tipo_accion = "C";
-                                notifProyecto.mensaje = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                                notifProyecto.mensaje = $"La sumatoria de permisos ({String.Format("{0:#,##0.##}",Math.Round((decimal)resultadoLong,2))} km) en el Proyecto {existeProyecto.CodigoProyecto} es mayor a la Longitud Aprobada del proyecto {String.Format("{0:#,##0.##}",Math.Round((decimal)existeProyecto.LongAprobPa,2))} km";
                                 notifProyecto.codigo = existeProyecto.Id;
                                 notifProyecto.modulo = "P";
                                 correosList.Add(correo);
                                 notificacionList.Add(notifProyecto);
                             }
                         }
-                        await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
-                        await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
-                        #endregion
-
-                        return new ResponseDTO
-                        {
-                            Valid = true,
-                            Message = Constantes.CreacionExistosa
-                        };
                     }
                     
+                    #region Envio de notificacion
+
+                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    CorreoTabla correoDatos = new CorreoTabla
+                    {
+                        codigo = existeProyecto.CodigoProyecto
+                    };
+                   
+                    string asunto = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                    composCorreo.Add(correoDatos);
+                    var usuInt = await _context.Usuario.Where(x => x.estado_user == "A").ToListAsync();
+                    foreach (var listaUsuInters in usuInt)
+                    {
+                        int cod_usu = listaUsuInters.cod_usu;
+                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                        string correo = UsuarioInt[0].correo_usu.ToString();
+                        
+                        if (lstpermisos.Count() == 1)
+                        {
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                            notifProyecto.codigo = existeProyecto.Id;
+                            notifProyecto.modulo = "P";
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
+                        }
+                    }
+                    await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
+                    #endregion
+
+                    return new ResponseDTO
+                    {
+                        Valid = true,
+                        Message = Constantes.CreacionExistosa
+                    };
                 }
+
                 else
                 {
                     return new ResponseDTO
@@ -332,25 +301,47 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             };
         }
-        public async Task<ResponseEntidadDto<PermisoByIdResponseDto>> GetPermiso(string CodigoProyecto, string TipoPermiso)
+        public async Task<PaginacionResponseDtoException<RequestPermisoGetDto>> ListarPermisos(PermisosListDto p)
         {
-            var tipoPerm = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(TipoPermiso.ToUpper())).FirstOrDefaultAsync();
-            if (tipoPerm == null)
+            var tipoPermiso = await _context.TipoPermisosProyecto.Where(x=>x.Descripcion.ToUpper().Equals(p.tipoPermiso.ToUpper())).FirstOrDefaultAsync();
+            var obtenerPermiso = await _context.RequestPermisoGetDto.FromSqlInterpolated($"EXEC ObtenerPermisoList  {p.ProyectoId} , {tipoPermiso.Id} , {p.Pagina} , {p.RecordsPorPagina} ").ToListAsync();
+
+            if (obtenerPermiso == null)
             {
-                return new ResponseEntidadDto<PermisoByIdResponseDto>
+                return new PaginacionResponseDtoException<RequestPermisoGetDto>
                 {
                     Model = null,
-                    Valid = true,
-                    Message = "No existe al tipo de permiso envíado"
+                    Cantidad=0
                 };
             }
             else
             {
-                var resultado = await _context.PermisosProyecto.Where(x => x.CodigoProyecto == CodigoProyecto && x.TipoPermisosProyectoId==tipoPerm.Id).FirstOrDefaultAsync();
 
-                if(resultado == null)
+                return new PaginacionResponseDtoException<RequestPermisoGetDto>
                 {
-                    return new ResponseEntidadDto<PermisoByIdResponseDto>
+                    Cantidad = obtenerPermiso.Count() == 0 ? 0 : obtenerPermiso.ElementAt(0).Total,
+                    Model = obtenerPermiso
+                };
+            }
+        }
+        public async Task<ResponseEntidadDto<RequestPermisoGetDto>> GetPermiso(int ProyectoId)
+        {
+            //var tipoPerm = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(TipoPermiso.ToUpper())).FirstOrDefaultAsync();
+            //if (tipoPerm == null)
+            //{
+            //    return new ResponseEntidadDto<RequestPermisoGetDto>
+            //    {
+            //        Model = null,
+            //        Valid = true,
+            //        Message = "No existe al tipo de permiso envíado"
+            //    };
+            //}
+            //else
+            //{
+                var obtenerPermiso = await _context.RequestPermisoGetDto.FromSqlRaw($"EXEC ObtenerPermiso  {ProyectoId}").ToListAsync();
+                if (obtenerPermiso == null)
+                {
+                    return new ResponseEntidadDto<RequestPermisoGetDto>
                     {
                         Model = null,
                         Valid = true,
@@ -359,38 +350,38 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
                 else
                 {
-                    var map = mapper.Map<PermisoByIdResponseDto>(resultado);
-                    return new ResponseEntidadDto<PermisoByIdResponseDto>
+                  
+                    return new ResponseEntidadDto<RequestPermisoGetDto>
                     {
-                        Model = map,
+                        Model = obtenerPermiso.ElementAt(0),
                         Valid = true,
                         Message = Constantes.BusquedaExitosa
                     };
                 }
-            }
+            //}
             
         }
 
         public async Task<ResponseDTO> CargarExpediente(DocumentosPermisosRequestDTO documentosPermisosRequestDTO, DatosUsuario usuario)
         {
-            var existeProyecto = await _context.Proyecto.Where(x => x.CodigoProyecto == documentosPermisosRequestDTO.CodigoProyecto).FirstOrDefaultAsync();
+            var existeProyecto = await _context.PermisosProyecto.Where(x => x.Id == documentosPermisosRequestDTO.PermisoId).FirstOrDefaultAsync();
 
             if(existeProyecto != null)
             {
                 var tipoPerm = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(documentosPermisosRequestDTO.TipoPermisosProyecto.ToUpper())).FirstOrDefaultAsync();
-                
+                var proyecto = await _context.Proyecto.Where(x => x.Id == existeProyecto.ProyectoId).FirstOrDefaultAsync();
                 DocumentosPermisos documentos = new DocumentosPermisos();
 
                 var guidId = Guid.NewGuid();
                 var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
-                documentos.CodigoProyecto = existeProyecto.CodigoProyecto;
+                documentos.PermisoId = existeProyecto.Id;
                 documentos.TipoPermisosProyectoId = tipoPerm.Id;
                 documentos.NombreDocumento = documentosPermisosRequestDTO.NombreDocumento;
                 documentos.CodigoDocumento = guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
                 documentos.Fecha = Convert.ToDateTime(documentosPermisosRequestDTO.Fecha);
-                documentos.Expediente = documentosPermisosRequestDTO.Expediente;
-                documentos.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" +"Proyectos\\"+ existeProyecto.CodigoProyecto + $"\\Permiso\\{tipoPerm.Descripcion}\\" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
-                documentos.ruta = configuration["DNS"] + "Proyectos" + "/" + existeProyecto.CodigoProyecto  + $"/Permiso/{tipoPerm.Descripcion}/" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
+                documentos.Expediente = existeProyecto.Expediente;
+                documentos.rutaFisica = configuration["RUTA_ARCHIVOS"] + "\\" +"Proyectos\\"+ proyecto.CodigoProyecto + $"\\Permiso\\{tipoPerm.Descripcion}\\" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
+                documentos.ruta = configuration["DNS"] + "Proyectos" + "/" + proyecto.CodigoProyecto  + $"/Permiso/{tipoPerm.Descripcion}/" + guidId + Path.GetExtension(documentosPermisosRequestDTO.NombreDocumento);
                 documentos.FechaCreacion = DateTime.Now;
                 documentos.FechaModificacion = DateTime.Now;
                 documentos.UsuarioCreacion = usuario.UsuaroId;
@@ -408,7 +399,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Permisos";
                     trazabilidad.Evento = "CargarExpediente";
-                    trazabilidad.DescripcionEvento = $"Se cargó correctamente el expediente {documentos.NombreDocumento} en el proyecto {documentos.CodigoProyecto}";
+                    trazabilidad.DescripcionEvento = $"Se cargó correctamente el expediente {documentos.Expediente} en el proyecto {proyecto.CodigoProyecto}";
                     trazabilidad.UsuarioId = usuario.UsuaroId;
                     trazabilidad.DireccionIp = usuario.Ip;
                     trazabilidad.FechaRegistro = DateTime.Now;
@@ -416,7 +407,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
                 }
-                saveDocument(documentosPermisosRequestDTO, guidId, tipoPerm.Descripcion,existeProyecto.CodigoProyecto);
+                saveDocument(documentosPermisosRequestDTO, guidId, tipoPerm.Descripcion, proyecto.CodigoProyecto);
                 return new ResponseDTO
                 {
                     Valid = true,
@@ -485,21 +476,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , Eliminar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Permisos";
                     trazabilidad.Evento = "Eliminar";
-                    trazabilidad.DescripcionEvento = $"Se elimnó correctamente el documento del proyecto  {dato.CodigoProyecto} ";
+                    trazabilidad.DescripcionEvento = $"Se elimnó correctamente el expediente  {dato.Expediente} ";
                     trazabilidad.UsuarioId = usuario.UsuaroId;
                     trazabilidad.DireccionIp = usuario.Ip;
                     trazabilidad.FechaRegistro = DateTime.Now;
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
 
 
                 obj.Valid = true;
@@ -525,7 +514,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var queryable = _context.DocumentosPermisos
                                 .Where(x => listDocumentosRequestDto.Buscar != "" ? x.Expediente.Contains(listDocumentosRequestDto.Buscar) || x.NombreDocumento.Contains(listDocumentosRequestDto.Buscar) : true)
                                 .Where(x=>x.TipoPermisosProyectoId == dato.Id)
-                                .Where(x => x.CodigoProyecto == listDocumentosRequestDto.CodigoProyecto)
+                                .Where(x => x.PermisoId == listDocumentosRequestDto.PermisoId)
                                 .Where(x=>x.Estado ==true)
                                 .AsQueryable();
 
@@ -594,6 +583,154 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 };
             }
            
+        }
+
+        public async Task<ResponseDTO> Update(int id, DatosUsuario usuario, PermisoUpdateDto dto)
+        {
+            
+            var existePermiso = await _context.PermisosProyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+
+            if (existePermiso == null)
+            {
+                return new ResponseDTO
+                {
+                    Message="No existe el permiso para editar",
+                    Valid = false
+                };
+            }
+            else
+            {
+                var proyecto = await _context.Proyecto.Where(x=>x.Id == existePermiso.ProyectoId).FirstOrDefaultAsync();
+                existePermiso.Longitud = dto.Longitud;
+                existePermiso.Expediente = dto.Expediente;
+                existePermiso.EstadoPermisosId = dto.EstadoPermisosId;
+                existePermiso.UsuarioModifca = usuario.UsuaroId;
+                existePermiso.FechaModificacion = DateTime.Now;
+                _context.Update(existePermiso);
+                await _context.SaveChangesAsync();
+
+                var documento = await _context.DocumentosPermisos.Where(x => x.PermisoId == existePermiso.Id).FirstOrDefaultAsync();
+
+                documento.Expediente = existePermiso.Expediente;
+                _context.Update(documento);
+                await _context.SaveChangesAsync();
+
+                Trazabilidad trazabilidad = new Trazabilidad();
+                    List<Trazabilidad> listaT = new List<Trazabilidad>();
+                    trazabilidad.Tabla = "Permisos";
+                    trazabilidad.Evento = "Actualizar";
+                    trazabilidad.DescripcionEvento = $"Se actualizó correctamente el permiso del proyecto {proyecto.CodigoProyecto} ";
+                    trazabilidad.UsuarioId = usuario.UsuaroId;
+                    trazabilidad.DireccionIp = usuario.Ip;
+                    trazabilidad.FechaRegistro = DateTime.Now;
+
+                    listaT.Add(trazabilidad);
+                    await _trazabilidadRepository.Add(listaT);
+                
+
+
+
+                var resultado = await _context.PermisosProyecto.Where(x => x.ProyectoId == existePermiso.ProyectoId && x.Estado == true).ToListAsync();
+
+
+                decimal? resultadoLong = resultado.Sum(objeto => objeto.Longitud);
+                var porcenaje = await _context.Constante.Where(x => x.Descripcion.Equals("% desviación")).FirstOrDefaultAsync();
+
+                decimal? LongAprobada = ((porcenaje.valor / 100) * proyecto?.LongAprobPa)+proyecto.LongAprobPa;
+
+                var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal")).FirstOrDefaultAsync();
+                List<string> correosList = new List<string>();
+                List<Notificaciones> notificacionList = new List<Notificaciones>();
+                if (perfiles != null)
+                {
+                    var usuLegal = await _context.Usuario.Where(x => x.estado_user == "A" && x.Perfilcod_perfil == perfiles.cod_perfil).ToListAsync();
+
+                    var Usuario = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == usuario.UsuaroId).ToListAsync();
+                    string nomPerfil = Usuario[0].Perfil.nombre_perfil;
+                    string NomCompleto = Usuario[0].nombre_usu.ToString() + " " + Usuario[0].apellido_usu.ToString();
+
+
+                    if (resultadoLong > LongAprobada)
+                    {
+                        foreach (var item in usuLegal)
+                        {
+                            int cod_usu = item.cod_usu;
+                            var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                            var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                            string correo = UsuarioInt[0].correo_usu.ToString();
+                            Notificaciones notifProyecto = new Notificaciones();
+                            notifProyecto.cod_usu = cod_usu;
+                            notifProyecto.seccion = $"Proyecto - Permiso";
+                            notifProyecto.nombreComp_usu = NomCompleto;
+                            notifProyecto.cod_reg = proyecto.CodigoProyecto;
+                            notifProyecto.area = nomPerfil;
+                            notifProyecto.fechora_not = DateTime.Now;
+                            notifProyecto.flag_visto = false;
+                            notifProyecto.tipo_accion = "C";
+                            notifProyecto.mensaje = $"La sumatoria de permisos ({String.Format("{0:#,##0.##}",Math.Round((decimal)resultadoLong, 2))} km) en el Proyecto {proyecto.CodigoProyecto} es mayor a la Longitud Aprobada del proyecto {String.Format("{0:#,##0.##}", Math.Round((decimal)proyecto.LongAprobPa, 2))} km";
+                            notifProyecto.codigo = proyecto.Id;
+                            notifProyecto.modulo = "P";
+                            correosList.Add(correo);
+                            notificacionList.Add(notifProyecto);
+                        }
+                    }
+                }
+
+                await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
+
+                return new ResponseDTO
+                {
+                    Message = Constantes.ActualizacionSatisfactoria,
+                    Valid = true
+                };
+            }
+
+            
+        }
+
+        public async Task<ResponseDTO> EliminarPermiso(int id, DatosUsuario usuario)
+        {
+            var resultado = await _context.PermisosProyecto.Where(x => x.Id == id).FirstOrDefaultAsync();
+            var proyecto  = await _context.Proyecto.Where(x => x.Id == resultado.ProyectoId).FirstOrDefaultAsync();
+            var permiso = await _context.TipoPermisosProyecto.Where(x => x.Id == resultado.TipoPermisosProyectoId).FirstOrDefaultAsync();
+            if(resultado == null)
+            {
+                return new ResponseDTO
+                {
+                    Message = Constantes.BusquedaNoExitosa,
+                    Valid = false
+                };
+            }
+            else
+            {
+                resultado.Estado = false;
+                resultado.UsuarioModifca = usuario.UsuaroId;
+                resultado.FechaModificacion = DateTime.Now;
+                _context.Update(resultado);
+                await _context.SaveChangesAsync();
+
+
+                Trazabilidad trazabilidad = new Trazabilidad();
+                List<Trazabilidad> listaT = new List<Trazabilidad>();
+                trazabilidad.Tabla = "Permisos";
+                trazabilidad.Evento = "Eliminar";
+                trazabilidad.DescripcionEvento = $"Se eliminó correctamente el permiso {permiso.Descripcion} del proyecto {proyecto.CodigoProyecto} ";
+                trazabilidad.UsuarioId = usuario.UsuaroId;
+                trazabilidad.DireccionIp = usuario.Ip;
+                trazabilidad.FechaRegistro = DateTime.Now;
+
+                listaT.Add(trazabilidad);
+                await _trazabilidadRepository.Add(listaT);
+
+
+
+                return new ResponseDTO
+                {
+                    Message = Constantes.EliminacionSatisfactoria,
+                    Valid = true
+                };
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
     public class ListDocumentosRequestDto: PaginacionDTO
     {
         public string Modulo { get; set; }
-        public string CodigoProyecto { get; set; }
+        public int PermisoId { get; set; }
         public string Buscar { get; set; } 
     }
 }

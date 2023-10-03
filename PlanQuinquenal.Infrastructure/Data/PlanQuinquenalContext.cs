@@ -27,6 +27,9 @@ namespace PlanQuinquenal.Infrastructure.Data
 
         public virtual DbSet<ColumnSelected> ColumnSelected { get; set; }
         public virtual DbSet<AvancePQDto> AvancePQDto { get; set; }
+
+        public virtual DbSet<Constante> Constante { get; set; }
+        
         public virtual DbSet<TrazabilidadDetalle> TrazabilidadDetalle { get; set; }
         public virtual DbSet<ReemplazoMaxDTO> ReemplazoMaxDTO { get; set; }
         public virtual DbSet<MensualDtoResponse> MensualDtoResponse { get; set; }
@@ -146,6 +149,10 @@ namespace PlanQuinquenal.Infrastructure.Data
         public virtual DbSet<PQComentarios> PQComentarios { get; set; }
         public virtual DbSet<PQDocumentos> PQDocumentos { get; set; }
         public virtual DbSet<CamposModulo_Permisos> CamposModulo_Permisos { get; set; }
+
+
+        public virtual DbSet<RequestPermisoGetDto> RequestPermisoGetDto { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelbuilder)
         {
             modelbuilder.Entity<ProyectoDetalle>(
@@ -214,8 +221,14 @@ namespace PlanQuinquenal.Infrastructure.Data
               {
                   eb.HasNoKey();
               });
-
+            modelbuilder.Entity<RequestPermisoGetDto>(
+              eb =>
+              {
+                  eb.HasNoKey();
+              });
             
+
+
 
 
 

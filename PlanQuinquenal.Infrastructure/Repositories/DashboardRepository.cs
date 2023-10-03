@@ -311,12 +311,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
         public async Task<ResposeDistritosDetalleDTO> ListarPermisos(RequestDashboradDTO o)
         {
-            if (o.anioPq.Equals(""))
-            {
-                o.anioPq = "NO";
-            }
-            var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TOTAL {o.MaterialId}, {o.CodigoPlan} , {o.tipoProy} , {o.anioPq}").ToListAsync();
-
+            //if (o.anioPq.Equals(""))
+            //{
+            //    o.anioPq = "NO";
+            //}
+            //var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TotalPermisos {o.MaterialId}, {o.CodigoPlan} , {o.tipoProy} , {o.anioPq}").ToListAsync();
+            var resultad = await _context.DistritosPermisoDTO.FromSqlRaw($"EXEC TotalPermisos").ToListAsync();
             List<string> categorias = new List<string>();
             List<int> norequiere = new List<int>();
             List<int> permisodenegado = new List<int>();
@@ -333,17 +333,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
             foreach (var item in resultad)
             {
-                var norequierecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 1 , {o.MaterialId} , {item.Descripcion} , {o.tipoProy} , {o.anioPq} , {o.CodigoPlan}").ToListAsync();
+                var norequierecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstadoDistrito 1 , {item.Descripcion}").ToListAsync();
                 norequiere.Add(norequierecount.Count);
-                var permisodenegadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 2 , {o.MaterialId} , {item.Descripcion} , {o.tipoProy} , {o.anioPq} , {o.CodigoPlan}").ToListAsync();
+                var permisodenegadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstadoDistrito 2 , {item.Descripcion}").ToListAsync();
                 permisodenegado.Add(permisodenegadocount.Count);
-                var permisotramitecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 3 , {o.MaterialId} , {item.Descripcion} , {o.tipoProy} , {o.anioPq} , {o.CodigoPlan}").ToListAsync();
+                var permisotramitecount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstadoDistrito 3 , {item.Descripcion}").ToListAsync();
                 permisotramite.Add(permisotramitecount.Count);
-                var permisonotramitadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 4 , {o.MaterialId} , {item.Descripcion} , {o.tipoProy} , {o.anioPq} , {o.CodigoPlan}").ToListAsync();
+                var permisonotramitadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstadoDistrito 4 , {item.Descripcion}").ToListAsync();
                 permisonotramitado.Add(permisonotramitadocount.Count);
-                var permisootorgadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 5 , {o.MaterialId} , {item.Descripcion} , {o.tipoProy} , {o.anioPq} , {o.CodigoPlan}").ToListAsync();
+                var permisootorgadocount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstadoDistrito 5 , {item.Descripcion}").ToListAsync();
                 permisootorgado.Add(permisootorgadocount.Count);
-                var sapcount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstado 6 , {o.MaterialId} , {item.Descripcion} , {o.tipoProy} , {o.anioPq} , {o.CodigoPlan}").ToListAsync();
+                var sapcount = await _context.DistritosPermisoDTO.FromSqlInterpolated($"EXEC PermisoEstadoDistrito 6 , {item.Descripcion}").ToListAsync();
                 sap.Add(sapcount.Count);
             }
             var datos = new ResposeDistritosDetalleDTO
