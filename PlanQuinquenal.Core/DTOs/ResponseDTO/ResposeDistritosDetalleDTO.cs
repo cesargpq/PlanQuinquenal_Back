@@ -9,12 +9,12 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
     public class ResposeDistritosDetalleDTO
     {
         public List<string> categorias { get; set; }
-        public List<int> norequiere { get; set; }
-        public List<int> permisodenegado { get; set; }
-        public List<int> permisotramite { get; set; }
+        public List<decimal?> norequiere { get; set; }
+        public List<decimal?> permisodenegado { get; set; }
+        public List<decimal?> permisotramite { get; set; }
 
-        public List<int> permisonotramitado { get; set; }
-        public List<int> permisootorgado { get; set; }
-        public List<int> sap { get; set; }
+        public List<decimal?> permisonotramitado { get; set; }
+        public List<decimal?> permisootorgado { get; set; }
+        public List<decimal?> sap { get; set; }
     }
 }
