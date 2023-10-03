@@ -64,24 +64,24 @@ namespace PlanQuinquenal.Controllers
             return Ok("Hubo un error en la consulta");
         }
 
-        [HttpPost("ObtenerListaNotif")]
-        public async Task<IActionResult> ObtenerListaNotif(RequestNotificacionDTO r)
-        {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            foreach (var item in identity.Claims)
-            {
-                if (item.Type.Equals("$I$Us$@I@D"))
-                {
-                    var codUsu = int.Parse(item.Value);
+        //[HttpPost("ObtenerListaNotif")]
+        //public async Task<IActionResult> ObtenerListaNotif(RequestNotificacionDTO r)
+        //{
+        //    var identity = HttpContext.User.Identity as ClaimsIdentity;
+        //    foreach (var item in identity.Claims)
+        //    {
+        //        if (item.Type.Equals("$I$Us$@I@D"))
+        //        {
+        //            var codUsu = int.Parse(item.Value);
                     
-                    var resultado = await _repositoryNotificaciones.ObtenerListaNotif(r,codUsu);
-                    return Ok(resultado);
-                }
-            }
+        //            var resultado = await _repositoryNotificaciones.ObtenerListaNotif(r,codUsu);
+        //            return Ok(resultado);
+        //        }
+        //    }
 
-            return Ok("Hubo un error en la consulta");
+        //    return Ok("Hubo un error en la consulta");
 
-        }
+        //}
 
         [HttpPost("ModificarConfigNotif")]
         public async Task<IActionResult> ModificarConfigNotif(Config_notificacionesRequestDTO config)
