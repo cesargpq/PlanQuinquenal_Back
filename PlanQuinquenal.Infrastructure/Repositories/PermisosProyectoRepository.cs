@@ -95,7 +95,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var porcenaje = await _context.Constante.Where(x => x.Descripcion.Equals("% desviación")).FirstOrDefaultAsync();
 
                     decimal? resultadoLong =resultado.Sum(objeto => objeto.Longitud);
-                    decimal? LongAprobada = ((porcenaje.valor / 100) * existeProyecto?.LongAprobPa) + existeProyecto.LongAprobPa;
+                    var LongAprobada = ((Convert.ToDecimal(porcenaje.valor) / 100) * existeProyecto?.LongAprobPa) + existeProyecto.LongAprobPa;
 
 
                     var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal") || x.nombre_perfil.Equals("Administrador")).ToListAsync();
@@ -135,45 +135,45 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         }
                     }
                     
-                    #region Envio de notificacion
+                    //#region Envio de notificacion
 
-                    List<CorreoTabla> composCorreo = new List<CorreoTabla>();
-                    CorreoTabla correoDatos = new CorreoTabla
-                    {
-                        codigo = existeProyecto.CodigoProyecto
-                    };
+                    //List<CorreoTabla> composCorreo = new List<CorreoTabla>();
+                    //CorreoTabla correoDatos = new CorreoTabla
+                    //{
+                    //    codigo = existeProyecto.CodigoProyecto
+                    //};
                    
-                    string asunto = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
-                    composCorreo.Add(correoDatos);
-                    var usuInt = await _context.Usuario.Where(x => x.estado_user == "A").ToListAsync();
-                    foreach (var listaUsuInters in usuInt)
-                    {
-                        int cod_usu = listaUsuInters.cod_usu;
-                        var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
-                        var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
-                        string correo = UsuarioInt[0].correo_usu.ToString();
+                    //string asunto = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                    //composCorreo.Add(correoDatos);
+                    //var usuInt = await _context.Usuario.Where(x => x.estado_user == "A").ToListAsync();
+                    //foreach (var listaUsuInters in usuInt)
+                    //{
+                    //    int cod_usu = listaUsuInters.cod_usu;
+                    //    var lstpermisos = await _context.Config_notificaciones.Where(x => x.cod_usu == cod_usu).Where(x => x.modPry == true).ToListAsync();
+                    //    var UsuarioInt = await _context.Usuario.Include(x => x.Perfil).Where(x => x.cod_usu == cod_usu).ToListAsync();
+                    //    string correo = UsuarioInt[0].correo_usu.ToString();
                         
-                        if (lstpermisos.Count() == 1)
-                        {
-                            Notificaciones notifProyecto = new Notificaciones();
-                            notifProyecto.cod_usu = cod_usu;
-                            notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
-                            notifProyecto.nombreComp_usu = NomCompleto;
-                            notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
-                            notifProyecto.area = nomPerfil;
-                            notifProyecto.fechora_not = DateTime.Now;
-                            notifProyecto.flag_visto = false;
-                            notifProyecto.tipo_accion = "C";
-                            notifProyecto.mensaje = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
-                            notifProyecto.codigo = existeProyecto.Id;
-                            notifProyecto.modulo = "P";
-                            correosList.Add(correo);
-                            notificacionList.Add(notifProyecto);
-                        }
-                    }
+                    //    if (lstpermisos.Count() == 1)
+                    //    {
+                    //        Notificaciones notifProyecto = new Notificaciones();
+                    //        notifProyecto.cod_usu = cod_usu;
+                    //        notifProyecto.seccion = $"Proyecto - Permiso {obtenerPermiso.Descripcion}";
+                    //        notifProyecto.nombreComp_usu = NomCompleto;
+                    //        notifProyecto.cod_reg = existeProyecto.CodigoProyecto;
+                    //        notifProyecto.area = nomPerfil;
+                    //        notifProyecto.fechora_not = DateTime.Now;
+                    //        notifProyecto.flag_visto = false;
+                    //        notifProyecto.tipo_accion = "C";
+                    //        notifProyecto.mensaje = $"Se registró el Permiso {obtenerPermiso.Descripcion} en Proyecto {existeProyecto.CodigoProyecto}";
+                    //        notifProyecto.codigo = existeProyecto.Id;
+                    //        notifProyecto.modulo = "P";
+                    //        correosList.Add(correo);
+                    //        notificacionList.Add(notifProyecto);
+                    //    }
+                    //}
                     await _repositoryNotificaciones.CrearNotificacionList(notificacionList);
-                    await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
-                    #endregion
+                    //await _repositoryNotificaciones.EnvioCorreoNotifList(composCorreo, correosList, "C", $"Proyecto - Permiso {obtenerPermiso.Descripcion}", asunto);
+                    //#endregion
 
                     return new ResponseDTO
                     {
@@ -642,7 +642,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 decimal? resultadoLong = resultado.Sum(objeto => objeto.Longitud);
                 var porcenaje = await _context.Constante.Where(x => x.Descripcion.Equals("% desviación")).FirstOrDefaultAsync();
 
-                decimal? LongAprobada = ((porcenaje.valor / 100) * proyecto?.LongAprobPa)+proyecto.LongAprobPa;
+                var LongAprobada = ((Convert.ToDecimal(porcenaje.valor) / 100) * proyecto?.LongAprobPa) + proyecto.LongAprobPa;
 
                 var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal") || x.nombre_perfil.Equals("Administrador")).ToListAsync();
                 List<string> correosList = new List<string>();
