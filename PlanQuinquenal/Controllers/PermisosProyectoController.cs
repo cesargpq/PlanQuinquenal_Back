@@ -148,7 +148,7 @@ namespace PlanQuinquenal.Controllers
         {
             var resultado = await _permisosProyectoRepository.Download(id);
 
-            string codigoArchivo = Path.GetFileName(resultado.Model.CodigoDocumento).Trim();
+            string codigoArchivo = Path.GetFileName(resultado.Model.NombreDocumento).Trim();
             byte[] fl = System.IO.File.ReadAllBytes(resultado.Model.ruta);
             return File(fl, System.Net.Mime.MediaTypeNames.Application.Octet, codigoArchivo);
 

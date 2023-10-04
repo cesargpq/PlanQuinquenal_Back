@@ -81,9 +81,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.NumeroReemplazo = null;
                     _context.Add(obj);
                     await _context.SaveChangesAsync();
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Crear").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
@@ -96,7 +94,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
                     #region Comparacion de estructuras y agregacion de cambios
                     var proyecto = await _context.Proyecto.Where(x => x.Id == obj.ProyectoId).FirstOrDefaultAsync();
                     List<CorreoTabla> composCorreo = new List<CorreoTabla>();
@@ -236,9 +234,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , CrearDocumento").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Impedimento";
@@ -250,7 +246,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
                 saveDocument(p, guidId);
                 #region Envio de notificacion
                 var proyecto = await _context.Proyecto.Where(x => x.Id == resultado.ProyectoId).FirstOrDefaultAsync();
@@ -469,9 +465,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
 
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Editar").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Impedimento";
@@ -483,7 +477,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
 
@@ -979,9 +973,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Importar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Impedimento";
@@ -993,7 +985,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
                 dto.listaError = null;
                 dto.listaRepetidos = null;
                 dto.listaInsert = null;
@@ -1030,9 +1022,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     _context.Update(existe);
                     await _context.SaveChangesAsync();
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , Eliminar").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Impedimento";
@@ -1044,7 +1034,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
                     var resultado = new ResponseDTO
                     {
                         Valid = true,
@@ -1086,9 +1076,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
 
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Impedimento , EliminarDocumento").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Impedimento";
@@ -1100,7 +1088,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
                     var resultado = new ResponseDTO
                     {
                         Valid = true,

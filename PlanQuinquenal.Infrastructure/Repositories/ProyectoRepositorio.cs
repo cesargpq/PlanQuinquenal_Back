@@ -298,9 +298,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             }
 
                         }
-                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Proyectos , Crear").ToListAsync();
-                        if (resultad.Count > 0)
-                        {
+                        
                             Trazabilidad trazabilidad = new Trazabilidad();
                             List<Trazabilidad> listaT = new List<Trazabilidad>();
                             trazabilidad.Tabla = "Proyecto";
@@ -312,7 +310,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                             listaT.Add(trazabilidad);
                             await _trazabilidadRepository.Add(listaT);
-                        }
+                        
 
 
                     #region notificacion
@@ -811,9 +809,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                 }
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Proyectos , Crear").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Proyecto";
@@ -825,7 +821,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
 
 
 

@@ -190,21 +190,20 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.Valid = true;
                     return obj;
                 }
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Comentario , Crear").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+               
                         Trazabilidad trazabilidad = new Trazabilidad();
+                        
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Comentario";
                         trazabilidad.Evento = "Crear";
-                        trazabilidad.DescripcionEvento = $"Se creo el comentario satisfactoriamente {comentarioregister} ";
+                        trazabilidad.DescripcionEvento = $"Nuevo comentario: \"{comentarioregister}\" ";
                         trazabilidad.UsuarioId = usuario.UsuaroId;
                         trazabilidad.DireccionIp = usuario.Ip;
                         trazabilidad.FechaRegistro = DateTime.Now;
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                  
 
                     List<CorreoTabla> composCorreo = new List<CorreoTabla>();
                     CorreoTabla correoDatos = new CorreoTabla

@@ -511,9 +511,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
 
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanQuinquenal , Crear").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "PlanQuinquenal";
@@ -525,7 +523,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
 
                     #region Comparacion de estructuras y agregacion de cambios
 
@@ -680,9 +678,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
 
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanQuinquenal , Editar").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "PlanQuinquenal";
@@ -694,7 +690,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                   
 
                     #region Notificacion
                     if (camposModificados.Count>0)

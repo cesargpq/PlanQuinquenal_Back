@@ -17,6 +17,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int Perfilcod_perfil { get; set; }
         public bool Interno { get; set; }
         public bool DobleFactor { get; set; } = true;
-        public string Estado { get; set; }
+        public string? Estado { get; set; }
     }
 }

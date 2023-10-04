@@ -132,21 +132,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 informe.TipoInformeId = tipoInforme.Id;
                 informe.Activo = true;
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Crear").ToListAsync();
-                if (resultad.Count > 0)
-                {
+               
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Actas";
                     trazabilidad.Evento = "Crear";
-                    trazabilidad.DescripcionEvento = $"Se creó correctamente el Acta o Informe {informe.Id} del proyecto {informe.CodigoProyecto} ";
+                    trazabilidad.DescripcionEvento = $"Se creó correctamente el {tipoInforme.Descripcion} en el proyecto {informe.CodigoProyecto} ";
                     trazabilidad.UsuarioId = usuario.UsuaroId;
                     trazabilidad.DireccionIp = usuario.Ip;
                     trazabilidad.FechaRegistro = DateTime.Now;
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+              
 
                 _context.Add(informe);
                 await _context.SaveChangesAsync();
@@ -771,21 +769,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Editar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+              
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Actas";
                     trazabilidad.Evento = "Editar";
-                    trazabilidad.DescripcionEvento = $"Se editó correctamente acta {getInforme.Id} del proyecto {getInforme.CodigoProyecto}";
+                    trazabilidad.DescripcionEvento = $"Se editó correctamente el {tipoInforme.Descripcion} {getInforme.Id} del proyecto {getInforme.CodigoProyecto}";
                     trazabilidad.UsuarioId = usuario.UsuaroId;
                     trazabilidad.DireccionIp = usuario.Ip;
                     trazabilidad.FechaRegistro = DateTime.Now;
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
 
                 #region Comparacion de estructuras y agregacion de cambios
 
@@ -1203,9 +1199,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
 
 
-                        var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Eliminar").ToListAsync();
-                        if (resultad.Count > 0)
-                        {
+                        
                             Trazabilidad trazabilidad = new Trazabilidad();
                             List<Trazabilidad> listaT = new List<Trazabilidad>();
                             trazabilidad.Tabla = "Actas";
@@ -1217,7 +1211,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                             listaT.Add(trazabilidad);
                             await _trazabilidadRepository.Add(listaT);
-                        }
+                        
                         return new ResponseDTO
                         {
                             Valid = true,
@@ -1261,9 +1255,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             infomre.Activo = false;
             _context.Update(infomre);
             await _context.SaveChangesAsync();
-            var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Actas , Eliminar").ToListAsync();
-            if (resultad.Count > 0)
-            {
+           
                 Trazabilidad trazabilidad = new Trazabilidad();
                 List<Trazabilidad> listaT = new List<Trazabilidad>();
                 trazabilidad.Tabla = "Actas";
@@ -1275,7 +1267,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 listaT.Add(trazabilidad);
                 await _trazabilidadRepository.Add(listaT);
-            }
+            
             return new ResponseDTO { Valid = true, Message = Constantes.EliminacionSatisfactoria };
         }
     }

@@ -67,9 +67,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 _context.Update(brUpdate);
                 await _context.SaveChangesAsync();
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Editar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+               
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "BolsaReemplazo";
@@ -81,7 +79,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
 
 
 
@@ -291,9 +289,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     await _context.SaveChangesAsync();
 
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Crear").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "BolsaReemplazo";
@@ -305,7 +301,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                   
 
 
                     #region Comparacion de estructuras y agregacion de cambios
@@ -593,9 +589,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
                 }
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Importar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "BolsaReemplazo";
@@ -607,7 +601,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
                 dto.listaError = null;
                 dto.listaRepetidos = null;
                 dto.listaInsert = null;
@@ -781,9 +775,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                    
                 }
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO BolsaReemplazo , Gestionar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Proyecto";
@@ -795,7 +787,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
 
 
 
