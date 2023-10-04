@@ -95,17 +95,21 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     var porcenaje = await _context.Constante.Where(x => x.Descripcion.Equals("% desviación")).FirstOrDefaultAsync();
 
                     decimal? resultadoLong =resultado.Sum(objeto => objeto.Longitud);
-                    decimal? LongAprobada = ((porcenaje.valor / 100) * existeProyecto?.LongAprobPa) + existeProyecto.LongAprobPa;
+                    var LongAprobada = ((Convert.ToDecimal(porcenaje.valor) / 100) * existeProyecto?.LongAprobPa) + existeProyecto.LongAprobPa;
 
 
-                    var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal")).FirstOrDefaultAsync();
+                    var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal") || x.nombre_perfil.Equals("Administrador")).ToListAsync();
                     List<string> correosList = new List<string>();
                     List<Notificaciones> notificacionList = new List<Notificaciones>();
+                    List<Usuario> usuLegal = new List<Usuario>();
                     if (perfiles != null)
                     {
-                        var usuLegal = await _context.Usuario.Where(x => x.estado_user == "A" && x.Perfilcod_perfil == perfiles.cod_perfil ).ToListAsync();
-
-                        if (resultadoLong > existeProyecto.LongAprobPa)
+                        foreach (var item in perfiles)
+                        {
+                            var uzu = await _context.Usuario.Where(x => x.estado_user == "A" && x.Perfilcod_perfil == item.cod_perfil).ToListAsync();
+                            usuLegal.AddRange(uzu);
+                        }
+                        if (resultadoLong > LongAprobada)
                         {
                             foreach (var item in usuLegal)
                             {
@@ -122,7 +126,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                 notifProyecto.fechora_not = DateTime.Now;
                                 notifProyecto.flag_visto = false;
                                 notifProyecto.tipo_accion = "C";
-                                notifProyecto.mensaje = $"La sumatoria de permisos ({String.Format("{0:#,##0.##}",Math.Round((decimal)resultadoLong,2))} km) en el Proyecto {existeProyecto.CodigoProyecto} es mayor a la Longitud Aprobada del proyecto {String.Format("{0:#,##0.##}",Math.Round((decimal)existeProyecto.LongAprobPa,2))} km";
+                                notifProyecto.mensaje = $"La sumatoria de permisos ({String.Format("{0:#,##0.##}",Math.Round((decimal)resultadoLong,2))} m) en el Proyecto {existeProyecto.CodigoProyecto} es mayor a la Longitud Aprobada del proyecto {String.Format("{0:#,##0.##}",Math.Round((decimal)existeProyecto.LongAprobPa,2))} m";
                                 notifProyecto.codigo = existeProyecto.Id;
                                 notifProyecto.modulo = "P";
                                 correosList.Add(correo);
@@ -136,7 +140,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     List<CorreoTabla> composCorreo = new List<CorreoTabla>();
                     CorreoTabla correoDatos = new CorreoTabla
                     {
-                        codigo = existeProyecto.CodigoProyecto
+                       codigo = existeProyecto.CodigoProyecto
                     };
                    
                     string asunto = $"Se registró el Permiso {obtenerPermiso.Descripcion} Expediente {obj.Expediente} en Proyecto {existeProyecto.CodigoProyecto}";
@@ -389,12 +393,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 documentos.Estado = true;
                 documentos.Vencimiento = documentosPermisosRequestDTO.Vencimiento!="" || documentosPermisosRequestDTO.Vencimiento != null ? DateTime.Parse(documentosPermisosRequestDTO.Vencimiento):null;
                 _context.Add(documentos);
-                await _context.SaveChangesAsync();
+                
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Permisos , CargarExpediente").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Permisos";
@@ -406,8 +408,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
-
+               
                 saveDocument(documentosPermisosRequestDTO, guidId, tipoPerm.Descripcion, proyecto.CodigoProyecto);
 
                 #region Envio de notificacion
@@ -708,9 +709,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 var documento = await _context.DocumentosPermisos.Where(x => x.PermisoId == existePermiso.Id).FirstOrDefaultAsync();
 
-                documento.Expediente = existePermiso.Expediente;
-                _context.Update(documento);
-                await _context.SaveChangesAsync();
+                if (documento != null)
+                {
+                    documento.Expediente = existePermiso.Expediente;
+                    _context.Update(documento);
+                    await _context.SaveChangesAsync();
+                }
 
                 Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
@@ -771,14 +775,19 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 decimal? resultadoLong = resultado.Sum(objeto => objeto.Longitud);
                 var porcenaje = await _context.Constante.Where(x => x.Descripcion.Equals("% desviación")).FirstOrDefaultAsync();
 
-                decimal? LongAprobada = ((porcenaje.valor / 100) * proyecto?.LongAprobPa)+proyecto.LongAprobPa;
+                var LongAprobada = ((Convert.ToDecimal(porcenaje.valor) / 100) * proyecto?.LongAprobPa) + proyecto.LongAprobPa;
 
-                var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal")).FirstOrDefaultAsync();
+                var perfiles = await _context.Perfil.Where(x => x.nombre_perfil.Equals("Legal") || x.nombre_perfil.Equals("Administrador")).ToListAsync();
                 List<string> correosList = new List<string>();
                 List<Notificaciones> notificacionList = new List<Notificaciones>();
+                List<Usuario> usuLegal = new List<Usuario>();
                 if (perfiles != null)
                 {
-                    var usuLegal = await _context.Usuario.Where(x => x.estado_user == "A" && x.Perfilcod_perfil == perfiles.cod_perfil).ToListAsync();
+                    foreach (var item in perfiles)
+                    {
+                         var uzu = await _context.Usuario.Where(x => x.estado_user == "A" && x.Perfilcod_perfil == item.cod_perfil).ToListAsync();
+                         usuLegal.AddRange(uzu);
+                    }
 
                     if (resultadoLong > LongAprobada)
                     {
@@ -797,7 +806,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             notifProyecto.fechora_not = DateTime.Now;
                             notifProyecto.flag_visto = false;
                             notifProyecto.tipo_accion = "C";
-                            notifProyecto.mensaje = $"La sumatoria de permisos ({String.Format("{0:#,##0.##}",Math.Round((decimal)resultadoLong, 2))} km) en el Proyecto {proyecto.CodigoProyecto} es mayor a la Longitud Aprobada del proyecto {String.Format("{0:#,##0.##}", Math.Round((decimal)proyecto.LongAprobPa, 2))} km";
+                            notifProyecto.mensaje = $"La sumatoria de permisos ({String.Format("{0:#,##0.##}",Math.Round((decimal)resultadoLong, 2))} m) en el Proyecto {proyecto.CodigoProyecto} es mayor a la Longitud Aprobada del proyecto {String.Format("{0:#,##0.##}", Math.Round((decimal)proyecto.LongAprobPa, 2))} m";
                             notifProyecto.codigo = proyecto.Id;
                             notifProyecto.modulo = "P";
                             correosList.Add(correo);
@@ -839,7 +848,17 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 _context.Update(resultado);
                 await _context.SaveChangesAsync();
 
+                var documentos = await _context.DocumentosPermisos.Where(x => x.PermisoId == id).ToListAsync();
 
+                if (documentos.Count > 0)
+                {
+                    foreach (var item in documentos)
+                    {
+                        item.Estado = false;
+                    }
+                }
+                _context.UpdateRange(documentos);
+                await _context.SaveChangesAsync();
                 Trazabilidad trazabilidad = new Trazabilidad();
                 List<Trazabilidad> listaT = new List<Trazabilidad>();
                 trazabilidad.Tabla = "Permisos";

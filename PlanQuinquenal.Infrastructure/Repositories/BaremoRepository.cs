@@ -157,9 +157,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Importar").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "Baremo";
@@ -171,7 +169,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+                
 
                 dto.listaError = null;
                 dto.listaRepetidos = null;
@@ -226,9 +224,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     dto.Message = Constantes.ActualizacionSatisfactoria;
                     dto.Valid = true;
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Editar").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                   
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Baremo";
@@ -240,7 +236,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
 
                 }
                 else
@@ -289,9 +285,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     dto.Message = Constantes.EliminacionSatisfactoria;
                     dto.Valid = true;
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Eliminar").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Baremo";
@@ -303,7 +297,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
                 }
                 else
                 {
@@ -350,9 +344,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     dto.Message = Constantes.CreacionExistosa;
                     dto.Valid = true;
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO Baremo , Crear").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "Baremo";
@@ -364,7 +356,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
 
                 }
             }

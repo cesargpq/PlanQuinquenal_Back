@@ -95,9 +95,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 }
 
 
-                var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanAnual , Crear").ToListAsync();
-                if (resultad.Count > 0)
-                {
+                
                     Trazabilidad trazabilidad = new Trazabilidad();
                     List<Trazabilidad> listaT = new List<Trazabilidad>();
                     trazabilidad.Tabla = "PlanAnual";
@@ -109,7 +107,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                     listaT.Add(trazabilidad);
                     await _trazabilidadRepository.Add(listaT);
-                }
+               
                 return new ResponseDTO
                 {
                     Valid = true,
@@ -166,9 +164,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     }
 
 
-                    var resultad = await _context.TrazabilidadVerifica.FromSqlInterpolated($"EXEC VERIFICAEVENTO PlanAnual , Editar").ToListAsync();
-                    if (resultad.Count > 0)
-                    {
+                    
                         Trazabilidad trazabilidad = new Trazabilidad();
                         List<Trazabilidad> listaT = new List<Trazabilidad>();
                         trazabilidad.Tabla = "PlanAnual";
@@ -180,7 +176,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                         listaT.Add(trazabilidad);
                         await _trazabilidadRepository.Add(listaT);
-                    }
+                    
                     var result = new ResponseDTO
                     {
                         Message = Constantes.ActualizacionSatisfactoria,
