@@ -213,13 +213,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
 
                 foreach (var item in compara)
                 {
-                    if (item.Metadata.Name.Equals("FechaModifica") || item.Metadata.Name.Equals("UsuarioModifica"))
+                    if (item.Metadata.Name.Equals("FechaModifica") || item.Metadata.Name.Equals("UsuarioModifica")  || item.Metadata.Name.Equals("FechaModificacion"))
                     {
                         continue;
                     }
                     else if (item.Metadata.Name.Equals("EstadoPermisosId"))
                     {
-                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("TipoPermisosProyecto");
+                        var enumerable = await _repositoryMantenedores.GetAllByAttribute("EstadoPermisos");
                         CorreoTabla fila = CrearCorreoTabla(codigo, nomCompleto, fechaFormateada, item, enumerable, "Estado Permiso");
                         camposModificados.Add(fila);
                     }
