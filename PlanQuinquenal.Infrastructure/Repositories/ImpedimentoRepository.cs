@@ -216,13 +216,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else
             {
-
-
+                string nuevoNombre = "";
+                if(p.NombreAdicional != null || p.NombreDocumento != "")
+                {
+                    nuevoNombre = p.NombreAdicional+"."+p.NombreDocumento.Split(".")[1];
+                }
                 DocumentosImpedimento d = new DocumentosImpedimento();
                 var guidId = Guid.NewGuid();
                 d.ImpedimentoId = p.CodigoImpedimento;
                 d.CodigoDocumento = guidId.ToString();
-                d.NombreDocumento = p.NombreDocumento;
+                d.NombreDocumento = nuevoNombre;
                 d.Gestion = p.Gestion;
                 d.FechaRegistro = DateTime.Now;
                 d.TipoDocumento = Path.GetExtension(p.NombreDocumento);

@@ -375,7 +375,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var tipoPerm = await _context.TipoPermisosProyecto.Where(x => x.Descripcion.ToUpper().Equals(documentosPermisosRequestDTO.TipoPermisosProyecto.ToUpper())).FirstOrDefaultAsync();
                 var proyecto = await _context.Proyecto.Where(x => x.Id == existeProyecto.ProyectoId).FirstOrDefaultAsync();
                 DocumentosPermisos documentos = new DocumentosPermisos();
-
+               
                 var guidId = Guid.NewGuid();
                 var fecha = DateTime.Now.ToString("ddMMyyy_hhMMss");
                 documentos.PermisoId = existeProyecto.Id;

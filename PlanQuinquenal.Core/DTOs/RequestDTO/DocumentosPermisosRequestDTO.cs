@@ -16,5 +16,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string NombreDocumento { get; set; }
         public string Fecha { get; set; }
         public string Vencimiento { get; set; }
+        
     }
 }

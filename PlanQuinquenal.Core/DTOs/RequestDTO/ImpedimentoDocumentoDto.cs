@@ -13,5 +13,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string Gestion { get; set; }
         public string base64 { get; set; }
         public string NombreDocumento { get; set; }
+        public string? NombreAdicional { get; set; }
     }
 }
