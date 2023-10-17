@@ -185,7 +185,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 DirectorySearcher dsearch = new DirectorySearcher(entry);
                 dsearch.Filter = "sAMAccountName=" + usuario.user + "";
                 SearchResult results = null;
-
+                    
                 try
                 {
                     results = dsearch.FindOne();

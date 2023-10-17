@@ -217,9 +217,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             else
             {
                 string nuevoNombre = "";
-                if(p.NombreAdicional != null || p.NombreDocumento != "")
+                if(p.NombreAdicional != "")
                 {
                     nuevoNombre = p.NombreAdicional+"."+p.NombreDocumento.Split(".")[1];
+                }
+                else
+                {
+                    nuevoNombre= p.NombreDocumento;
                 }
                 DocumentosImpedimento d = new DocumentosImpedimento();
                 var guidId = Guid.NewGuid();

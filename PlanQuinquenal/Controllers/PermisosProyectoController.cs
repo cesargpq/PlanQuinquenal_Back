@@ -75,7 +75,6 @@ namespace PlanQuinquenal.Controllers
             usuario.Ip = (HttpContext.Items["PublicIP"] as IPAddress).ToString(); ;
             usuario.UsuaroId = idUser;
             var resultado = await _permisosProyectoRepository.Update(PermisoId, usuario,dto);
-
             return Ok(resultado);
         }
         [HttpPost("CargarExpediente")]
