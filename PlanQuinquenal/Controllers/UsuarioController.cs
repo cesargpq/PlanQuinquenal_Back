@@ -14,7 +14,7 @@ using PlanQuinquenal.Infrastructure.Repositories;
 
 namespace PlanQuinquenal.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase

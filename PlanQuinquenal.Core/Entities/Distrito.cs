@@ -12,5 +12,6 @@ namespace PlanQuinquenal.Core.Entities
         public string Descripcion { get; set; }
         public bool Estado { get; set; }
         public string CodigoPostal { get; set; }
+        public string? Abreviado { get; set; }
     }
 }

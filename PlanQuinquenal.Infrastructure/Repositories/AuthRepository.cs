@@ -85,9 +85,10 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         await _context.SaveChangesAsync();
                         return DatosInvalidos();
                     }
-                    else if(!jwt.state && (userResult.Intentos == _constantes.CANTIDAD_INTENTOS || !userResult.Estado))
+                    else if(!jwt.state && (userResult.Intentos == _constantes.CANTIDAD_INTENTOS || !userResult.Estado ))
                     {
                         userResult.Estado = false;
+                        userResult.estado_user = "D";
                         _context.Update(userResult);
                         await _context.SaveChangesAsync();
                         return BloqueadoUser();
@@ -108,6 +109,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         else if (!jwt.state && (userResult.Intentos == _constantes.CANTIDAD_INTENTOS || !userResult.Estado))
                         {
                             userResult.Estado = false;
+                            userResult.estado_user = "D";
                             _context.Update(userResult);
                             await _context.SaveChangesAsync();
                             return BloqueadoUser();

@@ -236,7 +236,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         existe.MaterialId = p.MaterialId == null || p.MaterialId == 0 ? null : p.MaterialId;
                         existe.DistritoId = p.DistritoId == null || p.DistritoId == 0 ? null : p.DistritoId;
                         existe.TipoProyectoId = p.TipoProyectoId == null || p.TipoProyectoId == 0 ? null : p.TipoProyectoId;
-                        existe.CodigoMalla = p.CodigoMalla;
+                        existe.CodigoMalla = p.CodigoMalla ==null ? "":p.CodigoMalla;
                         existe.TipoRegistroId = p.TipoRegistroId == null || p.TipoRegistroId == 0 ? null : p.TipoRegistroId;
                         existe.IngenieroResponsableId = p.IngenieroResponsableId == null || p.IngenieroResponsableId == 0 ? null : p.IngenieroResponsableId;
                         existe.ConstructorId = p.ConstructorId == null || p.ConstructorId == 0 ? null : p.ConstructorId;
@@ -562,15 +562,16 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.MaterialId == 0) f.MaterialId = null;
             if (f.DistritoId == 0) f.DistritoId = null;
             if (f.TipoProyectoId == 0) f.TipoProyectoId = null;
+            if (f.TipoRegistroId == 0) f.TipoRegistroId = null;
             if (f.PQuinquenalId == 0) f.PQuinquenalId = null;
             if (f.PAnualId == 0) f.PAnualId = null;
             if (f.ConstructorId == 0) f.ConstructorId = null;
             if (f.IngenieroId == 0) f.IngenieroId = null;
             if (f.UsuarioRegisterId == 0) f.UsuarioRegisterId = null;
+            
 
 
-
-            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.TipoProy}, {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            var resultad = await _context.ProyectoDetalle.FromSqlInterpolated($"EXEC listar {f.TipoRegistroId} , {f.CodigoProyecto} , {f.NroExpediente} , {f.AñoPq} , {f.CodigoMalla} , {f.NombreProyecto} , {f.ProblematicaReal} , {f.FechaGasificacion} , {f.EstadoGeneral} , {f.MaterialId} , {f.DistritoId} , {f.TipoProyectoId} , {f.PQuinquenalId} , {f.PAnualId} , {f.ConstructorId} , {f.IngenieroId} , {f.UsuarioRegisterId} , {f.TipoProy}, {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
         
 

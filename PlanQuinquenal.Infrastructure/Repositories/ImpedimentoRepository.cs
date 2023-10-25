@@ -857,7 +857,13 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             var base64Content = data.base64;
             var causalReempList = await _repositoryMantenedores.GetAllByAttribute("CausalReemplazo");
             var ValidacionLegalList = await _repositoryMantenedores.GetAllByAttribute("ValidacionLegal");
+            var PlanAnuales = await _repositoryMantenedores.GetAllByAttribute("PlanAnual");
             var bytes = Convert.FromBase64String(base64Content);
+
+            string anioActual = DateTime.Now.Year.ToString();
+
+            var PlanAnualId = PlanAnuales.Where(x => x.Descripcion.Equals(anioActual)).FirstOrDefault();
+
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             List<Impedimento> lista = new List<Impedimento>();
             List<Impedimento> listaError = new List<Impedimento>();
@@ -893,8 +899,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var FechaPresentacionReemplazo = worksheet.Cells[row, 15].Value?.ToString();
                             var ComentarioEvaluacion = worksheet.Cells[row, 16].Value?.ToString();
 
-
-                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(codPry) ).FirstOrDefault();
+                            
+                            var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(codPry) && x.TipoProy == true && x.PlanAnualId == PlanAnualId.Id).FirstOrDefault();
                             var dProReal = ProblematicaReal.Where(x => x.Descripcion.Equals(ProbleReal==null?"NONAME":ProbleReal)).FirstOrDefault();
                             var validacionLegal = ValidacionLegalList.Where(x => x.Descripcion.Equals(ValidacionLegal== null?"NONAM":ValidacionLegal)).FirstOrDefault();
                             var causalReemp = causalReempList.Where(x=>x.Descripcion.Equals(CausalReemplazo == null ? "NONAME": CausalReemplazo)).FirstOrDefault();

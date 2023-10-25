@@ -168,7 +168,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             }
             else if (attribute.Equals("PlanAnual"))
             {
-                var dato = await _context.PlanAnual.Where(x => x.Estado == true).ToListAsync();
+                var dato = await _context.PlanAnual.Where(x => x.Estado == true).OrderByDescending(x=>x.FechaRegistro).ToListAsync();
 
                 foreach (var item in dato)
                 {

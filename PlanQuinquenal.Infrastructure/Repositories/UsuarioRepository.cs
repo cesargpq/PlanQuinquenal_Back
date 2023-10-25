@@ -1,6 +1,7 @@
 ﻿using ApiDavis.Core.Utilidades;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using PlanQuinquenal.Core.DTOs.RequestDTO;
 using PlanQuinquenal.Core.DTOs.ResponseDTO;
 using PlanQuinquenal.Core.Entities;
@@ -46,7 +47,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      x.nombre_usu.Contains(entidad.buscar )||
                                      x.apellido_usu.Contains(entidad.buscar) ||
                                      x.correo_usu.Contains(entidad.buscar) ||
-                                     x.estado_user.Contains(entidad.buscar) ||
                                      x.Perfil.nombre_perfil.Contains(entidad.buscar ))
                                      .AsQueryable();
                 var entidades = await queryable.OrderBy(e => e.nombre_usu).Paginar(entidad)
@@ -68,7 +68,6 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                      .Where(x => entidad.nombre_usu != "" ? x.nombre_usu == entidad.nombre_usu : true)
                                      .Where(x => entidad.apellido_usu != "" ? x.apellido_usu == entidad.apellido_usu : true)
                                      .Where(x => entidad.correo_usu != "" ? x.correo_usu == entidad.correo_usu : true)
-                                     .Where(x =>  x.estado_user.Equals("A"))
                                      .Where(x => entidad.cod_rol != 0 ? x.cod_rol == entidad.cod_rol : true)
                                      .Where(x => entidad.cod_perfil != 0 ? x.Perfilcod_perfil == entidad.cod_perfil : true)
                                      .AsQueryable();
@@ -119,6 +118,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 var perfil = await _context.Perfil.Where(x=>x.cod_perfil== usuario.Perfilcod_perfil).FirstOrDefaultAsync();
                 resultado.DobleFactor = usuario.DobleFactor;
                 resultado.Unidad_negociocod_und = perfil.cod_unidadNeg;
+                resultado.Intentos = usuario.Estado.ToUpper().Equals("A") ? 0 : resultado.Intentos;
 
                 
 
@@ -170,24 +170,60 @@ namespace PlanQuinquenal.Infrastructure.Repositories
         }
         public async Task<ResponseDTO> UpdateState(int id)
         {
-            var resultado = await _context.Usuario.FirstOrDefaultAsync(x => x.cod_usu == id);
-            ResponseDTO resp = new ResponseDTO();
-            if (resultado != null)
+
+
+            try
             {
-                resultado.estado_user = resultado.estado_user == "A" ? "D" : "A";
-                resultado.Estado = resultado.Estado == true ? false : true;
-                _context.Update(resultado);
-                await _context.SaveChangesAsync();
-                resp.Message = Constantes.EliminacionSatisfactoria;
+                var resultado = await _context.Usuario.FirstOrDefaultAsync(x => x.cod_usu == id);
+
+                var existeUsu = false;
+                if (resultado.estado_user == "D")
+                {
+                    var existe = await _context.Usuario.Where(x => x.correo_usu.Equals(resultado.correo_usu) && x.cod_usu != id && x.estado_user != "D" && x.Estado != false).FirstOrDefaultAsync();
+                    if (existe != null)
+                    {
+                        existeUsu = true;
+                    }
+                }
+
+                ResponseDTO resp = new ResponseDTO();
+                if (existeUsu != true)
+                {
+
+
+                    if (resultado != null)
+                    {
+                        resultado.estado_user = resultado.estado_user == "A" ? "D" : "A";
+                        resultado.Estado = resultado.Estado == true ? false : true;
+                        resultado.Intentos = resultado.estado_user == "A" ? 0 : 3;
+                        _context.Update(resultado);
+                        await _context.SaveChangesAsync();
+                        resp.Message = Constantes.EliminacionSatisfactoria;
+                        resp.Valid = true;
+                        return resp;
+                    }
+                    else
+                    {
+                        resp.Message = Constantes.ActualizacionError;
+                        resp.Valid = true;
+                        return resp;
+                    }
+                }
+                else
+                {
+                    resp.Message = "Ya existe un usuario activo con las mismas credenciales";
+                    resp.Valid = true;
+                    return resp;
+                }
+            }
+            catch (Exception)
+            {
+                ResponseDTO resp = new ResponseDTO();
+                resp.Message = Constantes.ErrorSistema;
                 resp.Valid = true;
                 return resp;
             }
-            else
-            {
-                resp.Message = Constantes.ActualizacionError;
-                resp.Valid = false;
-                return resp;
-            }
+
         }
         public async Task<ResponseDTO> CreateUser(UsuarioRequestDto usuario)
         {

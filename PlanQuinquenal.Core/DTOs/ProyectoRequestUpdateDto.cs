@@ -15,20 +15,20 @@ namespace PlanQuinquenal.Core.DTOs
         public int? PlanAnualId { get; set; }
         public int? MaterialId { get; set; }
         public int? DistritoId { get; set; }
-        public Decimal InversionEjecutada { get; set; }
+        public Decimal? InversionEjecutada { get; set; }
         public int? TipoProyectoId { get; set; }
         
-        public string CodigoMalla { get; set; }
+        public string? CodigoMalla { get; set; }
         public int? TipoRegistroId { get; set; }
         public int? IngenieroResponsableId { get; set; }
         public int? ConstructorId { get; set; }
         
 
         public string? FechaGacificacion { get; set; }
-        public Decimal LongAprobPa { get; set; }
-        public Decimal LongRealHab { get; set; }
-        public Decimal LongRealPend { get; set; }
-        public Decimal LongProyectos { get; set; }
+        public Decimal? LongAprobPa { get; set; }
+        public Decimal? LongRealHab { get; set; }
+        public Decimal? LongRealPend { get; set; }
+        public Decimal? LongProyectos { get; set; }
         public List<int> UsuariosInteresados { get; set; } = null;
         
 

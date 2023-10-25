@@ -69,7 +69,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                         for (int row = 2; row <= worksheet.Dimension.Rows; row++)
                         {
                             if (worksheet.Cells[row, 1].Value?.ToString() == null) { break; }
-                            var valor1 = worksheet.Cells[row, 1].Value?.ToString();
+                            var valor1 = worksheet.Cells[row, 1].Text;
                             var valor2 = worksheet.Cells[row, 2].Value?.ToString();
                             var valor3 = worksheet.Cells[row, 3].Value?.ToString();
                             var valor4 = worksheet.Cells[row, 4].Value?.ToString();
