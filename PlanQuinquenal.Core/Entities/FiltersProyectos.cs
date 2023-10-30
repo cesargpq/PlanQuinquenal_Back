@@ -21,6 +21,7 @@ namespace PlanQuinquenal.Core.Entities
         public int? DistritoId { get; set; }
         public int? TipoProyectoId { get; set; }
         public int? TipoRegistroId { get; set; }
+        public int? CausalReemplazoId { get; set; }
         public int? PQuinquenalId { get; set; }
         public string? AñoPq { get; set; }
         public int? PAnualId { get; set; }

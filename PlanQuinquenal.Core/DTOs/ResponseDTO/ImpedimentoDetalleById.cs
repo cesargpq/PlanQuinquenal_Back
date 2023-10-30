@@ -9,6 +9,7 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
     public class ImpedimentoDetalleById
     {
         public int Total { get; set; }
+        public string? Importancia { get; set; }
         public int Id { get; set; }
         public string? PQ { get; set; }
         public string? CodigoProyecto { get; set; }

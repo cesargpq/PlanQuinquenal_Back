@@ -79,6 +79,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     obj.Reemplazado = false;
                     obj.estado = true;
                     obj.NumeroReemplazo = null;
+                    obj.Importancia = p.Importancia.ToUpper();
                     _context.Add(obj);
                     await _context.SaveChangesAsync();
                     
@@ -416,6 +417,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                     existe.fechamodifica = DateTime.Now;
                     existe.UsuarioModificaId = usuario.UsuaroId;
                     existe.CostoInversion = p.CostoInversion == null ? 0 : p.CostoInversion;
+                    existe.Importancia = p.Importancia.ToUpper();
 
                     var proyecto = await _context.Proyecto.Where(x => x.Id == existe.ProyectoId).FirstOrDefaultAsync();
                     camposModificados = CompararPropiedadesAsync(proyecto.CodigoProyecto,existe, NomCompleto).GetAwaiter().GetResult();
@@ -809,8 +811,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.FechaRegistro.Equals("")) f.FechaRegistro = null;
             if (f.FechaReemplazo.Equals("")) f.FechaReemplazo = null;
 
+            if (f.Importancia.Equals("")) f.Importancia = null;
+            if (f.ValidaCargoPlanos.Equals("")) f.ValidaCargoPlanos = null;
+            if (f.ValidaCargoSustentosPermisos.Equals("")) f.ValidaCargoSustentosPermisos = null;
+            if (f.ValidaCargoSustentosRRCC.Equals("")) f.ValidaCargoSustentosRRCC = null;
+
 
             if (f.DistritoId == 0) f.DistritoId = null;
+            if (f.ValidacionLegalId == 0) f.ValidacionLegalId = null;
             if (f.CausalReemplazoId == 0) f.CausalReemplazoId = null;
             if (f.ConstructorId == 0) f.ConstructorId = null;
             if (f.IngenieroResponsableId == 0) f.IngenieroResponsableId = null;
@@ -825,7 +833,27 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.CuartoEstrato == 0) f.CuartoEstrato = null;
             if (f.QuintoEstrato == 0) f.QuintoEstrato = null;
             if (f.reemplazoId == 0) f.reemplazoId = null;
-            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento  {f.PAnualId} , {f.FechaReemplazo}  , {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina} , {f.reemplazoId}").ToListAsync();
+
+            if (f.Importancia!=null)
+            {
+                f.Importancia = f.Importancia.ToUpper();
+            }
+            if(f.ValidaCargoPlanos != null)
+            {
+                f.ValidaCargoPlanos = f.ValidaCargoPlanos.ToUpper().Equals("SI") ? "1" : "0";
+            }
+            if (f.ValidaCargoSustentosPermisos != null)
+            {
+                f.ValidaCargoSustentosPermisos = f.ValidaCargoSustentosPermisos.ToUpper().Equals("SI") ? "1" : "0";
+            }
+            if (f.ValidaCargoSustentosRRCC != null)
+            {
+                f.ValidaCargoSustentosRRCC = f.ValidaCargoSustentosRRCC.ToUpper().Equals("SI") ? "1" : "0";
+            }
+            
+
+
+            var resultad = await _context.ImpedimentoDetalle.FromSqlInterpolated($"EXEC listarimpedimento {f.ValidacionLegalId} , {f.Importancia} , {f.ValidaCargoPlanos} , {f.ValidaCargoSustentosPermisos} , {f.ValidaCargoSustentosRRCC} , {f.PAnualId} , {f.FechaReemplazo}  , {f.CodigoProyecto}  , {f.CodigoMalla} , {f.DistritoId} , {f.CausalReemplazoId} , {f.ConstructorId} , {f.IngenieroResponsableId} , {f.ProblematicaRealId} , {f.LongitudReemplazo} , {f.LongImpedimento} , {f.CostoInversion} , {f.PrimerEstrato} , {f.SegundoEstrato} , {f.TercerEstrato} , {f.CuartoEstrato} , {f.QuintoEstrato} , {f.FechaRegistro} , {f.Pagina} , {f.RecordsPorPagina} , {f.reemplazoId}").ToListAsync();
 
 
             var dato = new PaginacionResponseDtoException<ImpedimentoDetalle>
@@ -898,7 +926,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var ValidacionLegal = worksheet.Cells[row, 14].Value?.ToString();
                             var FechaPresentacionReemplazo = worksheet.Cells[row, 15].Value?.ToString();
                             var ComentarioEvaluacion = worksheet.Cells[row, 16].Value?.ToString();
-
+                            var Importancia = worksheet.Cells[row, 16].Value?.ToString();
                             
                             var dCodPry = proyectosMasivos.Where(x => x.CodigoProyecto.Equals(codPry) && x.TipoProy == true && x.PlanAnualId == PlanAnualId.Id).FirstOrDefault();
                             var dProReal = ProblematicaReal.Where(x => x.Descripcion.Equals(ProbleReal==null?"NONAME":ProbleReal)).FirstOrDefault();
@@ -925,7 +953,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         ProyectoId = dCodPry.Id,
                                         ProblematicaRealId = dProReal == null ? null : dProReal.Id,
                                         LongImpedimento = Convert.ToDecimal(LongImpe),
-                                        CausalReemplazoId = causalReemp == null ? null: causalReemp.Id,
+                                        CausalReemplazoId = causalReemp == null ? null : causalReemp.Id,
                                         Resuelto = false,
                                         PrimerEstrato = Convert.ToInt16(Estrato1),
                                         SegundoEstrato = Convert.ToInt16(Estrato2),
@@ -933,14 +961,14 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CuartoEstrato = Convert.ToInt16(Estrato4),
                                         QuintoEstrato = Convert.ToInt16(Estrato5),
                                         LongitudReemplazo = 0,
-                                        ValidacionCargoPlano = ValidacionProyectos == "SI"?true:false,
+                                        ValidacionCargoPlano = ValidacionProyectos == "SI" ? true : false,
                                         ValidacionCargoSustentoRRCC = ValidacionSustentosRRCC == "SI" ? true : false,
                                         ValidacionCargoSustentoAmbiental = ValidacionSustentosPermisos == "SI" ? true : false,
                                         ValidacionCargoSustentoArqueologia = false,
-                                        ValidacionLegalId = validacionLegal == null ?null:validacionLegal.Id,
-                                        Comentario = ComentarioEvaluacion==null?null:ComentarioEvaluacion,
+                                        ValidacionLegalId = validacionLegal == null ? null : validacionLegal.Id,
+                                        Comentario = ComentarioEvaluacion == null ? null : ComentarioEvaluacion,
                                         FechaPresentacion = null,
-                                        FechaPresentacionReemplazo = FechaPresentacionReemplazo==null?null:Convert.ToDateTime(FechaPresentacionReemplazo),
+                                        FechaPresentacionReemplazo = FechaPresentacionReemplazo == null ? null : Convert.ToDateTime(FechaPresentacionReemplazo),
                                         fechamodifica = DateTime.Now,
                                         FechaRegistro = DateTime.Now,
                                         UsuarioRegisterId = null,
@@ -948,7 +976,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CostoInversion = Convert.ToDecimal(CostoInversion),
                                         estado = true,
                                         Reemplazado = false,
-                                        NumeroReemplazo = null
+                                        NumeroReemplazo = null,
+                                        Importancia = Importancia.ToUpper().Equals("SI") ? "SI" : "NO"
 
                                     };
                                     lista.Add(entidad);

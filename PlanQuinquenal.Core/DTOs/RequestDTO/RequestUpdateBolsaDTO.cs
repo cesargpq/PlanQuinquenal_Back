@@ -21,5 +21,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public Decimal LongitudReemplazo { get; set; }
         public int ReemplazoId { get; set; }
         public int PermisoId { get; set; }
+        public string? Importancia { get; set; }
     }
 }

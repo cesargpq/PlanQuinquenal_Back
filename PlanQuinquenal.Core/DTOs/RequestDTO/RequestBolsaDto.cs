@@ -12,5 +12,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int DistritoId { get; set; }
         public int ContratistaId { get; set; }
         public string CodigoMalla { get; set; }
+        public string? Importancia { get; set; }
     }
 }

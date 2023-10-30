@@ -8,6 +8,17 @@ namespace PlanQuinquenal.Core.Entities
 {
     public class ImpedimentoDetalle
     {
+        public string? Importancia { get; set; }
+
+        public string? ValidacionCargoPlano { get; set; }
+
+        public string? ValidacionCargoSustentoPermiso { get; set; }
+
+        public string? ValidacionCargoSustentoRRCC { get; set; }
+
+        public string? ValidacionLegalId { get; set; }
+
+
         public int Total { get; set; }
         public int Id { get; set; }
         public string? PQ { get; set; }

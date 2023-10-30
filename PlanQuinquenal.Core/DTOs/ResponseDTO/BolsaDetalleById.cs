@@ -33,5 +33,6 @@ namespace PlanQuinquenal.Core.DTOs.ResponseDTO
         public DateTime? FechaModifica { get; set; }
         public string? UsuarioRegister { get; set; }
         public string? UsuarioModifica { get; set; }
+        public string? Importancia { get; set; }
     }
 }

@@ -63,6 +63,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                 brUpdate.PermisoId = p.PermisoId==0 ?null : p.PermisoId;
                 brUpdate.UsuarioModifica = usuario.UsuaroId;
                 brUpdate.FechaModifica = DateTime.Now;
+                brUpdate.Importancia = p.Importancia.ToUpper();
                 List<CorreoTabla> camposModificados = CompararPropiedadesAsync(brUpdate.CodigoProyecto,brUpdate, NomCompleto).GetAwaiter().GetResult();
                 _context.Update(brUpdate);
                 await _context.SaveChangesAsync();
@@ -388,6 +389,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.CodigoProyecto.Equals("")) f.CodigoProyecto = null;
             if (f.CodigoMalla.Equals("")) f.CodigoMalla = null;
             if (f.RiesgoSocial.Equals("")) f.RiesgoSocial = null;
+            if (f.Importancia.ToUpper().Equals("")) f.Importancia = null;
             if (f.FechaRegistro.Equals("")) f.FechaRegistro = null;
             if (f.FechaModifica.Equals("")) f.FechaModifica = null;
             //int
@@ -406,7 +408,7 @@ namespace PlanQuinquenal.Infrastructure.Repositories
             if (f.UsuarioRegistro == 0) f.UsuarioRegistro = null;
             if (f.UsuarioModifica == 0) f.UsuarioModifica = null;
 
-            var resultad = await _context.BolsaDetalle.FromSqlInterpolated($"EXEC LISTARREEMPLAZO {f.CodigoProyecto} , {f.DistritoId} , {f.ConstructorId} , {f.CodigoMalla} , {f.PermisoId} , {f.Estrato1} , {f.Estrato2} , {f.Estrato3} , {f.Estrato4} , {f.Estrato5} , {f.CostoInversion}, {f.LongitudReemplazo} , {f.RiesgoSocial} , {f.ReemplazoId} , {f.FechaRegistro} , {f.FechaModifica} , {f.UsuarioRegistro} , {f.UsuarioModifica} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
+            var resultad = await _context.BolsaDetalle.FromSqlInterpolated($"EXEC LISTARREEMPLAZO {f.Importancia} , {f.CodigoProyecto} , {f.DistritoId} , {f.ConstructorId} , {f.CodigoMalla} , {f.PermisoId} , {f.Estrato1} , {f.Estrato2} , {f.Estrato3} , {f.Estrato4} , {f.Estrato5} , {f.CostoInversion}, {f.LongitudReemplazo} , {f.RiesgoSocial} , {f.ReemplazoId} , {f.FechaRegistro} , {f.FechaModifica} , {f.UsuarioRegistro} , {f.UsuarioModifica} , {f.Pagina} , {f.RecordsPorPagina}").ToListAsync();
 
             var dato = new PaginacionResponseDtoException<BolsaDetalle>
             {
@@ -458,11 +460,12 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                             var LongReemplazo = worksheet.Cells[row, 11].Value?.ToString();
                             var RiesgoSocial = worksheet.Cells[row, 12].Value?.ToString();
                             var ZonaPermiso = worksheet.Cells[row, 13].Value?.ToString();
+                            var Importancia = worksheet.Cells[row, 14].Value?.ToString();
                             var proyecto = bolsaMasivos.Where(x => x.CodigoProyecto.Equals(codPry)).FirstOrDefault();
                             var distritodesc = Distritos.Where(x => x.Descripcion.Equals(distrito)).FirstOrDefault();
                             var contratistadesc = Constructores.Where(x => x.Descripcion.Equals(contratista)).FirstOrDefault();
                             var zonaPermisoDesc = zonaPermiso.Where(x=>x.Descripcion.Equals(ZonaPermiso)).FirstOrDefault();
-
+                            
 
                             if (  proyecto != null)
                             {
@@ -497,7 +500,8 @@ namespace PlanQuinquenal.Infrastructure.Repositories
                                         CostoInversion = Convert.ToDecimal(CostoInversion),
                                         LongitudReemplazo = Convert.ToDecimal(LongReemplazo),
                                         Reemplazado = false,
-                                        PermisoId = zonaPermisoDesc == null ? null : zonaPermisoDesc.Id
+                                        PermisoId = zonaPermisoDesc == null ? null : zonaPermisoDesc.Id,
+                                        Importancia = Importancia.ToUpper()
 
                                     };
                                     lista.Add(entidad);

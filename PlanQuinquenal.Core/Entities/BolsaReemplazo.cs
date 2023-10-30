@@ -31,5 +31,6 @@ namespace PlanQuinquenal.Core.Entities
         public bool? Reemplazado { get; set; }
         public int? NumeroReemplazo { get; set; }
         public DateTime? FechaPresenacionReemplazo { get; set; }
+        public  string? Importancia { get; set; }
     }
 }

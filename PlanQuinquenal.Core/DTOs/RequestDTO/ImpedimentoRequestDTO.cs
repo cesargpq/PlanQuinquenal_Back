@@ -12,5 +12,6 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         
         public int ProblematicaRealId { get; set; }
         public Decimal LongImpedimento { get; set; }
+        public string? Importancia { get; set; }
     }
 }

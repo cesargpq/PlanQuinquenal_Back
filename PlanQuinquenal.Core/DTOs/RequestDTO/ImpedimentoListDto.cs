@@ -27,5 +27,11 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public int? QuintoEstrato { get; set; }
         public string? FechaRegistro { get; set; }
         public int? reemplazoId { get; set; }
+
+        public string? Importancia { get; set; }
+        public string? ValidaCargoPlanos { get; set; }
+        public string? ValidaCargoSustentosPermisos { get; set; }
+        public string? ValidaCargoSustentosRRCC { get; set; }
+        public int? ValidacionLegalId { get; set; }
     }
 }

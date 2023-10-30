@@ -28,6 +28,7 @@ namespace PlanQuinquenal.Core.DTOs.RequestDTO
         public string? Comentario { get; set; }
         public DateTime? FechaPresentacionReemplazo { get; set; }
         public Decimal CostoInversion { get; set; }
+        public string? Importancia { get; set; }
         //public int? EvidenciaReemplazo { get; set; }
         //public DateTime? FechaRegistro { get; set; }
         //public DateTime? fechamodifica { get; set; }
